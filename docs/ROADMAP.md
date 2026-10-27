@@ -1,0 +1,9 @@
+# DearDaily roadmap
+
+1. **Frontend foundation (current):** responsive landing, demonstration dashboard, temporary editor, sample public stories and detail routes, design tokens, accessibility foundations, tests and documentation.
+2. **Identity and private storage:** integrate Supabase Auth, account lifecycle, protected storage and PostgreSQL policies. Test Row Level Security with multiple identities, anonymous access, and adversarial requests before storing private content. Never trust a frontend visibility flag as authorization.
+3. **Persistent journaling:** durable drafts and entries, edit/delete, synchronization, meaningful save states, recovery and conflict handling. Add a deliberate migration path from temporary prototype behavior.
+4. **Public storytelling:** explicit publish confirmation and unpublish flow, discovery, profiles, reporting and moderation. Publish only user-selected entries and audit privacy boundaries, including attachments and metadata.
+5. **Habit tools and production:** calendar, truthful streaks and analytics, performance and accessibility refinement, operational monitoring, deployment and production readiness checks.
+
+No backend integration, AI, payments, or live community interactions are part of Phase 1.

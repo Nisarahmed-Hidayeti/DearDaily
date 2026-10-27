@@ -1350,7 +1350,7 @@ footer a:not(.logo) {
     padding: 45px 25px 105px;
   }
   .hero h1 {
-    font-size: 72px;
+    font-size: clamp(56px, 16vw, 72px);
     letter-spacing: -3px;
   }
   .hero-copy {
@@ -1678,4 +1678,19 @@ footer a:not(.logo) {
 
 main:focus {
   outline: none;
+}
+/* Grid children must shrink below the intrinsic width of entry excerpts. */
+.dashboard-bottom > * {
+  min-width: 0;
+}
+@media (max-width: 800px) {
+  .filters button,
+  .tag-form button,
+  .quiet,
+  .icon-button {
+    min-height: 44px;
+  }
+  .tag-form button {
+    min-width: 44px;
+  }
 }

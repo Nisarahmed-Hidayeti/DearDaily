@@ -71,8 +71,7 @@ export default function Landing() {
           <div className="section-intro">
             <p className="eyebrow">Room for all of you</p>
             <h2>
-              A daily ritual.
-              <br />
+              A daily ritual. <br />
               <em>A world of possibility.</em>
             </h2>
             <a className="text-link" href="#ritual">

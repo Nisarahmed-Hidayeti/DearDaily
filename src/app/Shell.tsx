@@ -19,7 +19,7 @@ export default function Shell() {
             { to: '/app/write', label: 'Write an entry', icon: PenLine },
             { to: '/explore', label: 'Explore stories', icon: Compass },
           ].map(({ to, label, icon: Icon }) => (
-            <NavLink end to={to} key={to}>
+            <NavLink end to={to} key={to} aria-label={label}>
               <Icon size={19} />
               <span>{label}</span>
             </NavLink>
