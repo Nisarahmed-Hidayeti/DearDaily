@@ -101,16 +101,16 @@ describe('DearDaily prototype', () => {
     await userEvent.click(screen.getByRole('link', { name: 'Write an entry' }))
     expect(screen.getByLabelText('Journal body')).toHaveValue('')
   })
-  it('has a 404 and honest authentication notice', async () => {
+  it('has a 404 and honest unconfigured authentication page', async () => {
     const view = page('/missing')
     expect(
       screen.getByText('A little off the beaten path.'),
     ).toBeInTheDocument()
     view.unmount()
     page()
-    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
-    expect(screen.getByRole('dialog')).toHaveTextContent(
-      'Sign-in and accounts are coming in Phase 2',
+    await userEvent.click(screen.getByRole('link', { name: 'Sign in' }))
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Account services are not configured yet',
     )
   })
 })

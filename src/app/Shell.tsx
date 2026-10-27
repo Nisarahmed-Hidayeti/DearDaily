@@ -8,7 +8,9 @@ import {
   LockKeyhole,
 } from 'lucide-react'
 import { DemoNotice, Logo } from '../components/Shared'
+import { useAuth } from '../features/auth/AuthProvider'
 export default function Shell() {
+  const { session, loading } = useAuth()
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -47,6 +49,11 @@ export default function Shell() {
           <Logo />
         </div>
         <DemoNotice />
+        <div className="account-strip">
+          <Link to={session && !loading ? '/account' : '/auth/sign-in'}>
+            {session && !loading ? 'Your account' : 'Sign in'}
+          </Link>
+        </div>
         <main id="main" tabIndex={-1}>
           <Outlet />
         </main>
