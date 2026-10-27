@@ -1,6 +1,7 @@
 import { NavLink, Outlet, Link } from 'react-router-dom'
 import {
   House,
+  Settings,
   PenLine,
   Compass,
   ArrowUpRight,
@@ -18,6 +19,7 @@ export default function Shell() {
             { to: '/app', label: 'Overview', icon: House },
             { to: '/app/write', label: 'Write an entry', icon: PenLine },
             { to: '/explore', label: 'Explore stories', icon: Compass },
+            { to: '/app/settings', label: 'Settings', icon: Settings },
           ].map(({ to, label, icon: Icon }) => (
             <NavLink end to={to} key={to} aria-label={label}>
               <Icon size={19} />

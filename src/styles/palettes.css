@@ -1,0 +1,134 @@
+/* Color values live here. data-theme also scopes the miniature Settings previews. */
+:root,
+[data-theme='midnight-purple'] {
+  color-scheme: dark;
+  --bg: #090a12;
+  --elevated: #111321;
+  --surface: #191827;
+  --sidebar: #0d0e18;
+  --accent: #b888f8;
+  --emphasis: #cda8ff;
+  --text: #f6f3ff;
+  --muted: #aaa5bd;
+  --border: #302a42;
+  --border-strong: #736383;
+  --button-start: #c99afa;
+  --button-end: #ab77ea;
+  --button-hover: #d4b2ff;
+  --on-accent: #1b102b;
+  --focus: #dabaff;
+  --heat-0: #272335;
+  --heat-1: #503b69;
+  --heat-2: #79559e;
+  --heat-3: #a675d2;
+  --heat-4: #d4acff;
+  --sky-top: #10152c;
+  --sky-middle: #3c3055;
+  --sky-horizon: #ae7996;
+  --ridge-back: #342d4d;
+  --ridge-front: #101524;
+  --moon: #e0c9f5;
+  --scene-opacity: 1;
+}
+[data-theme='forest-green'] {
+  color-scheme: dark;
+  --bg: #09120f;
+  --elevated: #101f19;
+  --surface: #192c22;
+  --sidebar: #0d1913;
+  --accent: #8ccba5;
+  --emphasis: #b5e4c3;
+  --text: #f0f7ee;
+  --muted: #a6bcae;
+  --border: #2e4839;
+  --border-strong: #688b73;
+  --button-start: #b0dfbe;
+  --button-end: #81bc98;
+  --button-hover: #c6edce;
+  --on-accent: #102719;
+  --focus: #b8edc6;
+  --heat-0: #23362a;
+  --heat-1: #365b41;
+  --heat-2: #4f875d;
+  --heat-3: #85b78c;
+  --heat-4: #bce2b4;
+  --sky-top: #10241d;
+  --sky-middle: #36513c;
+  --sky-horizon: #91ac83;
+  --ridge-back: #2c4b36;
+  --ridge-front: #101f18;
+  --moon: #d9ebba;
+  --scene-opacity: 1;
+}
+[data-theme='paper-white'] {
+  color-scheme: light;
+  --bg: #faf8f3;
+  --elevated: #fffefb;
+  --surface: #eeeae2;
+  --sidebar: #f1eee7;
+  --accent: #70532c;
+  --emphasis: #694b27;
+  --text: #29261f;
+  --muted: #686155;
+  --border: #d8d0c2;
+  --border-strong: #938674;
+  --button-start: #715536;
+  --button-end: #604529;
+  --button-hover: #51391f;
+  --on-accent: #fffdf7;
+  --focus: #785022;
+  --heat-0: #e5dfd2;
+  --heat-1: #c8b89b;
+  --heat-2: #a58c65;
+  --heat-3: #83643f;
+  --heat-4: #5d4225;
+  --sky-top: #e6e2d6;
+  --sky-middle: #d3cab5;
+  --sky-horizon: #bba98a;
+  --ridge-back: #c3b79d;
+  --ridge-front: #a69c86;
+  --moon: #fffef8;
+  --scene-opacity: 0.48;
+}
+[data-theme='obsidian-black'] {
+  color-scheme: dark;
+  --bg: #050505;
+  --elevated: #111111;
+  --surface: #1c1c1c;
+  --sidebar: #0b0b0b;
+  --accent: #c4c4c4;
+  --emphasis: #e2e2e2;
+  --text: #f5f5f5;
+  --muted: #ababab;
+  --border: #333333;
+  --border-strong: #747474;
+  --button-start: #e0e0e0;
+  --button-end: #b5b5b5;
+  --button-hover: #f0f0f0;
+  --on-accent: #171717;
+  --focus: #eeeeee;
+  --heat-0: #272727;
+  --heat-1: #484848;
+  --heat-2: #767676;
+  --heat-3: #a6a6a6;
+  --heat-4: #dddddd;
+  --sky-top: #101010;
+  --sky-middle: #333333;
+  --sky-horizon: #858585;
+  --ridge-back: #303030;
+  --ridge-front: #101010;
+  --moon: #e2e2e2;
+  --scene-opacity: 1;
+}
+:root,
+[data-theme] {
+  --accent-soft: color-mix(in srgb, var(--accent) 11%, transparent);
+  --surface-hover: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  --surface-start: color-mix(in srgb, var(--surface) 65%, var(--elevated));
+  --scene-glow: color-mix(in srgb, var(--accent) 25%, transparent);
+  --moon-glow: color-mix(in srgb, var(--moon) 30%, transparent);
+  --water-glow: color-mix(in srgb, var(--sky-horizon) 35%, transparent);
+  --art-surface: color-mix(in srgb, var(--bg) 92%, transparent);
+  --shadow: color-mix(in srgb, var(--text) 7%, transparent);
+  --backdrop: #000b;
+}

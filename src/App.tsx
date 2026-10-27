@@ -5,9 +5,11 @@ import Editor from './features/journal/Editor'
 import Explore, { StoryDetail } from './features/explore/Explore'
 import Shell from './app/Shell'
 import RouteFocus from './app/RouteFocus'
+import Settings from './features/settings/Settings'
+import { ThemeProvider } from './features/theme/ThemeProvider'
 export function AppRoutes() {
   return (
-    <>
+    <ThemeProvider>
       <RouteFocus />
       <a className="skip-link" href="#main">
         Skip to content
@@ -17,6 +19,7 @@ export function AppRoutes() {
         <Route element={<Shell />}>
           <Route path="/app" element={<Dashboard />} />
           <Route path="/app/write" element={<Editor />} />
+          <Route path="/app/settings" element={<Settings />} />
           <Route path="/app/entries/:id" element={<StoryDetail personal />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/explore/:id" element={<StoryDetail />} />
@@ -35,7 +38,7 @@ export function AppRoutes() {
           />
         </Route>
       </Routes>
-    </>
+    </ThemeProvider>
   )
 }
 export default function App() {

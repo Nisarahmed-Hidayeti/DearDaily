@@ -124,6 +124,9 @@ export default function Landing() {
         <Link to="/app">
           Try the demo <ArrowRight size={14} />
         </Link>
+        <Link to="/app/settings">
+          Appearance <ArrowRight size={14} />
+        </Link>
         <span>© 2026 DearDaily</span>
       </footer>
       {auth && (

@@ -9,7 +9,8 @@ import {
   Plus,
 } from 'lucide-react'
 import { ArrowLink, PageHeading, Scene } from '../../components/Shared'
-import { entries, dashboardStats, sampleActivity } from '../../data/demo'
+import { entries, dashboardStats } from '../../data/demo'
+import ActivityHeatmap from './ActivityHeatmap'
 import type { Entry } from '../../data/demo'
 const statIcons = { streak: Flame, entries: BookOpen, words: PenLine }
 export default function Dashboard({
@@ -60,38 +61,7 @@ export default function Dashboard({
           )
         })}
       </div>
-      <section className="panel activity">
-        <div className="row spread">
-          <div>
-            <h2>Your writing rhythm</h2>
-            <p className="muted">A little consistency goes a long way.</p>
-          </div>
-          <span className="badge">Sample activity · 12 weeks</span>
-        </div>
-        <div
-          className="heatmap"
-          role="img"
-          aria-label="Fictional writing activity for twelve weeks; violet squares show writing frequency"
-        >
-          {sampleActivity.map((level, i) => (
-            <span key={i} style={{ background: `var(--heat-${level})` }} />
-          ))}
-        </div>
-        <div className="row spread muted tiny">
-          <span>August — October 2026</span>
-          <span className="row">
-            Less{' '}
-            {[0, 1, 2, 3, 4].map((i) => (
-              <i
-                className="heat-key"
-                key={i}
-                style={{ background: `var(--heat-${i})` }}
-              />
-            ))}{' '}
-            More
-          </span>
-        </div>
-      </section>
+      <ActivityHeatmap />
       <div className="dashboard-bottom">
         <section className="panel recent">
           <div className="row spread">
