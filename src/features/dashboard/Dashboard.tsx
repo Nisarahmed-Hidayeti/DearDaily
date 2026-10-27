@@ -1,5 +1,146 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Flame, BookOpen, PenLine, LockKeyhole, Globe, Plus } from 'lucide-react'
+import {
+  ArrowRight,
+  Flame,
+  BookOpen,
+  PenLine,
+  LockKeyhole,
+  Globe,
+  Plus,
+} from 'lucide-react'
 import { ArrowLink, PageHeading, Scene } from '../../components/Shared'
-import { entries } from '../../data/demo'
-export default function Dashboard(){return <div className="page dashboard"><PageHeading eyebrow="Your journal / Overview" title="A new day. A new page."><Link className="button" to="/app/write"><Plus size={17}/>New Entry</Link></PageHeading><p className="page-subtitle">Welcome, Jamie. What would you like to remember?</p><div className="dashboard-banner"><Scene/><div><p className="eyebrow">A gentle reminder</p><h2>You don’t have to do it all.<br/><em>Just notice a little.</em></h2><Link to="/app/write" className="text-link">Take a moment to write <ArrowRight size={16}/></Link></div></div><div className="stats">{[{Icon:Flame,value:'7',label:'Day writing streak',note:'One small moment, every day'},{Icon:BookOpen,value:'24',label:'Total entries',note:'A collection of ordinary magic'},{Icon:PenLine,value:'3.2k',label:'Words written',note:'Finding your voice, word by word'}].map(({Icon,value,label,note})=><article className="panel stat" key={label}><Icon size={21}/><div><strong>{value}</strong><span>{label}</span></div><small>{note}</small></article>)}</div><section className="panel activity"><div className="row spread"><div><h2>Your writing rhythm</h2><p className="muted">A little consistency goes a long way.</p></div><span className="badge">Sample activity · 12 weeks</span></div><div className="heatmap" role="img" aria-label="Fictional writing activity for twelve weeks; violet squares show writing frequency">{Array.from({length:84},(_,i)=><span key={i} style={{background:`var(--heat-${(i*7+Math.floor(i/3))%5})`}}/>)}</div><div className="row spread muted tiny"><span>August — October 2026</span><span className="row">Less {[0,1,2,3,4].map(i=><i className="heat-key" key={i} style={{background:`var(--heat-${i})`}}/>)} More</span></div></section><div className="dashboard-bottom"><section className="panel recent"><div className="row spread"><h2>Recent pages</h2><span className="badge">Sample entries</span></div>{entries.map((entry,i)=><Link to={`/app/entries/${entry.id}`} className="entry-row" key={entry.id}><Scene kind={['mountains','window','stars'][i]}/><div><span className="tiny muted">{entry.date}</span><h3>{entry.title}</h3><p>{entry.body}</p><span className="visibility">{entry.visibility==='Private'?<LockKeyhole size={12}/>:<Globe size={12}/>} {entry.visibility} · Sample</span></div><ArrowRight size={16}/></Link>)}</section><section className="panel prompt"><p className="eyebrow">A thought to begin with</p><span className="prompt-star">✧</span><h2>What’s one small thing that made today feel like yours?</h2><p>You don’t need a remarkable day to have something worth writing.</p><ArrowLink to="/app/write">Write about it</ArrowLink><ArrowLink to="/explore">Find inspiration in stories</ArrowLink></section></div></div>}
+import { entries, dashboardStats, sampleActivity } from '../../data/demo'
+import type { Entry } from '../../data/demo'
+const statIcons = { streak: Flame, entries: BookOpen, words: PenLine }
+export default function Dashboard({
+  recentEntries = entries,
+}: {
+  recentEntries?: Entry[]
+}) {
+  return (
+    <div className="page dashboard">
+      <PageHeading
+        eyebrow="Your journal / Overview"
+        title="A new day. A new page."
+      >
+        <Link className="button" to="/app/write">
+          <Plus size={17} />
+          New Entry
+        </Link>
+      </PageHeading>
+      <p className="page-subtitle">
+        Welcome, Jamie. What would you like to remember?
+      </p>
+      <div className="dashboard-banner">
+        <Scene />
+        <div>
+          <p className="eyebrow">A gentle reminder</p>
+          <h2>
+            You don’t have to do it all.
+            <br />
+            <em>Just notice a little.</em>
+          </h2>
+          <Link to="/app/write" className="text-link">
+            Take a moment to write <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
+      <div className="stats">
+        {dashboardStats.map(({ kind, value, label, note }) => {
+          const Icon = statIcons[kind]
+          return (
+            <article className="panel stat" key={label}>
+              <Icon size={21} />
+              <div>
+                <strong>{value}</strong>
+                <span>{label}</span>
+              </div>
+              <small>{note}</small>
+            </article>
+          )
+        })}
+      </div>
+      <section className="panel activity">
+        <div className="row spread">
+          <div>
+            <h2>Your writing rhythm</h2>
+            <p className="muted">A little consistency goes a long way.</p>
+          </div>
+          <span className="badge">Sample activity · 12 weeks</span>
+        </div>
+        <div
+          className="heatmap"
+          role="img"
+          aria-label="Fictional writing activity for twelve weeks; violet squares show writing frequency"
+        >
+          {sampleActivity.map((level, i) => (
+            <span key={i} style={{ background: `var(--heat-${level})` }} />
+          ))}
+        </div>
+        <div className="row spread muted tiny">
+          <span>August — October 2026</span>
+          <span className="row">
+            Less{' '}
+            {[0, 1, 2, 3, 4].map((i) => (
+              <i
+                className="heat-key"
+                key={i}
+                style={{ background: `var(--heat-${i})` }}
+              />
+            ))}{' '}
+            More
+          </span>
+        </div>
+      </section>
+      <div className="dashboard-bottom">
+        <section className="panel recent">
+          <div className="row spread">
+            <h2>Recent pages</h2>
+            <span className="badge">Sample entries</span>
+          </div>
+          {recentEntries.length === 0 && (
+            <div className="empty-state">
+              <BookOpen />
+              <h3>Your first page is waiting.</h3>
+              <p>Begin with one small moment.</p>
+              <ArrowLink to="/app/write">Write your first entry</ArrowLink>
+            </div>
+          )}
+          {recentEntries.map((entry, i) => (
+            <Link
+              to={`/app/entries/${entry.id}`}
+              className="entry-row"
+              key={entry.id}
+            >
+              <Scene kind={['mountains', 'window', 'stars'][i]} />
+              <div>
+                <span className="tiny muted">{entry.date}</span>
+                <h3>{entry.title}</h3>
+                <p>{entry.body}</p>
+                <span className="visibility">
+                  {entry.visibility === 'Private' ? (
+                    <LockKeyhole size={12} />
+                  ) : (
+                    <Globe size={12} />
+                  )}{' '}
+                  {entry.visibility} · Sample
+                </span>
+              </div>
+              <ArrowRight size={16} />
+            </Link>
+          ))}
+        </section>
+        <section className="panel prompt">
+          <p className="eyebrow">A thought to begin with</p>
+          <span className="prompt-star">✧</span>
+          <h2>What’s one small thing that made today feel like yours?</h2>
+          <p>
+            You don’t need a remarkable day to have something worth writing.
+          </p>
+          <ArrowLink to="/app/write">Write about it</ArrowLink>
+          <ArrowLink to="/explore">Find inspiration in stories</ArrowLink>
+        </section>
+      </div>
+    </div>
+  )
+}
