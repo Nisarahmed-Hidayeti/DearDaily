@@ -1,0 +1,84 @@
+/* One-shot entrances and tactile feedback. Writing itself stays still. */
+@keyframes page-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes theme-arrive {
+  from {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .page,
+  .hero-content {
+    animation: page-arrive 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .theme-option {
+    animation: page-arrive 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .theme-option:nth-of-type(2) {
+    animation-delay: 0.06s;
+  }
+  .theme-option:nth-of-type(3) {
+    animation-delay: 0.12s;
+  }
+  .theme-option:nth-of-type(4) {
+    animation-delay: 0.18s;
+  }
+  .theme-check {
+    transition:
+      background 0.25s,
+      border-color 0.25s,
+      transform 0.25s;
+  }
+  .theme-option input:checked + .theme-option-content .theme-check {
+    transform: scale(1.08);
+  }
+  .story-card {
+    transition:
+      transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
+      border-color 0.3s,
+      box-shadow 0.3s;
+  }
+  .story-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--border-strong);
+    box-shadow: 0 16px 32px var(--shadow);
+  }
+  .art-arrow {
+    transition: transform 0.3s;
+  }
+  .story-card:hover .art-arrow {
+    transform: rotate(-8deg);
+  }
+  .button:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+  ::view-transition-old(root) {
+    animation: none;
+  }
+  ::view-transition-new(root) {
+    animation: theme-arrive 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  ::view-transition-group(root) {
+    animation-duration: 0.45s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

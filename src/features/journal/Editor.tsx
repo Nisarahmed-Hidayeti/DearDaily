@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Eye, LockKeyhole, Globe, Feather, X } from 'lucide-react'
 import type { Mood, Visibility } from '../../data/demo'
+import { formatLocalDate } from '../../lib/dates'
 import { PageHeading } from '../../components/Shared'
 export default function Editor() {
   const [title, setTitle] = useState(''),
@@ -38,12 +39,7 @@ export default function Editor() {
       <div className="editor-layout">
         <section className="writing-paper">
           <div className="row spread paper-meta">
-            <span>
-              {new Intl.DateTimeFormat('en', {
-                dateStyle: 'long',
-                timeZone: 'Europe/Istanbul',
-              }).format(new Date())}
-            </span>
+            <span>{formatLocalDate(new Date())}</span>
             <Feather size={20} />
           </div>
           {preview ? (

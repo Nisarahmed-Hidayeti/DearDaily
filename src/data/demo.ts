@@ -106,7 +106,17 @@ export const dashboardStats = [
     note: 'Finding your voice, word by word',
   },
 ] as const
-export const sampleActivity = Array.from(
+export interface ActivityDay {
+  date: string
+  minutes: number
+  level: number
+}
+// Twelve complete Monday–Sunday weeks, in chronological order.
+export const sampleActivity: ActivityDay[] = Array.from(
   { length: 84 },
-  (_, i) => (i * 7 + Math.floor(i / 3)) % 5,
+  (_, index) => {
+    const date = new Date(Date.UTC(2026, 7, 3 + index))
+    const level = (index * 7 + Math.floor(index / 3)) % 5
+    return { date: date.toISOString().slice(0, 10), minutes: level * 10, level }
+  },
 )

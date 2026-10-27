@@ -16,7 +16,8 @@ export function DemoNotice() {
   return (
     <div className="demo-notice">
       <span className="status-dot" />
-      Phase 1 preview <span>· Fictional sample content · Nothing is saved</span>
+      Phase 1 preview{' '}
+      <span>· Fictional sample content · Journal drafts are temporary</span>
     </div>
   )
 }
