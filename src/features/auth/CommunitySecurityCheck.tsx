@@ -91,10 +91,12 @@ export default function CommunitySecurityCheck() {
         ids.current.A,
         ids.current.B,
       )
-      const out = await clients.current.B.auth.signOut({ scope: 'local' })
+      const out = result.passed
+        ? await clients.current.B.auth.signOut({ scope: 'local' })
+        : { error: null }
       setPassed(result.passed && !out.error)
       setMessage(
-        `${result.passed ? 'PASS' : 'FAIL'}: ${result.checks} hosted community checks. Distinct authenticated IDs: ${ids.current.A !== ids.current.B ? 'PASS' : 'FAIL'}. Cleanup: ${result.cleanup ? 'PASS' : 'FAIL'}. User B logout: ${out.error ? 'FAIL' : 'PASS'}.${result.failure ? ' Stage: ' + result.stage + '. ' + result.failure : ''} Synthetic report/audit cleanup IDs: ${result.fixtureStoryIds.join(', ')}.`,
+        `${result.passed ? 'PASS' : 'FAIL'}: ${result.checks} hosted community checks. Distinct authenticated IDs: ${ids.current.A !== ids.current.B ? 'PASS' : 'FAIL'}. Cleanup: ${result.cleanup ? 'PASS' : 'FAIL'}. User B logout: ${!result.passed ? 'session retained for retry' : out.error ? 'FAIL' : 'PASS'}.${result.failure ? ' Stage: ' + result.stage + '. ' + result.failure : ''} Synthetic report/audit cleanup IDs: ${result.fixtureStoryIds.join(', ')}.`,
       )
     } catch {
       setMessage(
@@ -103,6 +105,21 @@ export default function CommunitySecurityCheck() {
     } finally {
       setBusy(false)
     }
+  }
+  async function reconnectB() {
+    if (busy) return
+    delete ids.current.B
+    delete clients.current.B
+    setReceipts((current) => {
+      const next = { ...current }
+      delete next.B
+      return next
+    })
+    setDistinct(false)
+    setPassed(false)
+    setMessage(
+      'User A is retained. Sign in User B again; the earlier failed run logged B out.',
+    )
   }
   async function attachCurrentA() {
     if (!supabase || busy || receipts.A) return
@@ -203,6 +220,13 @@ export default function CommunitySecurityCheck() {
           )}
         </form>
       ))}
+      <button
+        className="button secondary"
+        disabled={busy || passed}
+        onClick={() => void reconnectB()}
+      >
+        Reconnect User B
+      </button>
       <p>
         Distinct authenticated IDs:{' '}
         {receipts.A && receipts.B

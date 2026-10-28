@@ -93,4 +93,4 @@ The exact journal/public-snapshot migration is applied to deardaily-dev. Distinc
 
 ## Phase 4 (staged)
 
-Public profiles and community tools are behind `VITE_ENABLE_COMMUNITY=false`. They require a separately approved migration and hosted security gate before enabling. See [Phase 4 review](docs/PHASE_4.md). Existing Phase 3 journaling remains available.
+Public profiles and community tools are behind `VITE_ENABLE_COMMUNITY=false`. The approved development migration and real-session database gate have passed; explicit activation approval and the enabled-page UI walkthrough remain pending. See [Phase 4 review](docs/PHASE_4.md). Existing Phase 3 journaling remains available.
