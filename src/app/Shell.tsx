@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { DemoNotice, Logo } from '../components/Shared'
 import { useAuth } from '../features/auth/AuthProvider'
+import { journalEnabled } from '../features/journal/journalApi'
 export default function Shell() {
   const { session, loading } = useAuth()
   return (
@@ -40,7 +41,10 @@ export default function Shell() {
         <div className="demo-person">
           <span className="avatar">JD</span>
           <div>
-            Jamie, demo writer<small>Fictional preview account</small>
+            {session ? 'Your account' : 'Jamie, demo writer'}
+            <small>
+              {session ? 'Private account' : 'Fictional preview account'}
+            </small>
           </div>
         </div>
       </aside>
@@ -48,7 +52,14 @@ export default function Shell() {
         <div className="mobile-logo">
           <Logo />
         </div>
-        <DemoNotice />
+        {session && journalEnabled ? (
+          <div className="demo-notice">
+            Your private journal · Public stories require an explicit publish
+            action
+          </div>
+        ) : (
+          <DemoNotice />
+        )}
         <div className="account-strip">
           <Link to={session && !loading ? '/account' : '/auth/sign-in'}>
             {session && !loading ? 'Your account' : 'Sign in'}

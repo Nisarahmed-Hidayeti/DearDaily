@@ -2,7 +2,11 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Landing from './features/landing/Landing'
 import Dashboard from './features/dashboard/Dashboard'
 import Editor from './features/journal/Editor'
-import Explore, { StoryDetail } from './features/explore/Explore'
+import Explore, {
+  StoryDetail,
+  PublishedStory,
+} from './features/explore/Explore'
+import DemoExplore from './features/explore/DemoExplore'
 import Shell from './app/Shell'
 import RouteFocus from './app/RouteFocus'
 import Settings from './features/settings/Settings'
@@ -13,6 +17,7 @@ import {
   RequireAccount,
 } from './features/auth/AuthPages'
 import Account from './features/auth/Account'
+import SecurityCheck from './features/auth/SecurityCheck'
 import { ThemeProvider } from './features/theme/ThemeProvider'
 export function AppRoutes() {
   return (
@@ -43,6 +48,9 @@ function ThemedRoutes() {
         ))}
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route element={<Shell />}>
+          {import.meta.env.DEV && (
+            <Route path="/dev/security-check" element={<SecurityCheck />} />
+          )}
           <Route path="/app" element={<Dashboard />} />
           <Route
             path="/account"
@@ -53,9 +61,12 @@ function ThemedRoutes() {
             }
           />
           <Route path="/app/write" element={<Editor />} />
+          <Route path="/app/write/:id" element={<Editor />} />
           <Route path="/app/settings" element={<Settings />} />
           <Route path="/app/entries/:id" element={<StoryDetail personal />} />
           <Route path="/explore" element={<Explore />} />
+          <Route path="/explore/samples" element={<DemoExplore />} />
+          <Route path="/explore/published/:id" element={<PublishedStory />} />
           <Route path="/explore/:id" element={<StoryDetail />} />
           <Route
             path="*"

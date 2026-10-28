@@ -1,13 +1,43 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowUpRight, ArrowLeft, LockKeyhole } from 'lucide-react'
 import { PageHeading, Scene } from '../../components/Shared'
-import { entries, stories } from '../../data/demo'
+import { useAuth } from '../auth/AuthProvider'
+import { journalEnabled, readStories } from '../journal/journalApi'
+import type { PublicStory } from '../journal/journalApi'
+import DemoExplore from './DemoExplore'
+export { StoryDetail } from './DemoExplore'
 export default function Explore() {
-  const [filter, setFilter] = useState('All stories')
-  const filtered = stories.filter(
-    (s) => filter === 'All stories' || s.category === filter,
-  )
+  return journalEnabled ? <PublicStories /> : <DemoExplore />
+}
+function PublicStories() {
+  const { client } = useAuth()
+  const [rows, setRows] = useState<PublicStory[]>([])
+  const [status, setStatus] = useState('loading')
+  const [retry, setRetry] = useState(0)
+  useEffect(() => {
+    let active = true
+    if (!client) return
+    void readStories(client)
+      .then((data) => {
+        if (active) {
+          setRows(data)
+          setStatus('ready')
+        }
+      })
+      .catch(() => {
+        if (active) setStatus('error')
+      })
+    return () => {
+      active = false
+    }
+  }, [client, retry])
+  if (!client)
+    return (
+      <div className="page">
+        <h1>Public stories are not configured.</h1>
+        <Link to="/explore/samples">Read the fictional examples</Link>
+      </div>
+    )
   return (
     <div className="page explore">
       <PageHeading
@@ -15,112 +45,109 @@ export default function Explore() {
         title="Different lives. Shared feelings."
       />
       <p className="page-subtitle">
-        Explore stories, find a little perspective, feel a little less alone.
+        Stories deliberately shared by their writers.
       </p>
-      <h2 className="explore-label">
-        Explore stories <span className="badge">Fictional sample stories</span>
-      </h2>
-      <div className="filters" aria-label="Story categories">
-        {['All stories', 'Personal growth', 'Everyday life', 'Reflections'].map(
-          (category) => (
-            <button
-              aria-pressed={filter === category}
-              className={filter === category ? 'selected' : ''}
-              onClick={() => setFilter(category)}
-              key={category}
-            >
-              {category}
-            </button>
-          ),
-        )}
-      </div>
+      {status === 'loading' && <p role="status">Loading public stories…</p>}
+      {status === 'error' && (
+        <div role="alert">
+          Could not load public stories.
+          <button
+            className="button secondary"
+            onClick={() => setRetry((n) => n + 1)}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      {status === 'ready' && !rows.length && (
+        <p className="panel">
+          No stories published yet. Private drafts never appear here.
+        </p>
+      )}
       <div className="story-grid">
-        {filtered.map((story) => (
+        {rows.map((r) => (
           <Link
-            to={`/explore/${story.id}`}
+            to={`/explore/published/${r.id}`}
+            key={r.id}
             className="story-card"
-            key={story.id}
           >
             <div className="story-art">
-              <Scene kind={story.scene} />
-              <span className="art-label">Sample story</span>
-              <span className="art-arrow">
-                <ArrowUpRight size={20} />
-              </span>
+              <Scene />
             </div>
             <div className="story-content">
-              <p className="eyebrow">
-                {story.category} <span>· {story.minutes} min read</span>
-              </p>
-              <h2>{story.title}</h2>
-              <p>{story.body.slice(0, 125)}…</p>
-              <div className="author">
-                <span className="avatar">{story.author.initials}</span>
-                <div>
-                  {story.author.name}
-                  <small>{story.date}</small>
-                </div>
-              </div>
+              <p className="eyebrow">Published story</p>
+              <h2>{r.title}</h2>
+              <p>{r.body.slice(0, 125)}…</p>
+              <small>{new Date(r.published_at).toLocaleDateString()}</small>
             </div>
           </Link>
         ))}
       </div>
-      {filtered.length === 0 && (
-        <p className="panel">No sample stories in this category yet.</p>
-      )}
-      <div className="explore-end">
-        <span>✧</span>
-        <h2>Your ordinary might be someone’s inspiration.</h2>
-        <p>For now, start with a page that’s just for you.</p>
-        <Link className="text-link" to="/app/write">
-          Write your own story <ArrowUpRight size={16} />
-        </Link>
-      </div>
+      <p className="tiny muted">Showing the latest 100 published stories.</p>
+      <Link className="text-link" to="/explore/samples">
+        Explore fictional examples
+      </Link>
     </div>
   )
 }
-export function StoryDetail({ personal = false }: { personal?: boolean }) {
+export function PublishedStory() {
   const { id } = useParams()
-  const story = stories.find((s) => s.id === id)
-  const entry = personal ? entries.find((e) => e.id === id) : story
-  if (!entry)
+  const { client } = useAuth()
+  const [story, setStory] = useState<PublicStory | null>(null)
+  const [status, setStatus] = useState('loading')
+  useEffect(() => {
+    if (!client || !id) return
+    let active = true
+    const load = () => {
+      void readStories(client, id)
+        .then((rows) => {
+          if (active) {
+            setStory(rows[0] ?? null)
+            setStatus('ready')
+          }
+        })
+        .catch(() => {
+          if (active) setStatus('error')
+        })
+    }
+    load()
+    window.addEventListener('focus', load)
+    const timer = window.setInterval(load, 15000)
+    return () => {
+      active = false
+      window.removeEventListener('focus', load)
+      window.clearInterval(timer)
+    }
+  }, [client, id])
+  if (!client)
     return (
       <div className="page">
-        <h1>That page is missing.</h1>
-        <Link to={personal ? '/app' : '/explore'}>Go back</Link>
+        <h1>Public stories are not configured.</h1>
       </div>
     )
   return (
     <div className="page detail">
-      <Link className="text-link" to={personal ? '/app' : '/explore'}>
-        <ArrowLeft size={16} />
-        Back to {personal ? 'your overview' : 'stories'}
+      <Link className="text-link" to="/explore">
+        Back to stories
       </Link>
-      <p className="eyebrow">
-        Fictional sample {personal ? 'entry' : 'story'} · {entry.date}
-      </p>
-      <h1>{entry.title}</h1>
-      {!personal && story && (
-        <div className="author">
-          <span className="avatar">{story.author.initials}</span>
-          {story.author.name} · {story.minutes} min read
-        </div>
+      {status === 'loading' ? (
+        <p role="status">Loading story…</p>
+      ) : status === 'error' ? (
+        <p role="alert">
+          Could not confirm whether this story is still public. Reload to retry.
+        </p>
+      ) : story ? (
+        <>
+          <p className="eyebrow">Published story</p>
+          <h1>{story.title}</h1>
+          <Scene />
+          <article>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{story.body}</p>
+          </article>
+        </>
+      ) : (
+        <h1>This story is not available.</h1>
       )}
-      {personal && (
-        <span className="badge">
-          <LockKeyhole size={12} />
-          {entry.visibility} · Demo only
-        </span>
-      )}
-      <Scene kind={story?.scene} />
-      <article>
-        {entry.body.split('\n\n').map((paragraph, i) => (
-          <p key={i}>{paragraph}</p>
-        ))}
-      </article>
-      <p className="detail-note">
-        This is fictional content created for the DearDaily prototype.
-      </p>
     </div>
   )
 }
