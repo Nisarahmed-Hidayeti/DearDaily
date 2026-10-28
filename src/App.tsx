@@ -7,6 +7,10 @@ import PublishedManager from './features/community/PublishedManager'
 import Moderation from './features/community/Moderation'
 import AccountPrivacy from './features/community/AccountPrivacy'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+const EditorWorkshop = import.meta.env.DEV
+  ? lazy(() => import('./features/rich-editor/EditorPreview'))
+  : null
 import Landing from './features/landing/Landing'
 import Dashboard from './features/dashboard/Dashboard'
 import Editor from './features/journal/Editor'
@@ -57,6 +61,16 @@ function ThemedRoutes() {
         ))}
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route element={<Shell />}>
+          {import.meta.env.DEV && EditorWorkshop && (
+            <Route
+              path="/dev/editor-workshop"
+              element={
+                <Suspense fallback={<p>Preparing your writing space…</p>}>
+                  <EditorWorkshop />
+                </Suspense>
+              }
+            />
+          )}
           {import.meta.env.DEV && (
             <Route path="/dev/security-check" element={<SecurityCheck />} />
           )}

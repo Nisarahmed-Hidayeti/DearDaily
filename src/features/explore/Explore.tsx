@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { PageHeading, Scene } from '../../components/Shared'
+import { PageHeading } from '../../components/Shared'
+import { RichRead } from '../rich-editor/RichRead'
 import { useAuth } from '../auth/AuthProvider'
 import { journalEnabled, readStories } from '../journal/journalApi'
 import type { PublicStory } from '../journal/journalApi'
@@ -224,9 +225,19 @@ export function PublishedStory() {
             <p className="muted">Anonymous writer</p>
           )}
           <h1>{story.title}</h1>
-          <Scene />
+          {story.cover_preset && story.cover_preset !== 'none' ? (
+            <div
+              className="writer-cover"
+              data-cover={story.cover_preset}
+              role="img"
+              aria-label={`${story.cover_preset} cover`}
+            />
+          ) : null}
+          {story.page_icon && (
+            <div className="writer-icon">{story.page_icon}</div>
+          )}
           <article>
-            <p style={{ whiteSpace: 'pre-wrap' }}>{story.body}</p>
+            <RichRead document={story.writing_document} fallback={story.body} />
           </article>
           <div className="tag-list">
             {story.public_tags?.map((t) => (

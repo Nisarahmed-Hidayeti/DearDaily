@@ -5,6 +5,37 @@ import { sampleActivity } from '../../data/demo'
 import { parseLocalDate } from '../../lib/dates'
 
 describe('dated activity calendar', () => {
+  it.each([
+    [
+      [0, 1, 0, 0, 0, 0, 0],
+      [0, 4, 0, 0, 0, 0, 0],
+    ],
+    [
+      [0, 1, 2, 3, 4, 8, 8],
+      [0, 1, 1, 2, 2, 4, 4],
+    ],
+    [
+      [0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+    ],
+  ])(
+    'scales saved entries to each writer’s visible maximum: %j',
+    (counts, levels) => {
+      render(
+        <ActivityHeatmap
+          real
+          activity={sampleActivity
+            .slice(0, 7)
+            .map((day, i) => ({ ...day, minutes: counts[i], level: 0 }))}
+        />,
+      )
+      expect(
+        screen
+          .getAllByRole('img')
+          .map((cell) => Number(cell.getAttribute('data-level'))),
+      ).toEqual(levels)
+    },
+  )
   it('orders twelve Monday-to-Sunday weeks with exactly seven cells per week', () => {
     render(<ActivityHeatmap />)
     const weeks = screen.getAllByRole('listitem')

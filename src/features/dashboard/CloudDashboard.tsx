@@ -151,7 +151,10 @@ export default function CloudDashboard() {
                   <span className="tiny muted">
                     {r.entry_date} · {r.status}
                   </span>
-                  <h3>{r.title || 'Untitled entry'}</h3>
+                  <h3>
+                    {r.page_icon && <span>{r.page_icon} </span>}
+                    {r.title || 'Untitled entry'}
+                  </h3>
                   <p>{r.body.slice(0, 150)}</p>
                   <span className="visibility">Private source entry</span>
                 </div>

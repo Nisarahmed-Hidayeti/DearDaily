@@ -1,3 +1,4 @@
+import type { CommunityStory } from '../community/communityApi'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { authConfig } from '../../lib/supabase/client'
@@ -154,7 +155,7 @@ export async function hostedCommunityChecks(
     stage = 'publication boundary'
     const draft = await anon
       .from('public_stories')
-      .select(storyFields)
+      .select<string, CommunityStory>(storyFields)
       .in('id', [aid, bid])
     check(!draft.error && draft.data?.length === 0)
     const pub = await A.from('public_stories')
@@ -167,7 +168,7 @@ export async function hostedCommunityChecks(
         public_category: 'Growth',
         public_tags: ['public-only'],
       })
-      .select(storyFields)
+      .select<string, CommunityStory>(storyFields)
       .single()
     check(!pub.error)
     const impersonate = await A.from('public_stories')
@@ -193,7 +194,7 @@ export async function hostedCommunityChecks(
     check(!foreignDelete.error && foreignDelete.data?.length === 0)
     const safe = await anon
       .from('public_stories')
-      .select(storyFields)
+      .select<string, CommunityStory>(storyFields)
       .eq('id', aid)
       .single()
     check(

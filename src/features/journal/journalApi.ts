@@ -2,9 +2,14 @@ import { communityEnabled, storyFields } from '../community/communityApi'
 import type { StoryMetadata } from '../community/communityApi'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Mood } from '../../data/demo'
+import type { WritingDocument, CoverPreset } from '../rich-editor/document'
+import { richEditorEnabled, richPublicFields } from '../rich-editor/config'
 
 export const journalEnabled = import.meta.env.VITE_ENABLE_JOURNALS === 'true'
 export interface Draft {
+  writing_document?: WritingDocument | null
+  page_icon?: string | null
+  cover_preset?: CoverPreset | null
   title: string
   body: string
   mood: Mood
@@ -21,18 +26,25 @@ export interface JournalEntry extends Draft {
   updated_at: string
 }
 export interface PublicStory {
+  writing_document?: WritingDocument | null
+  page_icon?: string | null
+  cover_preset?: CoverPreset | null
   id: string
   title: string
   body: string
   published_at: string
 }
-export const publicFields = 'id,title,body,published_at'
+export const publicFields: string =
+  'id,title,body,published_at' + richPublicFields
 const readableFields: string = communityEnabled ? storyFields : publicFields
 export function localDay(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 export function newDraft(): Draft {
   return {
+    ...(richEditorEnabled
+      ? { writing_document: null, page_icon: null, cover_preset: null }
+      : {}),
     title: '',
     body: '',
     mood: 'Calm',
@@ -44,6 +56,13 @@ export function newDraft(): Draft {
 }
 export function draftOf(row: Draft): Draft {
   return {
+    ...(richEditorEnabled
+      ? {
+          writing_document: row.writing_document ?? null,
+          page_icon: row.page_icon ?? null,
+          cover_preset: row.cover_preset ?? null,
+        }
+      : {}),
     title: row.title,
     body: row.body,
     mood: row.mood,
@@ -146,6 +165,13 @@ export async function publishStory(
   const fields = {
     title: entry.title,
     body: entry.body,
+    ...(richEditorEnabled
+      ? {
+          writing_document: entry.writing_document ?? null,
+          page_icon: entry.page_icon ?? null,
+          cover_preset: entry.cover_preset ?? null,
+        }
+      : {}),
     ...(communityEnabled && metadata ? metadata : {}),
   }
   const query = exists

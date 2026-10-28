@@ -21,7 +21,7 @@ export default function PublishedManager() {
       for (let i = 0; i < ids.length; i += 50) {
         const { data, error } = await client
           .from('public_stories')
-          .select(storyFields)
+          .select<string, CommunityStory>(storyFields)
           .in('id', ids.slice(i, i + 50))
         if (error) throw error
         stories.push(...(data as CommunityStory[]))

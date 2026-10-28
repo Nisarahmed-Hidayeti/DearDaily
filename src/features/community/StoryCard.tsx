@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { Scene } from '../../components/Shared'
 import { readingTime } from './communityApi'
 import type { CommunityStory } from './communityApi'
 export function StoryCard({ story: s }: { story: CommunityStory }) {
@@ -10,7 +9,18 @@ export function StoryCard({ story: s }: { story: CommunityStory }) {
         className="story-art"
         aria-label={`Read ${s.title}`}
       >
-        <Scene />
+        {s.cover_preset && s.cover_preset !== 'none' ? (
+          <div
+            className="writer-cover"
+            data-cover={s.cover_preset}
+            role="img"
+            aria-label={`${s.cover_preset} cover`}
+          />
+        ) : (
+          <span className="story-icon-fallback" aria-hidden="true">
+            {s.page_icon || '✧'}
+          </span>
+        )}
       </Link>
       <div className="story-content">
         <p className="eyebrow">{s.public_category ?? 'Published story'}</p>

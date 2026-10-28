@@ -7,6 +7,7 @@ import { useAuth } from './AuthProvider'
 import { authConfig } from '../../lib/supabase/client'
 import { authRedirect, safeNext } from '../../lib/supabase/config'
 import './auth.css'
+import BotCheck from './BotCheck'
 
 type Mode = 'sign-in' | 'sign-up' | 'forgot-password' | 'reset-password'
 const titles: Record<Mode, string> = {
@@ -26,11 +27,15 @@ export function AuthPage({ mode }: { mode: Mode }) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [captchaToken, setCaptchaToken] = useState('')
+  const [challenge, setChallenge] = useState(0)
+  const captchaSiteKey = authConfig?.captchaSiteKey
+  const needsBotCheck = !!captchaSiteKey && mode !== 'reset-password'
   useEffect(() => {
     if (mode === 'reset-password' && !loading)
       window.history.replaceState(null, '', location.pathname)
   }, [mode, loading, location.pathname])
-  const signupClosed = mode === 'sign-up' && !authConfig?.allowSignup
+  const signupClosed = mode === 'sign-up' && (!authConfig?.allowSignup || !captchaSiteKey)
   const resetUnavailable = mode === 'reset-password' && (!session || !recovery)
   const needsPassword = mode !== 'forgot-password'
   const needsConfirmation = mode === 'sign-up' || mode === 'reset-password'
@@ -38,13 +43,14 @@ export function AuthPage({ mode }: { mode: Mode }) {
     !client || busy || loading || signupClosed || resetUnavailable
   async function submit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!client || disabled) return
+    if (!client || disabled || (needsBotCheck && !captchaToken)) return
     setError('')
     setMessage('')
     if (needsConfirmation && password !== confirmation) {
       setError('The passwords do not match. Please try again.')
       return
     }
+    if (needsConfirmation && (password.length < 12 || password.length > 128)) { setError('Use a password between 12 and 128 characters.'); return }
     setBusy(true)
     try {
       if (mode === 'sign-in') {
@@ -52,6 +58,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         const result = await client.auth.signInWithPassword({
           email: email.trim(),
           password,
+          ...(needsBotCheck ? { options: { captchaToken } } : {}),
         })
         if (result.error) throw result.error
         setPassword('')
@@ -63,7 +70,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         const result = await client.auth.signUp({
           email: email.trim(),
           password,
-          options: { emailRedirectTo: authRedirect('/auth/callback') },
+          options: { emailRedirectTo: authRedirect('/auth/callback'), captchaToken },
         })
         if (result.error) throw result.error
         // Same response for new, duplicate and obfuscated accounts.
@@ -75,6 +82,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
       } else if (mode === 'forgot-password') {
         const result = await client.auth.resetPasswordForEmail(email.trim(), {
           redirectTo: authRedirect('/auth/reset-password'),
+          ...(needsBotCheck ? {captchaToken} : {}),
         })
         if (result.error) throw result.error
         setMessage(
@@ -96,6 +104,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
           : 'We could not complete this request. Check your connection and try again later.',
       )
     } finally {
+      setCaptchaToken(''); setChallenge(current => current + 1)
       setBusy(false)
     }
   }
@@ -127,7 +136,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         <Link to="/">Back home</Link>
       </div>
       <section className="panel auth-card">
-        <p className="eyebrow">DearDaily / Closed beta</p>
+        <p className="eyebrow">DearDaily / {authConfig?.allowSignup && captchaSiteKey ? 'Your private space' : 'Closed beta'}</p>
         <h1>{titles[mode]}</h1>
         <p className="muted">
           Your account is personal. Your story stays yours.
@@ -140,8 +149,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         )}
         {signupClosed && (
           <p className="auth-notice">
-            Registration is currently closed. Invited testers can sign in once
-            the development project is configured.
+            Registration is currently closed while email delivery and account protections are being verified. Existing testers can still sign in.
           </p>
         )}
         {resetUnavailable && !loading && !message && (
@@ -212,7 +220,8 @@ export function AuthPage({ mode }: { mode: Mode }) {
               {message}
             </p>
           )}
-          <button className="button" disabled={disabled}>
+          {needsBotCheck && !signupClosed && <BotCheck key={challenge} siteKey={captchaSiteKey!} onToken={setCaptchaToken}/>}
+          <button className="button" disabled={disabled || (needsBotCheck && !captchaToken)}>
             {busy
               ? 'Please wait…'
               : {
