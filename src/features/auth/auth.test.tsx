@@ -71,7 +71,7 @@ function form(
   return mock
 }
 function StateProbe() {
-  const { session, loading, recovery, error, signOut } = useAuth()
+  const { session, loading, recovery, error, signOut, beginSignIn } = useAuth()
   return (
     <>
       <p data-testid="session">
@@ -80,6 +80,7 @@ function StateProbe() {
       <p>{recovery ? 'Recovery verified' : 'No recovery'}</p>
       <p role="status">{error}</p>
       <button onClick={() => void signOut()}>Leave account</button>
+      <button onClick={beginSignIn}>Start another login</button>
     </>
   )
 }
@@ -297,6 +298,56 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
       expect(screen.getByTestId('session')).toHaveTextContent('user-a'),
     )
     await userEvent.click(screen.getByRole('button', { name: 'Leave account' }))
+    expect(screen.getByTestId('session')).toHaveTextContent('guest')
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Sign-out could not finish',
+    )
+  })
+  it.each(['success', 'failure'])(
+    'ignores stale sign-out %s after a newer login',
+    async (outcome) => {
+      const mock = mockClient(sessionA)
+      let complete!: (value: { error: Error | null }) => void
+      mock.auth.signOut.mockReturnValue(
+        new Promise((resolve) => {
+          complete = resolve
+        }),
+      )
+      render(
+        <AuthProvider client={mock.client}>
+          <StateProbe />
+        </AuthProvider>,
+      )
+      await waitFor(() =>
+        expect(screen.getByTestId('session')).toHaveTextContent('user-a'),
+      )
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Leave account' }),
+      )
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Start another login' }),
+      )
+      mock.emit('SIGNED_IN', sessionB)
+      await act(async () => {
+        complete({ error: outcome === 'failure' ? new Error('Offline') : null })
+      })
+      expect(screen.getByTestId('session')).toHaveTextContent('user-b')
+      expect(screen.getByRole('status')).toBeEmptyDOMElement()
+    },
+  )
+  it('ignores refresh events after a failed sign-out', async () => {
+    const mock = mockClient(sessionA)
+    mock.auth.signOut.mockResolvedValue({ error: new Error('Offline') })
+    render(
+      <AuthProvider client={mock.client}>
+        <StateProbe />
+      </AuthProvider>,
+    )
+    await waitFor(() =>
+      expect(screen.getByTestId('session')).toHaveTextContent('user-a'),
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Leave account' }))
+    mock.emit('TOKEN_REFRESHED', sessionA)
     expect(screen.getByTestId('session')).toHaveTextContent('guest')
     expect(screen.getByRole('status')).toHaveTextContent(
       'Sign-out could not finish',

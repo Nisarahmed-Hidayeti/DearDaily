@@ -7,3 +7,7 @@
 5. **Habit tools and production:** calendar, truthful streaks and analytics, performance and accessibility refinement, operational monitoring, deployment and production readiness checks.
 
 No backend integration, AI, payments, or live community interactions are part of Phase 1.
+
+## Phase 2 foundation checkpoint
+
+Local auth/UI integration, account migrations, RLS policies, theme synchronization code, and automated tests are implemented. The hosted development account schema, enabled/forced RLS, anonymous denial and Advisor Center were checked. Real two-account isolation, email/Google/recovery verification, migration-ledger reconciliation and the integration checklist in SUPABASE_SETUP.md remain required. Public registration remains closed. Do not start live journal persistence or call Phase 2 complete before these checks.

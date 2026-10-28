@@ -109,15 +109,17 @@ export function AuthProvider({
   async function signOut() {
     if (!client) return false
     signedOutLocally.current = true
-    intentVersion.current++
+    const signOutIntent = ++intentVersion.current
     // Hide all account state before making a network request, even when offline.
     setState({ session: null, loading: true, recovery: false, error: '' })
     try {
       const { error } = await client.auth.signOut({ scope: 'local' })
       if (error) throw error
+      if (signOutIntent !== intentVersion.current) return false
       setState({ session: null, loading: false, recovery: false, error: '' })
       return true
     } catch {
+      if (signOutIntent !== intentVersion.current) return false
       setState({
         session: null,
         loading: false,

@@ -2,11 +2,17 @@
 
 Every day has a story.
 
-DearDaily combines a private daily journal with optional public storytelling. Phase 1 is a responsive frontend prototype: four coordinated themes, a quiet writing space, and clearly fictional stories and activity.
+DearDaily combines a private daily journal with optional public storytelling. The UI is a responsive prototype with a Phase 2 account foundation: four coordinated themes, a quiet writing space, and clearly fictional stories and activity.
+
+## Phase 2 status
+
+The Phase 2 account foundation is implemented, and its private account migration has been applied to `deardaily-dev` (Paris, Free plan). The local environment connects successfully; hosted signup is disabled and email confirmation is required. All 71 local database security checks passed; hosted RLS/grants and anonymous read denial were verified. Real two-account authentication/isolation, email recovery, Google OAuth, and cloud theme synchronization remain unverified. Phase 2 is not complete, and persistent journals remain blocked on those checks. The sample experience works without credentials.
+
+Start with [the Supabase setup guide](docs/SUPABASE_SETUP.md) and [security model](docs/SECURITY_MODEL.md). They cover the exact environment variables, local database commands, migrations, RLS, Google/SMTP configuration, Netlify settings, and remaining verification.
 
 ## Stack
 
-React + strict TypeScript, Vite, Tailwind CSS v4, React Router, Lucide React, Vitest, React Testing Library, ESLint, and Prettier. Node.js 22.12+ (or a compatible current LTS) and npm are required. Dependencies are locked in package-lock.json; TypeScript 6 is selected for compatibility with typescript-eslint.
+React + strict TypeScript, Vite, Tailwind CSS v4, React Router, Lucide React, Vitest, React Testing Library, ESLint, Prettier, Supabase JS, and a pinned Supabase CLI. Node.js 22.12+ (or a compatible current LTS) and npm are required. Dependencies are locked in package-lock.json; TypeScript 6 is selected for compatibility with typescript-eslint.
 
 ## Local setup
 
@@ -30,7 +36,7 @@ npm run format
 
 | Route              | Experience                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------ |
-| `/`                | Public landing, features, sign-in/sign-up coming-soon dialog                         |
+| `/`                | Public landing, features, sign-in/sign-up navigation                                 |
 | `/app`             | Fictional dashboard, streak, statistics, writing heatmap, recent pages               |
 | `/app/write`       | In-memory editor: title, body, mood, tags, category, visibility, word count, preview |
 | `/app/entries/:id` | Read-only fictional journal entry (morning, progress, wins)                          |
@@ -39,11 +45,15 @@ npm run format
 | `/app/settings`    | Four theme previews, accessible selection, browser preference persistence            |
 | Any unmatched URL  | 404 with a route home                                                                |
 
+Account routes: `/auth/sign-in`, `/auth/sign-up`, `/auth/forgot-password`, `/auth/reset-password`, and `/auth/callback`. `/account` is guarded and contains private profile editing and sign-out when configured. Sample routes stay public and clearly fictional.
+
+Local database commands (Docker required): `npm run db:start`, `npm run db:reset`, `npm run db:test`, `npm run db:stop`. Reset is for disposable local development data only.
+
 ## Privacy and prototype boundaries
 
-No backend, authentication, database, durable drafts, live publishing, likes, comments, analytics, or AI is implemented. Entries default to Private. Selecting Public only changes a local preference; it does not publish anything. Save and Publish are disabled with explanations. Sign-in/sign-up explicitly announce the future phase rather than simulating authentication.
+The account integration uses Supabase Auth and private profile/settings tables when explicitly configured. There are no durable drafts, live journals, publishing, likes, comments, analytics, or AI. Entries default to Private. Selecting Public only changes temporary editor state. Save and Publish remain disabled with explanations. Auth controls are disabled with clear feedback when the project is unconfigured.
 
-Editor text exists only in React state. Leaving the editor, refreshing, or closing the tab discards it. Only the selected theme ID is stored in localStorage under `deardaily.theme`. No journal text is placed in localStorage, cookies, URLs, or network requests. Do not rely on this prototype for keeping a journal. Dashboard counts, identity, dates, activity, and stories are fictional samples, not actual user data. Public/private badges on samples demonstrate the future interface and do not represent access control.
+Editor text exists only in React state. Leaving the editor, refreshing, or closing the tab discards it. Only the guest theme ID is stored in localStorage under `deardaily.theme`. Supabase manages tab-scoped authentication/PKCE state in sessionStorage; account themes live in the private cloud settings table when configured. No journal text is placed in localStorage, cookies, URLs, or network requests. Do not rely on this prototype for keeping a journal. Dashboard counts, identity, dates, activity, and stories are fictional samples, not actual user data. Public/private badges on samples demonstrate the future interface and do not represent access control.
 
 Fonts load from Google Fonts with system fallbacks; no journal text is sent with font requests. Decorative landscapes are lightweight CSS illustrations, not embedded reference screenshots. Tailwind is configured; reusable semantic CSS and tokens carry the design system.
 
@@ -55,7 +65,7 @@ Fonts load from Google Fonts with system fallbacks; no journal text is sent with
 
 Settings offers Midnight Purple, Forest Green, Paper White, and Obsidian Black. Semantic CSS variables in `src/styles/palettes.css` update every route, including decorative landscapes and the activity scale. Native radio controls support keyboard selection. Invalid or unavailable browser storage falls back safely; a failed preference write is reported without preventing theme changes.
 
-`ThemeProvider` consumes the small `ThemePreferenceStore` interface. A future account synchronization layer can use this boundary; no Supabase client or account sync exists yet. Only a validated theme ID belongs in this store.
+`ThemeProvider` consumes the small `ThemePreferenceStore` interface. The local adapter stores only validated guest theme IDs. Signed-in users use the cloud boundary: load first, initialize only if absent, confirm writes, and reread on focus or every 30 seconds while visible. Existing cloud values are never overwritten by guest defaults. Hosted synchronization still needs integration verification.
 
 Page entrances, staggered theme previews, card hover feedback, and native view transitions add restrained motion. Browsers without view-transition support switch immediately. `prefers-reduced-motion` disables entrance/transition animation.
 

@@ -37,7 +37,7 @@ Semantic navigation, main landmarks, buttons, labels, fieldset, native select, d
 
 ## Settings and persistence
 
-The Settings page uses four native radio cards with independent miniature previews, checked-state icons, keyboard focus outlines, and a polite status message. Two columns become one below 560px. The preference is applied to the document root, not individual route wrappers, so all pages share it. Only the selected theme ID is persisted; private writing remains in memory. The preference-store interface leaves a clear future account synchronization boundary.
+The Settings page uses four native radio cards with independent miniature previews, checked-state icons, keyboard focus outlines, and a polite status message. Two columns become one below 560px. The preference is applied to the document root, not individual route wrappers, so all pages share it. Only the selected theme ID is persisted; private writing remains in memory. Guest preferences use the local preference store; authenticated preferences use the separate cloud boundary. Loading/error states prevent accidental cloud overwrites.
 
 ## Writing activity
 
@@ -54,3 +54,7 @@ Use short, one-shot movement rather than continuous ambient animation:
 - Theme-card hover and selected indicator: 250ms; button press scale 0.98.
 
 Animate opacity and transforms where possible. Typing does not restart entrances. Reduced-motion preferences bypass native theme transitions and disable CSS animations/transitions, including view-transition pseudo-elements.
+
+## Account foundation
+
+Auth routes reuse the theme variables and short page-entrance animation. A narrow editorial card keeps forms readable; labelled inputs use native password/email semantics and autocomplete. Disabled services, closed registration, recovery requirements, loading, and safe errors are explicit. The private account route is separate from fictional sample pages. Theme and account state remount on identity changes to avoid showing another account's data.
