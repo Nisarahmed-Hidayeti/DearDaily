@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import {
   ArrowRight,
@@ -7,9 +6,8 @@ import {
   Sprout,
   ArrowDown,
 } from 'lucide-react'
-import { Logo, Modal, Scene } from '../../components/Shared'
+import { Logo, Scene } from '../../components/Shared'
 export default function Landing() {
-  const [auth, setAuth] = useState(false)
   return (
     <div className="landing">
       <nav className="public-nav">
@@ -20,12 +18,12 @@ export default function Landing() {
           <a href="#features">Features</a>
         </div>
         <div className="row">
-          <button className="quiet" onClick={() => setAuth(true)}>
+          <Link className="quiet" to="/auth/sign-in">
             Sign in
-          </button>
-          <button className="button small" onClick={() => setAuth(true)}>
+          </Link>
+          <Link className="button small" to="/auth/sign-up">
             Sign up <ArrowRight size={15} />
-          </button>
+          </Link>
         </div>
       </nav>
       <main id="main" tabIndex={-1}>
@@ -129,17 +127,6 @@ export default function Landing() {
         </Link>
         <span>© 2026 DearDaily</span>
       </footer>
-      {auth && (
-        <Modal title="A new chapter is coming" onClose={() => setAuth(false)}>
-          <p>
-            Sign-in and accounts are coming in Phase 2. You can explore the
-            prototype now, without an account.
-          </p>
-          <Link className="button" to="/app">
-            Explore the preview <ArrowRight size={16} />
-          </Link>
-        </Modal>
-      )}
     </div>
   )
 }

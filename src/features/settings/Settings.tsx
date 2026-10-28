@@ -8,11 +8,20 @@ import {
 import { Link } from 'react-router-dom'
 import { PageHeading } from '../../components/Shared'
 import { themes } from '../theme/themes'
+import { useAuth } from '../auth/AuthProvider'
 import { useTheme } from '../theme/ThemeProvider'
 import './settings.css'
 
 export default function Settings() {
-  const { theme, selectTheme, storageAvailable } = useTheme()
+  const {
+    theme,
+    selectTheme,
+    storageAvailable,
+    syncStatus,
+    retrySync,
+    themeDisabled,
+  } = useTheme()
+  const { session } = useAuth()
   const current = themes.find((preset) => preset.id === theme)!
   return (
     <div className="page settings-page">
@@ -43,6 +52,7 @@ export default function Settings() {
             <label className="theme-option" key={preset.id}>
               <input
                 type="radio"
+                disabled={themeDisabled}
                 name="website-theme"
                 value={preset.id}
                 checked={theme === preset.id}
@@ -100,20 +110,35 @@ export default function Settings() {
           <Check size={16} />
           <p>
             <strong>{current.name}</strong> is active.{' '}
-            {storageAvailable
-              ? 'Theme changes are remembered on this browser.'
-              : 'Browser storage is unavailable. Your choice lasts for this session only.'}
+            {session
+              ? {
+                  loading: 'Loading your private cloud preference…',
+                  saving: 'Saving your preference…',
+                  synced: 'Your preference is synchronized with your account.',
+                  error:
+                    'Cloud settings are unavailable. Your existing preference has not been overwritten.',
+                  guest: '',
+                }[syncStatus]
+              : storageAvailable
+                ? 'Theme changes are remembered on this browser.'
+                : 'Browser storage is unavailable. Your choice lasts for this session only.'}
           </p>
         </div>
+        {syncStatus === 'error' && (
+          <button className="button secondary" onClick={retrySync}>
+            Retry cloud settings
+          </button>
+        )}
       </section>
       <section className="panel settings-privacy">
         <LockKeyhole size={23} />
         <div>
           <h2>Your preference stays simple.</h2>
           <p>
-            Only your theme choice is saved on this device. Journal drafts
-            remain temporary and are never stored in your browser. Account
-            syncing is coming in a later phase.
+            Guest theme preferences stay on this device. Signed-in theme
+            preferences sync to your private account. Journal drafts remain
+            temporary and are never stored in your browser or sent to account
+            services.
           </p>
         </div>
         <Link to="/" className="text-link">
