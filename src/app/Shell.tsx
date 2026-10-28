@@ -1,4 +1,4 @@
-import { NavLink, Outlet, Link } from 'react-router-dom'
+import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 import {
   House,
   Settings,
@@ -12,6 +12,10 @@ import { useAuth } from '../features/auth/AuthProvider'
 import { journalEnabled } from '../features/journal/journalApi'
 export default function Shell() {
   const { session, loading } = useAuth()
+  const { pathname } = useLocation()
+  const publicPage =
+    journalEnabled &&
+    (pathname === '/explore' || pathname.startsWith('/explore/published/'))
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -41,9 +45,17 @@ export default function Shell() {
         <div className="demo-person">
           <span className="avatar">JD</span>
           <div>
-            {session ? 'Your account' : 'Jamie, demo writer'}
+            {session
+              ? 'Your account'
+              : publicPage
+                ? 'Reader'
+                : 'Jamie, demo writer'}
             <small>
-              {session ? 'Private account' : 'Fictional preview account'}
+              {session
+                ? 'Private account'
+                : publicPage
+                  ? 'Public stories'
+                  : 'Fictional preview account'}
             </small>
           </div>
         </div>
@@ -52,7 +64,11 @@ export default function Shell() {
         <div className="mobile-logo">
           <Logo />
         </div>
-        {session && journalEnabled ? (
+        {publicPage ? (
+          <div className="demo-notice">
+            Public stories · Shared explicitly by their writers
+          </div>
+        ) : session && journalEnabled ? (
           <div className="demo-notice">
             Your private journal · Public stories require an explicit publish
             action

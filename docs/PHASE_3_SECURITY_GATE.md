@@ -1,3 +1,9 @@
+# Essential MVP gate result — October 28, 2026
+
+The reprioritized essential gate passed: two distinct genuine Supabase IDs; 44 hosted account checks and logout verification; 54 hosted journal/public/private checks with fixture cleanup; actual browser write/save/publish/anonymous view/unpublish/autosave/reload/delete. Hosted migration was explicitly approved and its exact hash verified. Local runtime is now enabled. Google, custom SMTP and recovery remain deferred; CLI history is not modified and must be repaired under separate approval before any future db push. Two advisor findings remain documented. See MVP_MILESTONE.md for the authoritative current results; older kickoff entries below are historical.
+
+---
+
 # Updated milestone priorities
 
 The owner's latest request supersedes the earlier exit criteria below: custom SMTP, Google OAuth and email recovery are deferred. Essential real password login/logout and A/B hosted account isolation must pass before enabling private journals. Public publishing is now explicitly in scope through separate reviewed snapshots. See MVP_MILESTONE.md for the reviewed local implementation and current unverified gates. No hosted schema/fixture change or deployment is implicitly approved by this document.

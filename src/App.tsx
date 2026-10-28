@@ -18,6 +18,7 @@ import {
 } from './features/auth/AuthPages'
 import Account from './features/auth/Account'
 import SecurityCheck from './features/auth/SecurityCheck'
+import JournalSecurityCheck from './features/auth/JournalSecurityCheck'
 import { ThemeProvider } from './features/theme/ThemeProvider'
 export function AppRoutes() {
   return (
@@ -50,6 +51,12 @@ function ThemedRoutes() {
         <Route element={<Shell />}>
           {import.meta.env.DEV && (
             <Route path="/dev/security-check" element={<SecurityCheck />} />
+          )}
+          {import.meta.env.DEV && (
+            <Route
+              path="/dev/journal-check"
+              element={<JournalSecurityCheck />}
+            />
           )}
           <Route path="/app" element={<Dashboard />} />
           <Route

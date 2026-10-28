@@ -1,3 +1,4 @@
+import { journalEnabled } from '../journal/journalApi'
 import { Link, NavLink } from 'react-router-dom'
 import {
   ArrowRight,
@@ -112,7 +113,9 @@ export default function Landing() {
             Find your first words <ArrowRight size={18} />
           </Link>
           <p className="muted">
-            Explore the frontend preview. Drafts are temporary.
+            {journalEnabled
+              ? 'Closed beta: sign in to save private entries and deliberately share stories.'
+              : 'Explore the frontend preview. Drafts are temporary.'}
           </p>
         </section>
       </main>

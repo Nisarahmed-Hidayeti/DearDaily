@@ -136,9 +136,9 @@ export default function Settings() {
           <h2>Your preference stays simple.</h2>
           <p>
             Guest theme preferences stay on this device. Signed-in theme
-            preferences sync to your private account. Journal drafts remain
-            temporary and are never stored in your browser or sent to account
-            services.
+            preferences sync to your private account. Appearance settings
+            contain no journal text. Private writing is never stored in browser
+            localStorage.
           </p>
         </div>
         <Link to="/" className="text-link">

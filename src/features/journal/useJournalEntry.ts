@@ -79,6 +79,14 @@ export function useJournalEntry(existingId?: string) {
           row?.version ?? null,
         )
         if (generation !== epoch.current) return
+        // Canonical URL survives reload without remounting and losing in-flight edits.
+        if (window.location.pathname === '/app/write') {
+          window.history.replaceState(
+            window.history.state,
+            '',
+            '/app/write/' + id,
+          )
+        }
         setRow(result)
         setConfirmed(JSON.stringify(draftOf(result)))
         // Only status is merged; words typed during the request are preserved.

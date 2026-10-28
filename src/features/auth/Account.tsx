@@ -1,3 +1,4 @@
+import { journalEnabled } from '../journal/journalApi'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
@@ -76,8 +77,9 @@ export default function Account() {
         title="A space that belongs to you."
       />
       <p className="muted">
-        Account details are private. The dashboard and stories are still
-        fictional samples.
+        {journalEnabled
+          ? 'Account details and source entries are private. Public stories are separate copies you choose to publish.'
+          : 'Account details are private. The dashboard and stories are still fictional samples.'}
       </p>
       <form className="panel auth-card account-form" onSubmit={save}>
         <label>
@@ -119,7 +121,9 @@ export default function Account() {
       </div>
       <p className="auth-footnote">
         Sign-out ends this browser session. Other devices remain signed in.
-        Journal persistence is planned for Phase 3.
+        {journalEnabled
+          ? 'Your saved entries remain in your account after signing out.'
+          : 'Journal persistence is planned for Phase 3.'}
       </p>
     </div>
   )

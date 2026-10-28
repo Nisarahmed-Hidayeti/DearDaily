@@ -19,3 +19,7 @@ The feature branch starts from merged PR #2. Work begins with the mandatory Phas
 ## Reprioritized usable MVP
 
 Essential password authentication and hosted A/B isolation remain the gate. Optional email delivery/Google/recovery are deferred. Private journaling and explicit public snapshot publishing/unpublishing are implemented locally and tested; hosted use awaits approval and real-session checks. Export fallback is available. Public comments, followers, AI and payments remain out of scope. See MVP_MILESTONE.md.
+
+## Development milestone verified
+
+Real A/B authentication/isolation, hosted private-entry RLS, explicit public snapshots and the complete browser save/publish/unpublish flow are verified. Local cloud journaling is enabled; public signup stays disabled. Optional email/Google infrastructure remains deferred. Advisor findings, CLI history and production deployment are separately reviewed follow-ups; no comments/followers/AI/payment scope is added.
