@@ -1,3 +1,13 @@
+# Phase 3 gate kickoff — October 28, 2026
+
+Created feat/deardaily-phase-3 from latest main (be29da7). Reran all 71 local pgTAP checks successfully against the preserved local database; stopped it afterward without deleting its volume. Read-only hosted query confirmed zero Auth accounts, zero profiles/settings and no CLI migration-history relation. SMTP was disabled and Google remains disabled.
+
+With explicit user approval, set the development Site URL to http://localhost:5173 and added exactly http://localhost:5173/auth/callback and http://localhost:5173/auth/reset-password. Dashboard saved state and success notification verified. No other auth setting, account creation, hosted fixture write, migration-history repair, journal storage or deployment occurred.
+
+Real authentication and hosted A/B isolation remain blocked on tester addresses and approved provisioning/delivery setup. See PHASE_3_SECURITY_GATE.md for the staged plan and reconciliation proposal.
+
+---
+
 # DearDaily Phase 2 hosted account migration report
 
 Verified October 28, 2026. Status: account schema applied and checked; Phase 2 authentication integration is still incomplete.

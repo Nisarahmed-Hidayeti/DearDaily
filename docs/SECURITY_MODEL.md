@@ -76,3 +76,7 @@ The account migration was applied to a fresh local Supabase PostgreSQL database 
 The exact locally tested account migration was applied transactionally to deardaily-dev through Dashboard SQL Editor after user approval and an empty-schema conflict check. Both tables have enabled/forced RLS, four policies each, restricted grants and timestamp triggers. Catalog checks deny anonymous CRUD table privileges, ownership updates and timestamp writes. Anonymous HTTP reads return 401/42501. Advisor Center with filters cleared reported no issues. Both tables are empty. Signup remains disabled, email enabled, and confirmation required.
 
 The CLI migration ledger was absent and has not been created or modified; reconcile it with separate approval before any future db push. Do not replay the CREATE migration. Hosted two-user API tests and real authentication/provider/email flows remain pending. Earlier placeholder/unconfigured statements are historical. See VALIDATION.md for the current report and limits.
+
+## Phase 3 entry gate
+
+The PHASE_3_SECURITY_GATE.md checklist is mandatory before durable journals. Two actual ordinary-user sessions must verify HTTP isolation; admin/catalog checks do not replace them. Tester provisioning, fixture writes, auth settings and history repair require explicit scoped approval. Exact localhost development redirect URLs were approved and configured on October 28, 2026. No public registration, broader identity linking or journal data storage is enabled.
