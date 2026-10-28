@@ -1,3 +1,4 @@
+import type { StoryMetadata } from '../community/communityApi'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import {
@@ -133,7 +134,10 @@ export function useJournalEntry(existingId?: string) {
       document.removeEventListener('click', leave, true)
     }
   }, [dirty, busy])
-  async function action(kind: 'publish' | 'unpublish' | 'delete') {
+  async function action(
+    kind: 'publish' | 'unpublish' | 'delete',
+    metadata?: StoryMetadata,
+  ) {
     if (!client || !row || lock.current || (kind === 'publish' && dirty))
       return false
     const generation = epoch.current
@@ -142,7 +146,9 @@ export function useJournalEntry(existingId?: string) {
     setError('')
     try {
       if (kind === 'publish') {
-        await publishStory(client, userId, row, published)
+        if (metadata)
+          await publishStory(client, userId, row, published, metadata)
+        else await publishStory(client, userId, row, published)
         if (generation === epoch.current) setPublished(true)
       } else if (kind === 'unpublish') {
         await unpublishStory(client, id)

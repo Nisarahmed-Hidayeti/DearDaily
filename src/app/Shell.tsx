@@ -1,3 +1,4 @@
+import { communityEnabled } from '../features/community/communityApi'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 import {
   House,
@@ -15,7 +16,10 @@ export default function Shell() {
   const { pathname } = useLocation()
   const publicPage =
     journalEnabled &&
-    (pathname === '/explore' || pathname.startsWith('/explore/published/'))
+    (pathname === '/explore' ||
+      pathname.startsWith('/u/') ||
+      (pathname.startsWith('/explore/') &&
+        !pathname.startsWith('/explore/samples')))
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -34,6 +38,12 @@ export default function Shell() {
             </NavLink>
           ))}
         </nav>
+        {session && communityEnabled && (
+          <nav aria-label="Publishing navigation">
+            <NavLink to="/app/published">My published stories</NavLink>
+            <NavLink to="/account/public-profile">Public profile</NavLink>
+          </nav>
+        )}
         <div className="sidebar-note">
           <LockKeyhole size={20} />
           <p>A space that’s yours.</p>

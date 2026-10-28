@@ -1,3 +1,5 @@
+import { communityEnabled, storyFields } from '../community/communityApi'
+import type { StoryMetadata } from '../community/communityApi'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Mood } from '../../data/demo'
 
@@ -25,6 +27,7 @@ export interface PublicStory {
   published_at: string
 }
 export const publicFields = 'id,title,body,published_at'
+const readableFields: string = communityEnabled ? storyFields : publicFields
 export function localDay(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
@@ -125,11 +128,11 @@ export async function listEntries(client: SupabaseClient, userId: string) {
 export async function readStories(client: SupabaseClient, id?: string) {
   let query = client
     .from('public_stories')
-    .select(publicFields)
+    .select(readableFields)
     .order('published_at', { ascending: false })
     .limit(100)
   if (id) query = query.eq('id', id)
-  const { data, error } = await query
+  const { data, error } = await query.returns<PublicStory[]>()
   if (error) throw new Error('Public stories unavailable')
   return data as PublicStory[]
 }
@@ -138,14 +141,22 @@ export async function publishStory(
   userId: string,
   entry: JournalEntry,
   exists: boolean,
+  metadata?: StoryMetadata,
 ) {
-  const fields = { title: entry.title, body: entry.body }
+  const fields = {
+    title: entry.title,
+    body: entry.body,
+    ...(communityEnabled && metadata ? metadata : {}),
+  }
   const query = exists
     ? client.from('public_stories').update(fields).eq('id', entry.id)
     : client
         .from('public_stories')
         .insert({ ...fields, id: entry.id, user_id: userId })
-  const { data, error } = await query.select(publicFields).single()
+  const { data, error } = await query
+    .select(readableFields)
+    .returns<PublicStory[]>()
+    .single()
   if (error || data?.id !== entry.id)
     throw new Error('Publication not confirmed')
   return data as PublicStory

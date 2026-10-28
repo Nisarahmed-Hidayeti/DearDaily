@@ -5,6 +5,15 @@ import { useAuth } from '../auth/AuthProvider'
 import { journalEnabled, readStories } from '../journal/journalApi'
 import type { PublicStory } from '../journal/journalApi'
 import DemoExplore from './DemoExplore'
+import {
+  categories,
+  communityEnabled,
+  readingTime,
+  storyPage,
+} from '../community/communityApi'
+import { StoryCard } from '../community/StoryCard'
+import ReportStory from '../community/ReportStory'
+import type { CommunityStory } from '../community/communityApi'
 export { StoryDetail } from './DemoExplore'
 export default function Explore() {
   return journalEnabled ? <PublicStories /> : <DemoExplore />
@@ -14,23 +23,36 @@ function PublicStories() {
   const [rows, setRows] = useState<PublicStory[]>([])
   const [status, setStatus] = useState('loading')
   const [retry, setRetry] = useState(0)
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('')
+  const [oldest, setOldest] = useState(false)
+  const [page, setPage] = useState(0)
+  const [more, setMore] = useState(false)
   useEffect(() => {
     let active = true
     if (!client) return
-    void readStories(client)
-      .then((data) => {
-        if (active) {
-          setRows(data)
-          setStatus('ready')
-        }
-      })
-      .catch(() => {
-        if (active) setStatus('error')
-      })
+    const timer = window.setTimeout(() => {
+      void (
+        communityEnabled
+          ? storyPage(client, { search, category, oldest, page })
+          : readStories(client).then((stories) => ({ stories, more: false }))
+      )
+        .then((data) => {
+          if (active) {
+            setRows(data.stories)
+            setMore(data.more)
+            setStatus('ready')
+          }
+        })
+        .catch(() => {
+          if (active) setStatus('error')
+        })
+    }, 250)
     return () => {
       active = false
+      window.clearTimeout(timer)
     }
-  }, [client, retry])
+  }, [client, retry, search, category, oldest, page])
   if (!client)
     return (
       <div className="page">
@@ -64,26 +86,77 @@ function PublicStories() {
           No stories published yet. Private drafts never appear here.
         </p>
       )}
+      {communityEnabled && (
+        <form
+          className="explore-controls panel"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <label>
+            Search story titles
+            <input
+              type="search"
+              maxLength={100}
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(0)
+              }}
+            />
+          </label>
+          <label>
+            Category
+            <select
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value)
+                setPage(0)
+              }}
+            >
+              <option value="">All categories</option>
+              {categories.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Sort
+            <select
+              value={oldest ? 'oldest' : 'newest'}
+              onChange={(e) => {
+                setOldest(e.target.value === 'oldest')
+                setPage(0)
+              }}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </label>
+        </form>
+      )}
       <div className="story-grid">
         {rows.map((r) => (
-          <Link
-            to={`/explore/published/${r.id}`}
-            key={r.id}
-            className="story-card"
-          >
-            <div className="story-art">
-              <Scene />
-            </div>
-            <div className="story-content">
-              <p className="eyebrow">Published story</p>
-              <h2>{r.title}</h2>
-              <p>{r.body.slice(0, 125)}…</p>
-              <small>{new Date(r.published_at).toLocaleDateString()}</small>
-            </div>
-          </Link>
+          <StoryCard key={r.id} story={r} />
         ))}
       </div>
-      <p className="tiny muted">Showing the latest 100 published stories.</p>
+      {communityEnabled && (
+        <div className="row">
+          <button
+            className="button secondary"
+            disabled={!page || status === 'loading'}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Previous
+          </button>
+          <span>Page {page + 1}</span>
+          <button
+            className="button secondary"
+            disabled={!more || status === 'loading'}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
       <Link className="text-link" to="/explore/samples">
         Explore fictional examples
       </Link>
@@ -93,7 +166,7 @@ function PublicStories() {
 export function PublishedStory() {
   const { id } = useParams()
   const { client } = useAuth()
-  const [story, setStory] = useState<PublicStory | null>(null)
+  const [story, setStory] = useState<CommunityStory | null>(null)
   const [status, setStatus] = useState('loading')
   useEffect(() => {
     if (!client || !id) return
@@ -138,12 +211,31 @@ export function PublishedStory() {
         </p>
       ) : story ? (
         <>
-          <p className="eyebrow">Published story</p>
+          <p className="eyebrow">
+            {story.public_category ?? 'Published story'} ·{' '}
+            {readingTime(story.body)} min read ·{' '}
+            {new Date(story.published_at).toLocaleDateString()}
+          </p>
+          {story.public_username ? (
+            <Link className="text-link" to={`/u/${story.public_username}`}>
+              @{story.public_username}
+            </Link>
+          ) : (
+            <p className="muted">Anonymous writer</p>
+          )}
           <h1>{story.title}</h1>
           <Scene />
           <article>
             <p style={{ whiteSpace: 'pre-wrap' }}>{story.body}</p>
           </article>
+          <div className="tag-list">
+            {story.public_tags?.map((t) => (
+              <span className="tag" key={t}>
+                #{t}
+              </span>
+            ))}
+          </div>
+          {communityEnabled && <ReportStory id={story.id} />}
         </>
       ) : (
         <h1>This story is not available.</h1>

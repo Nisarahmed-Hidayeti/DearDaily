@@ -25,3 +25,4 @@ HTMLDialogElement.prototype.close = function () {
 }
 
 window.scrollTo = () => {}
+vi.stubEnv('VITE_ENABLE_COMMUNITY', 'false')

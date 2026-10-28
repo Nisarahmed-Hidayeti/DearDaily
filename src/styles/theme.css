@@ -1686,3 +1686,102 @@ main:focus {
 .entry-preview h2 {
   overflow-wrap: anywhere;
 }
+/* Public storytelling uses the same theme tokens as the private journal. */
+.profile-masthead {
+  margin-block: 24px;
+  padding: clamp(24px, 5vw, 56px);
+}
+.profile-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--accent);
+  font-size: 38px;
+  margin-bottom: 20px;
+}
+.profile-bio {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.85;
+}
+.public-profile .page-heading {
+  margin-bottom: 16px;
+}
+.explore-controls {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+  margin-block: 24px;
+}
+.explore-controls label,
+.account-form label,
+.modal label {
+  display: grid;
+  gap: 8px;
+  margin-block: 12px;
+}
+.account-form fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+.account-form textarea,
+.modal textarea {
+  min-height: 100px;
+  width: 100%;
+}
+.story-card {
+  overflow: hidden;
+  min-width: 0;
+}
+.story-card h2,
+.story-card p,
+.detail h1 {
+  overflow-wrap: anywhere;
+}
+.story-card .story-art {
+  display: block;
+}
+.story-card h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.story-byline {
+  margin-block: 16px;
+}
+.published-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+  margin-block: 16px;
+}
+.detail article {
+  max-width: 68ch;
+  margin-inline: auto;
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.row {
+  flex-wrap: wrap;
+}
+@media (max-width: 768px) {
+  .explore-controls {
+    grid-template-columns: 1fr;
+  }
+  .profile-masthead {
+    padding: 24px;
+  }
+  .published-row .row {
+    width: 100%;
+  }
+}
+@media (max-width: 560px) {
+  .sidebar nav[aria-label='Publishing navigation'] {
+    display: none;
+  }
+}

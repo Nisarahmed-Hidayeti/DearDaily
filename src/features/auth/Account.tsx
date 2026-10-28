@@ -1,3 +1,4 @@
+import { communityEnabled } from '../community/communityApi'
 import { journalEnabled } from '../journal/journalApi'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -104,6 +105,16 @@ export default function Account() {
         >
           Retry profile loading
         </button>
+      )}
+      {communityEnabled && (
+        <div className="account-actions">
+          <Link className="button secondary" to="/account/public-profile">
+            Public identity
+          </Link>
+          <Link className="button secondary" to="/account/privacy">
+            Export and deletion
+          </Link>
+        </div>
       )}
       <div className="account-actions">
         <Link className="button secondary" to="/app/settings">

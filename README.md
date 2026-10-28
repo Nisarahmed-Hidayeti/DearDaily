@@ -90,3 +90,7 @@ The Phase 3 branch includes a locally tested private editor/library, autosave wi
 ## Verified development milestone (October 28, 2026)
 
 The exact journal/public-snapshot migration is applied to deardaily-dev. Distinct real user IDs, 54 hosted journal/privacy checks and the real write/save/publish/anonymous-view/unpublish/autosave/delete flow passed. Cloud mode is enabled in the owner's local ignored environment. Signup stays closed; optional Google/SMTP/recovery are deferred. See docs/MVP_MILESTONE.md for actual evidence, two advisor findings and operational limitations. Other environments must enable VITE_ENABLE_JOURNALS only after reviewed configuration; no Netlify deployment was performed.
+
+## Phase 4 (staged)
+
+Public profiles and community tools are behind `VITE_ENABLE_COMMUNITY=false`. They require a separately approved migration and hosted security gate before enabling. See [Phase 4 review](docs/PHASE_4.md). Existing Phase 3 journaling remains available.
