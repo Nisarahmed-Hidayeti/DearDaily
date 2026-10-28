@@ -1,18 +1,25 @@
 import { sampleActivity } from '../../data/demo'
+import type { ActivityDay } from '../../data/demo'
 import { parseLocalDate } from '../../lib/dates'
 import './activity.css'
 
-export default function ActivityHeatmap() {
+export default function ActivityHeatmap({
+  activity = sampleActivity,
+  real = false,
+}: {
+  activity?: ActivityDay[]
+  real?: boolean
+}) {
   const monthFormatter = new Intl.DateTimeFormat(undefined, { month: 'short' })
   const dayFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'full' })
   const weekdayFormatter = new Intl.DateTimeFormat(undefined, {
     weekday: 'short',
   })
-  const weeks = Array.from({ length: sampleActivity.length / 7 }, (_, week) =>
-    sampleActivity.slice(week * 7, week * 7 + 7),
+  const weeks = Array.from({ length: activity.length / 7 }, (_, week) =>
+    activity.slice(week * 7, week * 7 + 7),
   )
-  const start = parseLocalDate(sampleActivity[0].date)
-  const end = parseLocalDate(sampleActivity[sampleActivity.length - 1].date)
+  const start = parseLocalDate(activity[0].date)
+  const end = parseLocalDate(activity[activity.length - 1].date)
   const rangeFormatter = new Intl.DateTimeFormat(undefined, {
     month: 'short',
     day: 'numeric',
@@ -25,12 +32,16 @@ export default function ActivityHeatmap() {
           <h2 id="activity-title">Your writing rhythm</h2>
           <p className="muted">A little consistency goes a long way.</p>
         </div>
-        <span className="badge">Sample activity · 12 weeks</span>
+        <span className="badge">
+          {real ? 'Saved entries · 12 weeks' : 'Sample activity · 12 weeks'}
+        </span>
       </div>
       <p className="sr-only" id="activity-description">
-        Fictional writing activity. Weeks run left to right, with Monday through
-        Sunday from top to bottom. Each square describes its date and minutes
-        written. Scroll horizontally for more weeks on small screens.
+        {real
+          ? 'Saved entries by calendar date.'
+          : 'Fictional writing activity.'}{' '}
+        Weeks run left to right, Monday through Sunday. Scroll horizontally for
+        more weeks on small screens.
       </p>
       <div
         className="activity-scroll"
@@ -50,7 +61,11 @@ export default function ActivityHeatmap() {
           <div
             className="activity-weeks"
             role="list"
-            aria-label="Weeks of sample writing activity"
+            aria-label={
+              real
+                ? 'Weeks of saved journal activity'
+                : 'Weeks of sample writing activity'
+            }
           >
             {weeks.map((days, weekIndex) => {
               const monthDay = days.find(
@@ -74,7 +89,7 @@ export default function ActivityHeatmap() {
                   </span>
                   <div className="heatmap">
                     {days.map((day) => {
-                      const description = `${dayFormatter.format(parseLocalDate(day.date))}: ${day.minutes === 0 ? 'no writing' : `${day.minutes} minutes written`} (sample)`
+                      const description = `${dayFormatter.format(parseLocalDate(day.date))}: ${day.minutes === 0 ? 'no writing' : `${day.minutes} ${real ? 'saved entries' : 'minutes written'}`} ${real ? '' : '(sample)'}`
                       return (
                         <span
                           className="activity-cell"
@@ -99,7 +114,11 @@ export default function ActivityHeatmap() {
         <span>{rangeFormatter.formatRange(start, end)}</span>
         <span
           className="activity-legend"
-          aria-label="Color intensity increases from no writing to 40 minutes written"
+          aria-label={
+            real
+              ? 'Color intensity increases from zero to four or more saved entries'
+              : 'Color intensity increases from no writing to 40 minutes written'
+          }
         >
           Less{' '}
           {[0, 1, 2, 3, 4].map((level) => (

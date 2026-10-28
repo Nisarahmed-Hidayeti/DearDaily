@@ -11,9 +11,13 @@ import {
 import { ArrowLink, PageHeading, Scene } from '../../components/Shared'
 import { entries, dashboardStats } from '../../data/demo'
 import ActivityHeatmap from './ActivityHeatmap'
+import CloudDashboard from './CloudDashboard'
+import { useAuth } from '../auth/AuthProvider'
+import { RequireAccount } from '../auth/AuthPages'
+import { journalEnabled } from '../journal/journalApi'
 import type { Entry } from '../../data/demo'
 const statIcons = { streak: Flame, entries: BookOpen, words: PenLine }
-export default function Dashboard({
+function DemoDashboard({
   recentEntries = entries,
 }: {
   recentEntries?: Entry[]
@@ -113,4 +117,15 @@ export default function Dashboard({
       </div>
     </div>
   )
+}
+
+export default function Dashboard(props: { recentEntries?: Entry[] }) {
+  const { session, loading } = useAuth()
+  if (journalEnabled && (session || loading))
+    return (
+      <RequireAccount>
+        <CloudDashboard />
+      </RequireAccount>
+    )
+  return <DemoDashboard {...props} />
 }

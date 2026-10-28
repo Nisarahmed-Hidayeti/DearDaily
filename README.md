@@ -4,7 +4,7 @@ Every day has a story.
 
 DearDaily combines a private daily journal with optional public storytelling. The UI is a responsive prototype with a Phase 2 account foundation: four coordinated themes, a quiet writing space, and clearly fictional stories and activity.
 
-## Phase 2 status
+## Current development status
 
 The Phase 2 account foundation is implemented, and its private account migration has been applied to `deardaily-dev` (Paris, Free plan). The local environment connects successfully; hosted signup is disabled and email confirmation is required. All 71 local database security checks passed; hosted RLS/grants and anonymous read denial were verified. Real two-account authentication/isolation, email recovery, Google OAuth, and cloud theme synchronization remain unverified. Phase 2 is not complete, and persistent journals remain blocked on those checks. The sample experience works without credentials.
 
@@ -78,3 +78,15 @@ Editor dates use the visitor's local timezone and locale. Fictional heatmap cale
 After deploying, smoke-test direct visits and refreshes on `/app/write`, `/app/settings`, and `/explore/long-way`. Configuration follows [Netlify redirect options](https://docs.netlify.com/manage/routing/redirects/redirect-options/).
 
 See [the design system](docs/DESIGN_SYSTEM.md), [validation results](docs/VALIDATION.md), and [roadmap](docs/ROADMAP.md).
+
+## Phase 3 security gate
+
+Phase 3 work starts on `feat/deardaily-phase-3` from merged PR #2. Complete the [security gate](docs/PHASE_3_SECURITY_GATE.md) before storing journal content. Approved hosted callbacks now target localhost:5173; tester provisioning, real authentication, two-account isolation and migration-history reconciliation remain pending.
+
+## Small journaling/publishing MVP
+
+The Phase 3 branch includes a locally tested private editor/library, autosave with version checks, and explicitly published public snapshots. Cloud journal functionality stays disabled until genuine account isolation, hosted migration approval and end-to-end verification pass. `VITE_ENABLE_JOURNALS=false` is the safe default. Private Markdown export and a reviewed public-only HTML export are usable immediately. See [MVP_MILESTONE.md](docs/MVP_MILESTONE.md) for actual tests, remaining gates and the manual static-story fallback. SMTP, Google and recovery are deferred by the owner's revised scope.
+
+## Verified development milestone (October 28, 2026)
+
+The exact journal/public-snapshot migration is applied to deardaily-dev. Distinct real user IDs, 54 hosted journal/privacy checks and the real write/save/publish/anonymous-view/unpublish/autosave/delete flow passed. Cloud mode is enabled in the owner's local ignored environment. Signup stays closed; optional Google/SMTP/recovery are deferred. See docs/MVP_MILESTONE.md for actual evidence, two advisor findings and operational limitations. Other environments must enable VITE_ENABLE_JOURNALS only after reviewed configuration; no Netlify deployment was performed.

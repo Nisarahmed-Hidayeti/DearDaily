@@ -1,3 +1,4 @@
+import { journalEnabled } from '../journal/journalApi'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowRight, LockKeyhole } from 'lucide-react'
@@ -249,8 +250,10 @@ export function AuthPage({ mode }: { mode: Mode }) {
           <Link to="/app">Explore the sample dashboard</Link>
         </nav>
         <p className="auth-footnote">
-          <LockKeyhole size={14} /> No journal storage or publishing is
-          available yet.
+          <LockKeyhole size={14} />{' '}
+          {journalEnabled
+            ? 'Save private entries in your account. Publish only with explicit confirmation.'
+            : 'No journal storage or publishing is available yet.'}
         </p>
       </section>
     </main>

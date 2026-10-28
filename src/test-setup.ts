@@ -7,6 +7,7 @@ import { afterEach, beforeEach, vi } from 'vitest'
 vi.stubEnv('VITE_SUPABASE_URL', '')
 vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', '')
 vi.stubEnv('VITE_ALLOW_SIGNUP', 'false')
+vi.stubEnv('VITE_ENABLE_JOURNALS', 'false')
 
 beforeEach(() => {
   localStorage.clear()

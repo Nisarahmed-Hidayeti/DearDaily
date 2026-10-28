@@ -1,3 +1,80 @@
+# DearDaily working development MVP — October 28, 2026
+
+## Result
+
+Private journaling and deliberate public publishing work locally against deardaily-dev. Public registration remains disabled. User A is signed in at /app/write with a clean editor ready for a real entry. No website deployment was performed. This is a controlled development MVP, not a production-readiness certification.
+
+## Identity verification
+
+The original account verifier rejected duplicate authenticated IDs and independently validated both users with Supabase auth.getUser(). Its separate own-row inserts and cross-user checks could not all pass for one ID; editable post-logout email fields were not the identity evidence.
+
+A second real-session verification displayed two different masked ID endings and compared the **full authenticated IDs** both during login and at the start of hosted journal tests. Both server-validated IDs differed. No passwords, tokens or full user IDs are recorded here. The 44 earlier account checks, fixture cleanup, both logouts and signed-out access denial passed.
+
+## Approved hosted migration
+
+Preflight confirmed deardaily-dev, exactly the original profiles/user_settings public tables, their eight policies and enabled/forced RLS, two distinct confirmed accounts, and no conflicting journal/story table or version function. No existing data was reset, overwritten or deleted.
+
+Applied only 20261028000100_private_entries_public_snapshots.sql in BEGIN/COMMIT after verifying the exact editor payload against the reviewed file.
+
+SHA-256: 22a46f2d5fa8f72b43e1bbe16114a746bca8830b49e82c7f16e28e4467bea8eb
+
+Both new tables have RLS enabled and forced, with four policies each. journal_entries is owner-only. public_stories permits anonymous reads of id/title/body/published_at only. Owner IDs and private journal metadata cannot be read through that interface. Private drafts are not public records; draft edits do not update an existing published snapshot.
+
+The two migrations were applied through Dashboard SQL Editor. CLI migration history remains absent and unchanged. Do not run db push/replay the CREATE migrations before separately approved history reconciliation.
+
+## Tests actually executed
+
+- **44 real hosted account checks** passed earlier, with fixture cleanup and both logouts.
+- **54 real hosted journal checks passed**, using two ordinary authenticated user sessions and an anonymous client. Verified own CRUD; A/B private read/update/delete denial; owner/version spoofing rejection; stale-save rejection; private drafts absent from public queries; public field allowlist; hidden owner/wildcard/private joins denied; unauthorized publication/update/unpublish rejection; private edits leaving public copies unchanged; unpublish; delete cascade; fixture cleanup. User B was logged out. User A's existing session was transferred to the normal application SDK for the writing walkthrough; passwords were not retained.
+- **Actual browser lifecycle passed:** Write → Save → Publish confirmation → Explore → anonymous story view → Unpublish confirmation → anonymous story unavailable → private source still saved → autosave edit → reload preserved words → delete confirmation → empty dashboard.
+- A second synthetic entry verified the first autosave gives a canonical entry URL and survives immediate refresh. It was then removed.
+- Dashboard showed one saved entry, 16 words and a one-day streak for the first fixture; after deletion it returned to zero. All synthetic journal/public-story records were cleaned up.
+- Four themes applied through the authenticated cloud settings: Forest Green, Paper White, Obsidian Black, then restored Midnight Purple. A rapid click during a previous theme transition had to be retried after it settled; each final synchronized state was verified.
+- TypeScript, ESLint, **73 frontend tests**, and production build passed after the final code changes. The development verifier routes/fixture text were absent from production output.
+- **124 pgTAP tests passed locally** earlier against the same unchanged migrations. A final local rerun was blocked because Docker was inactive and starting it required interactive sudo; the GitHub verification workflow provides a separate Docker-capable rerun. The hosted 54-check suite and browser tests above executed successfully after migration application.
+- Browser layout had no horizontal overflow at its actual 715px viewport. Requested override widths did not take effect in this IAB session; separate 360/768/1440px responsive certification is not claimed.
+- Final anonymous REST checks: private entries 401/42501; public safe fields 200 with no remaining test stories; hidden owner field 401/42501. Hosted settings still report disabled signup and required email confirmation.
+
+## Advisor findings and remaining limits
+
+Two findings are present after the migration: **Leaked Password Protection Disabled** (Auth warning) and **Unindexed foreign keys** on public.public_stories (performance advisory). Neither was silently changed. Use unique strong passwords for the closed-beta accounts; review compromised-password protection before expanding access. Review a supporting FK index as a separate migration. These findings must not be described as a zero-warning/fully production-ready state.
+
+Google OAuth, custom SMTP and email recovery are deferred by explicit owner instruction. Manually confirming users does not prove email delivery/verification. Migration-history reconciliation, backups/restore, broader device testing and production operations remain future work. Public text can be copied by readers; unpublish cannot retract downloaded copies. Open story pages recheck on focus/every 15 seconds; already fetched copies may persist until refreshed.
+
+No comments, followers, AI, payments, analytics, public signup, or website deployment were added. The original design, demo routes, reduced-motion support and four themes remain available. Local runtime uses VITE_ENABLE_JOURNALS=true in the ignored .env.local; .env.example keeps a safe false default for other environments. The local server runs as the transient user service deardaily-dev.service so chat interruptions do not stop it. Stop it when finished with: systemctl --user stop deardaily-dev.
+
+## First real entry
+
+Open http://localhost:5173/app/write in the existing signed-in browser tab. Write a title and text. Wait for Saved to your private account (or click Save entry). Publish story requires saving first and confirming the complete public text. Explore shows published snapshots; Unpublish removes the public copy while keeping the private source. Export private copy downloads Markdown without placing journal text in localStorage.
+
+---
+
+# Real-account essential gate passed — October 28, 2026
+
+The local verifier reported **PASS: 44 hosted checks**, **Cleanup: PASS**, and **Both logouts and signed-out denial: PASS**. These used two distinct manually confirmed users, genuine email/password sessions and only ordinary publishable-key clients. No passwords, tokens, emails or user IDs are included in this report.
+
+The checks verified owner profile/settings CRUD, cross-account read/update/delete denial, spoofed inserts and owner-change rejection, anonymous denial, unchanged owner rows following attacks, own updates, synthetic-fixture cleanup, logout and signed-out permission denial. Afterward both verifier clients were signed out. Email delivery/verification, recovery and Google were deliberately deferred by the owner; manually confirmed users do not prove delivered email confirmation.
+
+The journal/public-snapshot migration remains locally tested only, unchanged at SHA-256 22a46f2d5fa8f72b43e1bbe16114a746bca8830b49e82c7f16e28e4467bea8eb. Hosted application still requires explicit approval. No hosted journal/public-story writes or deployment have occurred. Cloud mode stays disabled until hosted schema/public-private tests pass. Earlier pending-account-login statements below are historical.
+
+---
+
+# MVP implementation checkpoint — October 28, 2026
+
+124 local pgTAP checks and 73 frontend tests passed; TypeScript, ESLint, build and git diff --check passed. Browser synthetic writing/public-export review/download passed. The new journal migration is local only; cloud mode defaults off. Hosted real-password logins/account isolation and new migration approval are pending. No hosted journal/publishing test success is claimed. Complete evidence and limitations: MVP_MILESTONE.md.
+
+---
+
+# Phase 3 gate kickoff — October 28, 2026
+
+Created feat/deardaily-phase-3 from latest main (be29da7). Reran all 71 local pgTAP checks successfully against the preserved local database; stopped it afterward without deleting its volume. Read-only hosted query confirmed zero Auth accounts, zero profiles/settings and no CLI migration-history relation. SMTP was disabled and Google remains disabled.
+
+With explicit user approval, set the development Site URL to http://localhost:5173 and added exactly http://localhost:5173/auth/callback and http://localhost:5173/auth/reset-password. Dashboard saved state and success notification verified. No other auth setting, account creation, hosted fixture write, migration-history repair, journal storage or deployment occurred.
+
+Real authentication and hosted A/B isolation remain blocked on tester addresses and approved provisioning/delivery setup. See PHASE_3_SECURITY_GATE.md for the staged plan and reconciliation proposal.
+
+---
+
 # DearDaily Phase 2 hosted account migration report
 
 Verified October 28, 2026. Status: account schema applied and checked; Phase 2 authentication integration is still incomplete.
