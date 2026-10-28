@@ -37,7 +37,7 @@ export default function Explore() {
       <div className="story-grid">
         {filtered.map((story) => (
           <Link
-            to={`/explore/${story.id}`}
+            to={`/explore/samples/${story.id}`}
             className="story-card"
             key={story.id}
           >

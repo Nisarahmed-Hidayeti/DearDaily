@@ -1,3 +1,11 @@
+import CommunityPreview from './features/community/CommunityPreview'
+import CommunitySecurityCheck from './features/auth/CommunitySecurityCheck'
+import { communityEnabled } from './features/community/communityApi'
+import PublicProfile from './features/community/PublicProfile'
+import ProfileSettings from './features/community/ProfileSettings'
+import PublishedManager from './features/community/PublishedManager'
+import Moderation from './features/community/Moderation'
+import AccountPrivacy from './features/community/AccountPrivacy'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Landing from './features/landing/Landing'
 import Dashboard from './features/dashboard/Dashboard'
@@ -58,6 +66,55 @@ function ThemedRoutes() {
               element={<JournalSecurityCheck />}
             />
           )}
+          {import.meta.env.DEV && (
+            <Route
+              path="/dev/community-preview"
+              element={<CommunityPreview />}
+            />
+          )}
+          {import.meta.env.DEV && (
+            <Route
+              path="/dev/community-check"
+              element={<CommunitySecurityCheck />}
+            />
+          )}
+          {communityEnabled && (
+            <>
+              <Route path="/u/:username" element={<PublicProfile />} />
+              <Route
+                path="/account/public-profile"
+                element={
+                  <RequireAccount>
+                    <ProfileSettings />
+                  </RequireAccount>
+                }
+              />
+              <Route
+                path="/app/published"
+                element={
+                  <RequireAccount>
+                    <PublishedManager />
+                  </RequireAccount>
+                }
+              />
+              <Route
+                path="/moderation"
+                element={
+                  <RequireAccount>
+                    <Moderation />
+                  </RequireAccount>
+                }
+              />
+              <Route
+                path="/account/privacy"
+                element={
+                  <RequireAccount>
+                    <AccountPrivacy />
+                  </RequireAccount>
+                }
+              />
+            </>
+          )}
           <Route path="/app" element={<Dashboard />} />
           <Route
             path="/account"
@@ -74,7 +131,8 @@ function ThemedRoutes() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/explore/samples" element={<DemoExplore />} />
           <Route path="/explore/published/:id" element={<PublishedStory />} />
-          <Route path="/explore/:id" element={<StoryDetail />} />
+          <Route path="/explore/:id" element={<PublishedStory />} />
+          <Route path="/explore/samples/:id" element={<StoryDetail />} />
           <Route
             path="*"
             element={

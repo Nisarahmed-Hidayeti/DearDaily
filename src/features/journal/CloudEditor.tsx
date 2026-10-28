@@ -1,4 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuth } from '../auth/AuthProvider'
+import {
+  communityEnabled,
+  categories,
+  myProfile,
+} from '../community/communityApi'
+import type { PublicProfile } from '../community/communityApi'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Eye, Feather, LockKeyhole, X } from 'lucide-react'
 import type { Mood } from '../../data/demo'
@@ -19,6 +26,23 @@ function EntryForm({ existingId }: { existingId?: string }) {
     'publish' | 'unpublish' | 'delete' | null
   >(null)
   const navigate = useNavigate()
+  const { client } = useAuth()
+  const [profile, setProfile] = useState<PublicProfile | null>(null)
+  const [byline, setByline] = useState(false)
+  const [publicCategory, setPublicCategory] = useState('Uncategorized')
+  const [publicTags, setPublicTags] = useState('')
+  useEffect(() => {
+    let active = true
+    if (communityEnabled && client)
+      void myProfile(client)
+        .then((p) => {
+          if (active) setProfile(p)
+        })
+        .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [client])
   const count = draft.body.trim() ? draft.body.trim().split(/\s+/).length : 0
   const patch = (values: Partial<typeof draft>) =>
     setDraft((current) => ({ ...current, ...values }))
@@ -296,6 +320,50 @@ function EntryForm({ existingId }: { existingId?: string }) {
           </p>
           {confirmation === 'publish' && (
             <article className="entry-preview">
+              {communityEnabled && (
+                <fieldset disabled={busy}>
+                  <legend>Deliberately public details</legend>
+                  <label>
+                    Public category
+                    <select
+                      value={publicCategory}
+                      onChange={(e) => setPublicCategory(e.target.value)}
+                    >
+                      {categories.map((c) => (
+                        <option key={c}>{c}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Public tags (up to 5, comma separated)
+                    <input
+                      maxLength={154}
+                      value={publicTags}
+                      onChange={(e) => setPublicTags(e.target.value)}
+                    />
+                  </label>
+                  {profile?.visible ? (
+                    <label className="row">
+                      <input
+                        type="checkbox"
+                        checked={byline}
+                        onChange={(e) => setByline(e.target.checked)}
+                      />
+                      Attribute this story to @{profile.username}
+                    </label>
+                  ) : (
+                    <p>
+                      Anonymous writer. Opt into a public profile separately to
+                      add a byline.
+                    </p>
+                  )}
+                  <p>
+                    Only these selected details are public. Each update replaces
+                    the public metadata shown here; private tags and category
+                    are never copied automatically.
+                  </p>
+                </fieldset>
+              )}
               <h3>{row?.title}</h3>
               <p
                 style={{
@@ -310,10 +378,28 @@ function EntryForm({ existingId }: { existingId?: string }) {
           )}
           <button
             className="button"
-            disabled={busy}
+            disabled={
+              busy ||
+              (confirmation === 'publish' &&
+                (publicTags.split(',').filter((t) => t.trim()).length > 5 ||
+                  publicTags.split(',').some((t) => t.trim().length > 30)))
+            }
             onClick={async () => {
               const kind = confirmation
-              const done = await state.action(kind)
+              const done = await state.action(
+                kind,
+                communityEnabled
+                  ? {
+                      public_username:
+                        byline && profile?.visible ? profile.username : null,
+                      public_category: publicCategory,
+                      public_tags: publicTags
+                        .split(',')
+                        .map((t) => t.trim())
+                        .filter(Boolean),
+                    }
+                  : undefined,
+              )
               setConfirmation(null)
               if (done && kind === 'delete') navigate('/app', { replace: true })
             }}
