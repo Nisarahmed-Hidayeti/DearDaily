@@ -1,3 +1,4 @@
+import CommunityPreview from './features/community/CommunityPreview'
 import CommunitySecurityCheck from './features/auth/CommunitySecurityCheck'
 import { communityEnabled } from './features/community/communityApi'
 import PublicProfile from './features/community/PublicProfile'
@@ -63,6 +64,12 @@ function ThemedRoutes() {
             <Route
               path="/dev/journal-check"
               element={<JournalSecurityCheck />}
+            />
+          )}
+          {import.meta.env.DEV && (
+            <Route
+              path="/dev/community-preview"
+              element={<CommunityPreview />}
             />
           )}
           {import.meta.env.DEV && (
