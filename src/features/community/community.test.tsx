@@ -170,3 +170,68 @@ describe('public surfaces', () => {
     expect(result.more).toBe(true)
   })
 })
+
+describe('profile writes preserve hidden ownership', () => {
+  const profile = {
+    username: 'writer_a',
+    display_name: 'Chosen name',
+    bio: 'Chosen biography',
+    avatar: 'leaf',
+    visible: false,
+    joined_month: null,
+  }
+  it('inserts with no row representation and confirms via the safe own-profile RPC', async () => {
+    const insert = vi.fn().mockResolvedValue({ error: null })
+    const rpc = vi.fn().mockResolvedValue({ data: profile, error: null })
+    const client = {
+      from: vi.fn().mockReturnValue({ insert }),
+      rpc,
+    } as unknown as SupabaseClient
+    expect(await saveProfile(client, profile, null)).toEqual(profile)
+    expect(insert).toHaveBeenCalledWith(profile)
+    expect(rpc).toHaveBeenCalledWith('my_public_profile')
+  })
+  it('updates minimally and checks the server-confirmed safe fields', async () => {
+    const eq = vi.fn().mockResolvedValue({ error: null })
+    const update = vi.fn().mockReturnValue({ eq })
+    const client = {
+      from: vi.fn().mockReturnValue({ update }),
+      rpc: vi.fn().mockResolvedValue({ data: profile, error: null }),
+    } as unknown as SupabaseClient
+    expect(await saveProfile(client, profile, 'previous_name')).toEqual(profile)
+    expect(eq).toHaveBeenCalledWith('username', 'previous_name')
+  })
+  it('never claims success when the confirmation differs', async () => {
+    const client = {
+      from: vi
+        .fn()
+        .mockReturnValue({
+          insert: vi.fn().mockResolvedValue({ error: null }),
+        }),
+      rpc: vi
+        .fn()
+        .mockResolvedValue({
+          data: { ...profile, bio: 'Old server version' },
+          error: null,
+        }),
+    } as unknown as SupabaseClient
+    await expect(saveProfile(client, profile, null)).rejects.toThrow(
+      'reconcile',
+    )
+  })
+  it('does not hide a write failure behind a later read', async () => {
+    const rpc = vi.fn()
+    const client = {
+      from: vi
+        .fn()
+        .mockReturnValue({
+          insert: vi.fn().mockResolvedValue({ error: { code: '42501' } }),
+        }),
+      rpc,
+    } as unknown as SupabaseClient
+    await expect(saveProfile(client, profile, null)).rejects.toThrow(
+      'not confirmed',
+    )
+    expect(rpc).not.toHaveBeenCalled()
+  })
+})

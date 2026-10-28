@@ -71,12 +71,24 @@ export async function saveProfile(
   const query = previous
     ? client.from('public_profiles').update(profile).eq('username', previous)
     : client.from('public_profiles').insert(profile)
-  const { data, error } = await query.select(profileFields).single()
-  if (error || !data)
+  // PostgREST representation responses need the hidden primary key. Keep the
+  // write minimal, then verify only the approved fields through the own-row RPC.
+  const { error } = await query
+  if (error)
     throw new Error(
-      'Profile not confirmed. The username may be unavailable; reload before retrying.',
+      'Profile not confirmed. Reload before retrying; the username may be unavailable.',
     )
-  return data as PublicProfile
+  const saved = await myProfile(client)
+  if (
+    !saved ||
+    !(Object.keys(profile) as (keyof PublicProfile)[]).every(
+      (key) => saved[key] === profile[key],
+    )
+  )
+    throw new Error(
+      'Profile not confirmed. Reload to reconcile the server version.',
+    )
+  return saved
 }
 export async function storyPage(
   client: SupabaseClient,

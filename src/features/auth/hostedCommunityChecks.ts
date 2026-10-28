@@ -45,22 +45,23 @@ export async function hostedCommunityChecks(
       bp = await B.rpc('my_public_profile')
     check(!ap.error && !bp.error && !ap.data && !bp.data)
     stage = 'hidden profiles'
-    const pa = await A.from('public_profiles')
-      .insert({
-        username: aname,
-        display_name: 'Synthetic writer A',
-        bio: 'Synthetic public biography',
-      })
-      .select(profileFields)
-      .single()
+    const pa = await A.from('public_profiles').insert({
+      username: aname,
+      display_name: 'Synthetic writer A',
+      bio: 'Synthetic public biography',
+    })
     profileA = !pa.error
-    check(!pa.error && pa.data?.visible === false)
-    const pb = await B.from('public_profiles')
-      .insert({ username: bname, display_name: 'Synthetic writer B' })
-      .select(profileFields)
-      .single()
+    const paRead = await A.rpc('my_public_profile')
+    stage = 'hidden profile A insert ' + (pa.error?.code ?? 'OK')
+    check(!pa.error && !paRead.error && paRead.data?.visible === false)
+    const pb = await B.from('public_profiles').insert({
+      username: bname,
+      display_name: 'Synthetic writer B',
+    })
     profileB = !pb.error
-    check(!pb.error && pb.data?.visible === false)
+    const pbRead = await B.rpc('my_public_profile')
+    stage = 'hidden profile B insert ' + (pb.error?.code ?? 'OK')
+    check(!pb.error && !pbRead.error && pbRead.data?.visible === false)
     const hidden = await anon
       .from('public_profiles')
       .select(profileFields)
@@ -136,9 +137,8 @@ export async function hostedCommunityChecks(
         .from('public_profiles')
         .update({ visible: true })
         .eq('username', name)
-        .select('username')
-        .single()
-      check(!r.error)
+      const own = await client.rpc('my_public_profile')
+      check(!r.error && !own.error && own.data?.visible === true)
     }
     const publicProfiles = await anon
       .from('public_profiles')
@@ -148,8 +148,7 @@ export async function hostedCommunityChecks(
     const badEdit = await B.from('public_profiles')
       .update({ bio: 'ATTACK' })
       .eq('username', aname)
-      .select('username')
-    check(!badEdit.error && badEdit.data?.length === 0)
+    check(!badEdit.error)
     const preserved = await A.rpc('my_public_profile')
     check(preserved.data?.bio === 'Synthetic public biography')
     stage = 'publication boundary'
@@ -291,6 +290,7 @@ export async function hostedCommunityChecks(
         })
       ).error?.code === '42501',
     )
+    stage = 'authorized moderation'
     const queue = await A.rpc('moderation_queue')
     check(!queue.error && Array.isArray(queue.data))
     const report = (
