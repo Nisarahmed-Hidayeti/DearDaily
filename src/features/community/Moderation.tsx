@@ -14,16 +14,23 @@ export default function Moderation() {
   useEffect(() => {
     let active = true
     if (!client) return
-    void client.rpc('moderation_queue').then(({ data, error }) => {
-      if (active) {
-        setItems(error ? [] : (data ?? []))
-        setMessage(
-          error
-            ? 'Access denied or moderation unavailable. Backend authorization is required.'
-            : '',
-        )
-      }
-    })
+    void Promise.resolve(client.rpc('moderation_queue'))
+      .then(({ data, error }) => {
+        if (active) {
+          setItems(error ? [] : (data ?? []))
+          setMessage(
+            error
+              ? 'Access denied or moderation unavailable. Backend authorization is required.'
+              : '',
+          )
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setItems([])
+          setMessage('Moderation unavailable. Reconnect and reload.')
+        }
+      })
     return () => {
       active = false
     }
@@ -32,20 +39,25 @@ export default function Moderation() {
     e.preventDefault()
     if (!client || !selected || busy) return
     setBusy(true)
-    const { error } = await client.rpc('moderate_report', {
-      report: selected.id,
-      decision,
-      note,
-    })
-    setBusy(false)
-    setMessage(
-      error
-        ? 'Decision not confirmed. Refresh before retrying.'
-        : 'Decision recorded in the private audit log.',
-    )
-    setSelected(null)
-    setNote('')
-    setRetry((n) => n + 1)
+    try {
+      const { error } = await client.rpc('moderate_report', {
+        report: selected.id,
+        decision,
+        note,
+      })
+      setMessage(
+        error
+          ? 'Decision not confirmed. Refresh before retrying.'
+          : 'Decision recorded in the private audit log.',
+      )
+      setSelected(null)
+      setNote('')
+      setRetry((n) => n + 1)
+    } catch {
+      setMessage('Decision not confirmed. Refresh before retrying.')
+    } finally {
+      setBusy(false)
+    }
   }
   return (
     <div className="page">

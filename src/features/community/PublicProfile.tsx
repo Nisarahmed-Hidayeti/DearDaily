@@ -51,6 +51,12 @@ export default function PublicProfile() {
       active = false
     }
   }, [client, username, page])
+  if (!validUsername(username))
+    return (
+      <div className="page">
+        <h1>This public profile is not available.</h1>
+      </div>
+    )
   if (!communityEnabled)
     return (
       <div className="page">

@@ -1,7 +1,7 @@
 # Phase 4 — staged community implementation
 
 Status: INCOMPLETE; hosted approval and real-session security verification required.
-Branch: feat/deardaily-phase-4. Phase 3 PR #3 was merged; main was clean/current at 22eabd9. No leftover Phase 3 changes were found.
+Implementation branch: feat/deardaily-phase-4. The owner subsequently requested keeping main fresh; tested code may be merged with community disabled and Netlify deployment skipped, without claiming Phase 4 acceptance. Phase 3 PR #3 was merged; main was clean/current at 22eabd9. No leftover Phase 3 changes were found.
 
 ## Local implementation
 
@@ -18,7 +18,7 @@ Branch: feat/deardaily-phase-4. Phase 3 PR #3 was merged; main was clean/current
 
 20261028000200_public_community.sql is additive: adds public_profiles, a non-exposed private schema with moderator/report/audit/removal/deletion-request tables, three public snapshot metadata columns, indexes and narrowly scoped functions/triggers. It does not reset, drop or rewrite source journal entries or existing account tables. Existing stories receive privacy-safe empty metadata defaults.
 
-All new tables enable and force RLS. Private schema has no API usage/table grants. Public columns are explicitly granted. Ownership changes are not granted. Security-definer functions have empty search_path, no dynamic SQL, fixed return fields and explicit auth/role checks. Trigger functions are not callable by API roles. They access hidden ownership/moderation rows; this is a deliberate privileged boundary, not an unchecked view bypass. Attribution validation locks the profile row to serialize against opt-out. Concurrency tests remain required before a larger release.
+All new tables enable and force RLS. Private schema has no API usage/table grants. Public columns are explicitly granted. Ownership changes are not granted. Security-definer functions have empty search_path, no dynamic SQL, fixed return fields and explicit auth/role checks. Trigger functions are not callable by API roles. They access hidden ownership/moderation rows; this is a deliberate privileged boundary, not an unchecked view bypass. Attribution validation locks the profile row to serialize against opt-out. A shared per-story transaction lock serializes moderation removal with publication. Concurrency tests remain required before a larger release.
 
 No hosted migration, moderator assignment, migration-ledger repair, Auth setting change, Netlify deployment or paid feature is authorized by this document. Public registration stays disabled. VITE_ENABLE_COMMUNITY defaults false and must stay false against hosted deardaily-dev until its migration and real A/B/moderator/anonymous tests pass.
 
@@ -42,4 +42,4 @@ Deletion requests do not delete Auth accounts or publish removal immediately, ha
 
 ## Next milestone
 
-Finish hosted security gate and real end-to-end tests, verify 360/768/1440 layouts in all four themes, resolve critical findings, then merge only verified work. No Phase 5 implementation now. Recommend Phase 5 focus on deletion/retention operations, moderation policies and access review, accessibility/device testing, backups/restore and controlled release; Google/email recovery remain deferred.
+Finish hosted security gate and real end-to-end tests, verify 360/768/1440 layouts in all four themes, resolve critical findings, then enable the community flag only after verified acceptance. No Phase 5 implementation now. Recommend Phase 5 focus on deletion/retention operations, moderation policies and access review, accessibility/device testing, backups/restore and controlled release; Google/email recovery remain deferred.

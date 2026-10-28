@@ -20,24 +20,31 @@ export default function ReportStory({ id }: { id: string }) {
     e.preventDefault()
     if (!client || !session || busy) return
     setBusy(true)
-    const { error } = await client.rpc('submit_story_report', {
-      story: id,
-      reason,
-      explanation: text,
-    })
-    setBusy(false)
-    setMessage(
-      error
-        ? error.code === '23505'
-          ? 'You have already reported this story.'
-          : error.code === '54000'
-            ? 'Daily limit reached. Please try tomorrow.'
-            : 'Report not confirmed. The story may be unavailable; reconnect and retry.'
-        : 'Report received. Your identity is not shared with the author.',
-    )
-    if (!error) {
-      setOpen(false)
-      setText('')
+    try {
+      const { error } = await client.rpc('submit_story_report', {
+        story: id,
+        reason,
+        explanation: text,
+      })
+      setMessage(
+        error
+          ? error.code === '23505'
+            ? 'You have already reported this story.'
+            : error.code === '54000'
+              ? 'Daily limit reached. Please try tomorrow.'
+              : 'Report not confirmed. The story may be unavailable; reconnect and retry.'
+          : 'Report received. Your identity is not shared with the author.',
+      )
+      if (!error) {
+        setOpen(false)
+        setText('')
+      }
+    } catch {
+      setMessage(
+        'Report not confirmed. Reconnect and retry; duplicates are safely rejected.',
+      )
+    } finally {
+      setBusy(false)
     }
   }
   return (

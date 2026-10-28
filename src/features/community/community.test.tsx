@@ -149,12 +149,10 @@ describe('public surfaces', () => {
       order: vi.fn(),
       ilike: vi.fn(),
       eq: vi.fn(),
-      range: vi
-        .fn()
-        .mockResolvedValue({
-          data: Array.from({ length: 13 }, () => story),
-          error: null,
-        }),
+      range: vi.fn().mockResolvedValue({
+        data: Array.from({ length: 13 }, () => story),
+        error: null,
+      }),
     }
     for (const key of ['select', 'order', 'ilike', 'eq'] as const)
       chain[key].mockReturnValue(chain)

@@ -111,8 +111,14 @@ export default function Account() {
           <Link className="button secondary" to="/account/public-profile">
             Public identity
           </Link>
+          <Link className="button secondary" to="/app/published">
+            My published stories
+          </Link>
           <Link className="button secondary" to="/account/privacy">
             Export and deletion
+          </Link>
+          <Link className="text-link" to="/moderation">
+            Moderation (authorized accounts only)
           </Link>
         </div>
       )}

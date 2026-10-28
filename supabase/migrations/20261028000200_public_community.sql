@@ -24,6 +24,7 @@ create policy profile_delete on public.public_profiles for delete to authenticat
 alter table public.public_stories add column public_username text default null,
  add column public_category text not null default 'Uncategorized' check(public_category in ('Uncategorized','Personal','Gratitude','Growth','Travel')),
  add column public_tags text[] not null default '{}' check(cardinality(public_tags)<=5 and array_position(public_tags,null) is null and char_length(array_to_string(public_tags,','))<=154 and (cardinality(public_tags)=0 or array_to_string(public_tags,',') ~ '^[^,]{1,30}(,[^,]{1,30}){0,4}$'));
+create index public_stories_public_author on public.public_stories(public_username,published_at desc,id) where public_username is not null;
 grant select(public_username,public_category,public_tags),insert(public_username,public_category,public_tags),update(public_username,public_category,public_tags) on public.public_stories to authenticated;
 grant select(public_username,public_category,public_tags) on public.public_stories to anon;
 create table deardaily_private.moderators(user_id uuid primary key references auth.users(id) on delete cascade);
@@ -52,11 +53,12 @@ create function public.my_public_profile() returns jsonb language sql stable sec
 $$;
 create function public.validate_public_attribution() returns trigger language plpgsql security definer set search_path='' as $$
 begin
- if exists(select 1 from deardaily_private.removed_stories where story_id=new.id) then raise exception 'Publication restricted by moderation' using errcode='42501'; end if;
  if new.public_username is not null then
   perform 1 from public.public_profiles where user_id=new.user_id and username=new.public_username and visible for share;
   if not found then raise exception 'Public identity not authorized' using errcode='42501'; end if;
  end if;
+ perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(new.id::text,1));
+ if exists(select 1 from deardaily_private.removed_stories where story_id=new.id) then raise exception 'Publication restricted by moderation' using errcode='42501'; end if;
  return new;
 end; $$;
 create trigger check_public_attribution before insert or update on public.public_stories for each row execute function public.validate_public_attribution();
@@ -89,6 +91,7 @@ begin
  select story_id into target from deardaily_private.reports where id=report and resolved_at is null for update;
  if not found then raise exception 'Report unavailable' using errcode='22023'; end if;
  if decision='remove' then
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(target::text,1));
   insert into deardaily_private.removed_stories(story_id) select id from public.journal_entries where id=target on conflict do nothing;
   delete from public.public_stories where id=target;
  end if;

@@ -11,6 +11,8 @@ select lives_ok($$insert into public.public_profiles(username,display_name,bio) 
 select is(public.my_public_profile()->>'visible','false','default profile invisible');
 select throws_ok($$select user_id from public.public_profiles$$,'42501',null,'authenticated cannot read public ownership IDs');
 select throws_ok($$insert into public.public_profiles(username,display_name) values('../bad','Bad')$$,'23514',null,'malformed username rejected');
+select throws_ok($$update public.public_profiles set user_id='40000000-0000-0000-0000-000000000002'$$,'42501',null,'profile ownership immutable');
+select throws_ok($$insert into public.public_profiles(user_id,username,display_name) values('40000000-0000-0000-0000-000000000002','spoof_user','Spoof')$$,'42501',null,'cannot set another profile owner');
 select lives_ok($$insert into public.journal_entries(id,title,body) values('50000000-0000-0000-0000-000000000001','SECRET','PRIVATE WORDS')$$,'private source');
 select throws_ok($$insert into public.public_stories(id,user_id,title,body,public_username) values('50000000-0000-0000-0000-000000000001','40000000-0000-0000-0000-000000000001','Public title','Public words','writer_a')$$,'42501',null,'hidden identity attribution denied');
 select lives_ok($$insert into public.public_stories(id,user_id,title,body) values('50000000-0000-0000-0000-000000000001','40000000-0000-0000-0000-000000000001','Public title','Public words')$$,'anonymous pseudonym-free publication');
@@ -28,6 +30,8 @@ select lives_ok($$update public.public_profiles set bio='ATTACK' where username=
 select lives_ok($$delete from public.public_profiles where username='writer_a'$$,'B cannot remove A profile');
 select throws_ok($$insert into deardaily_private.moderators values(auth.uid())$$,'42501',null,'cannot self elevate');
 select throws_ok($$select * from deardaily_private.reports$$,'42501',null,'reports private');
+select throws_ok($$select * from deardaily_private.moderation_audit$$,'42501',null,'audit private');
+select throws_ok($$select public.validate_public_attribution()$$,'42501',null,'trigger helper not callable');
 select throws_ok($$select public.moderation_queue()$$,'42501',null,'ordinary user denied moderation queue');
 select throws_ok($$select public.moderate_report(gen_random_uuid(),'remove','attack')$$,'42501',null,'ordinary user denied moderation decision');
 select lives_ok($$select public.submit_story_report('50000000-0000-0000-0000-000000000001','spam','Synthetic report')$$,'B submits report');
@@ -54,6 +58,9 @@ select lives_ok($$update public.public_profiles set visible=false$$,'A opts out'
 select is((select public_username from public.public_stories),null::text,'optout detaches all story attribution');
 select lives_ok($$update public.public_profiles set visible=true$$,'A opts back in');
 select is((select public_username from public.public_stories),null::text,'opt back in does not silently relink');
+select set_config('request.jwt.claims','{"sub":"40000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
+update public.public_profiles set visible=true;
+select set_config('request.jwt.claims','{"sub":"40000000-0000-0000-0000-000000000001","role":"authenticated"}',true);
 select throws_ok($$update public.public_stories set public_username='writer_b'$$,'42501',null,'A cannot impersonate B');
 -- Create six more synthetic stories as A; B may report five total within 24h.
 insert into public.journal_entries(id,title,body) select ('50000000-0000-0000-0000-'||lpad(n::text,12,'0'))::uuid,'Synthetic','Only fixture' from generate_series(2,7)n;

@@ -117,14 +117,19 @@ export default function AccountPrivacy() {
             onClick={async () => {
               if (!client) return
               setBusy(true)
-              const { error } = await client.rpc('request_account_deletion')
-              setBusy(false)
-              setConfirm(false)
-              setMessage(
-                error
-                  ? 'Request not confirmed. Reconnect and retry.'
-                  : 'Deletion request recorded. Contact the project owner for completion; your data has not yet been deleted.',
-              )
+              try {
+                const { error } = await client.rpc('request_account_deletion')
+                setConfirm(false)
+                setMessage(
+                  error
+                    ? 'Request not confirmed. Reconnect and retry.'
+                    : 'Deletion request recorded. Contact the project owner for completion; your data has not yet been deleted.',
+                )
+              } catch {
+                setMessage('Request not confirmed. Reconnect and retry.')
+              } finally {
+                setBusy(false)
+              }
             }}
           >
             Confirm deletion request

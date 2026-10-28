@@ -1,3 +1,4 @@
+import CommunitySecurityCheck from './features/auth/CommunitySecurityCheck'
 import { communityEnabled } from './features/community/communityApi'
 import PublicProfile from './features/community/PublicProfile'
 import ProfileSettings from './features/community/ProfileSettings'
@@ -62,6 +63,12 @@ function ThemedRoutes() {
             <Route
               path="/dev/journal-check"
               element={<JournalSecurityCheck />}
+            />
+          )}
+          {import.meta.env.DEV && (
+            <Route
+              path="/dev/community-check"
+              element={<CommunitySecurityCheck />}
             />
           )}
           {communityEnabled && (
