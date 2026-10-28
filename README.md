@@ -82,3 +82,7 @@ See [the design system](docs/DESIGN_SYSTEM.md), [validation results](docs/VALIDA
 ## Phase 3 security gate
 
 Phase 3 work starts on `feat/deardaily-phase-3` from merged PR #2. Complete the [security gate](docs/PHASE_3_SECURITY_GATE.md) before storing journal content. Approved hosted callbacks now target localhost:5173; tester provisioning, real authentication, two-account isolation and migration-history reconciliation remain pending.
+
+## Small journaling/publishing MVP
+
+The Phase 3 branch includes a locally tested private editor/library, autosave with version checks, and explicitly published public snapshots. Cloud journal functionality stays disabled until genuine account isolation, hosted migration approval and end-to-end verification pass. `VITE_ENABLE_JOURNALS=false` is the safe default. Private Markdown export and a reviewed public-only HTML export are usable immediately. See [MVP_MILESTONE.md](docs/MVP_MILESTONE.md) for actual tests, remaining gates and the manual static-story fallback. SMTP, Google and recovery are deferred by the owner's revised scope.

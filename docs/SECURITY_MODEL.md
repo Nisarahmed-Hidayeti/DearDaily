@@ -80,3 +80,7 @@ The CLI migration ledger was absent and has not been created or modified; reconc
 ## Phase 3 entry gate
 
 The PHASE_3_SECURITY_GATE.md checklist is mandatory before durable journals. Two actual ordinary-user sessions must verify HTTP isolation; admin/catalog checks do not replace them. Tester provisioning, fixture writes, auth settings and history repair require explicit scoped approval. Exact localhost development redirect URLs were approved and configured on October 28, 2026. No public registration, broader identity linking or journal data storage is enabled.
+
+## Journal and publication boundary (local implementation; hosted gate pending)
+
+The new migration keeps journal_entries owner-only and exposes only copied title/body/id/publication date through public_stories column grants. No public source-entry SELECT policy exists. Private changes do not republish; publication/unpublication are explicit mutations with confirmation. Owner IDs and source metadata are not public API fields. Optimistic server revision checks prevent silent stale overwrites. Both tables enable/force RLS; least-privilege grants deny ownership, revision and timestamp mutation. Public snapshots cascade on source deletion. The local 124-check suite passes; actual hosted A/B and writing/publishing tests remain pending. Cloud mode defaults off. No production readiness claim is made. See MVP_MILESTONE.md for complete limits and the reviewed static export fallback.

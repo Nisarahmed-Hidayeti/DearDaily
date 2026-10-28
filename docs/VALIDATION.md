@@ -1,3 +1,9 @@
+# MVP implementation checkpoint — October 28, 2026
+
+124 local pgTAP checks and 73 frontend tests passed; TypeScript, ESLint, build and git diff --check passed. Browser synthetic writing/public-export review/download passed. The new journal migration is local only; cloud mode defaults off. Hosted real-password logins/account isolation and new migration approval are pending. No hosted journal/publishing test success is claimed. Complete evidence and limitations: MVP_MILESTONE.md.
+
+---
+
 # Phase 3 gate kickoff — October 28, 2026
 
 Created feat/deardaily-phase-3 from latest main (be29da7). Reran all 71 local pgTAP checks successfully against the preserved local database; stopped it afterward without deleting its volume. Read-only hosted query confirmed zero Auth accounts, zero profiles/settings and no CLI migration-history relation. SMTP was disabled and Google remains disabled.

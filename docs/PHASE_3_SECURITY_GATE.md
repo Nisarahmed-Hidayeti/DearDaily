@@ -1,3 +1,9 @@
+# Updated milestone priorities
+
+The owner's latest request supersedes the earlier exit criteria below: custom SMTP, Google OAuth and email recovery are deferred. Essential real password login/logout and A/B hosted account isolation must pass before enabling private journals. Public publishing is now explicitly in scope through separate reviewed snapshots. See MVP_MILESTONE.md for the reviewed local implementation and current unverified gates. No hosted schema/fixture change or deployment is implicitly approved by this document.
+
+---
+
 # Phase 3 security gate — October 28, 2026
 
 Branch: feat/deardaily-phase-3, created from reviewed main commit be29da7. Persistent journals are blocked until this gate passes. The existing UI and all four themes remain unchanged.

@@ -15,3 +15,7 @@ Local auth/UI integration, account migrations, RLS policies, theme synchronizati
 ## Phase 3 started — security verification first
 
 The feature branch starts from merged PR #2. Work begins with the mandatory Phase 2 security gate in [PHASE_3_SECURITY_GATE.md](PHASE_3_SECURITY_GATE.md): real testers/authentication, hosted cross-account API isolation, Google/email configuration and safe migration-history reconciliation. Local pgTAP was rerun successfully (71 tests). Approved localhost redirects are configured. Persistent journals and real dashboard statistics remain blocked pending the gate. No publishing or deployment is included.
+
+## Reprioritized usable MVP
+
+Essential password authentication and hosted A/B isolation remain the gate. Optional email delivery/Google/recovery are deferred. Private journaling and explicit public snapshot publishing/unpublishing are implemented locally and tested; hosted use awaits approval and real-session checks. Export fallback is available. Public comments, followers, AI and payments remain out of scope. See MVP_MILESTONE.md.
