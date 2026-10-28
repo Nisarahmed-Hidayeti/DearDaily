@@ -43,3 +43,9 @@ Deletion requests do not delete Auth accounts or publish removal immediately, ha
 ## Next milestone
 
 Finish hosted security gate and real end-to-end tests, verify 360/768/1440 layouts in all four themes, resolve critical findings, then enable the community flag only after verified acceptance. No Phase 5 implementation now. Recommend Phase 5 focus on deletion/retention operations, moderation policies and access review, accessibility/device testing, backups/restore and controlled release; Google/email recovery remain deferred.
+
+## Completed verification checkpoint
+
+TypeScript, lint, production build and 94 frontend tests passed. The initial full GitHub isolated-Supabase run passed 186 database checks; subsequent hardening adds ownership/helper tests and re-runs the entire suite before merge. Development-only verifier/visual fixtures are excluded from production output. The hosted read-only preflight confirmed exactly journal_entries/profiles/public_stories/user_settings, no public_profiles/private-schema conflict and no CLI ledger. No hosted writes were performed.
+
+A separate, explicitly labeled synthetic visual preview passed real browser overflow checks at actual 360/768/1440 widths in each of four themes (12 combinations). A 360px modal fit the viewport, received focus and closed with Escape. These are layout/interaction checks of synthetic components, not hosted functional or security evidence. The complete real-profile/publish/report/moderate walkthrough remains pending approval and login. No private journal text was read during the preview.

@@ -127,3 +127,19 @@ export function downloadJSON(value: unknown) {
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
+
+// Management needs source IDs only; never fetch private journal bodies for this list.
+export async function listOwnStoryIds(client: SupabaseClient, userId: string) {
+  const ids: string[] = []
+  for (let offset = 0; ; offset += 100) {
+    const { data, error } = await client
+      .from('journal_entries')
+      .select('id')
+      .eq('user_id', userId)
+      .order('id')
+      .range(offset, offset + 99)
+    if (error) throw new Error('Publications unavailable')
+    ids.push(...data.map((row) => row.id as string))
+    if (data.length < 100) return ids
+  }
+}

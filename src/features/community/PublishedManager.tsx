@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { PageHeading, Modal } from '../../components/Shared'
-import { listEntries, unpublishStory } from '../journal/journalApi'
-import { storyFields } from './communityApi'
+import { unpublishStory } from '../journal/journalApi'
+import { storyFields, listOwnStoryIds } from './communityApi'
 import type { CommunityStory } from './communityApi'
 export default function PublishedManager() {
   const { client, session } = useAuth()
@@ -16,16 +16,13 @@ export default function PublishedManager() {
     let active = true
     if (!client || !session) return
     void (async () => {
-      const entries = await listEntries(client, session.user.id)
+      const ids = await listOwnStoryIds(client, session.user.id)
       const stories: CommunityStory[] = []
-      for (let i = 0; i < entries.length; i += 50) {
+      for (let i = 0; i < ids.length; i += 50) {
         const { data, error } = await client
           .from('public_stories')
           .select(storyFields)
-          .in(
-            'id',
-            entries.slice(i, i + 50).map((e) => e.id),
-          )
+          .in('id', ids.slice(i, i + 50))
         if (error) throw error
         stories.push(...(data as CommunityStory[]))
       }
