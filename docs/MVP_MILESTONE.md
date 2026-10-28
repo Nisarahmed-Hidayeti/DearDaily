@@ -1,3 +1,13 @@
+# Real-account essential gate passed — October 28, 2026
+
+The local verifier reported **PASS: 44 hosted checks**, **Cleanup: PASS**, and **Both logouts and signed-out denial: PASS**. These used two distinct manually confirmed users, genuine email/password sessions and only ordinary publishable-key clients. No passwords, tokens, emails or user IDs are included in this report.
+
+The checks verified owner profile/settings CRUD, cross-account read/update/delete denial, spoofed inserts and owner-change rejection, anonymous denial, unchanged owner rows following attacks, own updates, synthetic-fixture cleanup, logout and signed-out permission denial. Afterward both verifier clients were signed out. Email delivery/verification, recovery and Google were deliberately deferred by the owner; manually confirmed users do not prove delivered email confirmation.
+
+The journal/public-snapshot migration remains locally tested only, unchanged at SHA-256 22a46f2d5fa8f72b43e1bbe16114a746bca8830b49e82c7f16e28e4467bea8eb. Hosted application still requires explicit approval. No hosted journal/public-story writes or deployment have occurred. Cloud mode stays disabled until hosted schema/public-private tests pass. Earlier pending-account-login statements below are historical.
+
+---
+
 # DearDaily smallest usable milestone — October 28, 2026
 
 ## Current scope and safety gate
