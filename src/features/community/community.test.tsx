@@ -78,16 +78,24 @@ describe('public surfaces', () => {
     expect(screen.getByText('Anonymous writer')).toBeVisible()
     expect(screen.getByText('#chosen')).toBeVisible()
   })
-  it('links an explicitly chosen pseudonym', () => {
+  it('links an explicitly chosen pseudonym after confirming its public profile', async () => {
+    const query = {
+      select: () => query,
+      eq: () => query,
+      maybeSingle: async () => ({
+        data: { username: 'writer_a', display_name: '', avatar: 'leaf' },
+        error: null,
+      }),
+    }
+    auth.client = { from: () => query }
     render(
       <MemoryRouter>
         <StoryCard story={{ ...story, public_username: 'writer_a' }} />
       </MemoryRouter>,
     )
-    expect(screen.getByRole('link', { name: '@writer_a' })).toHaveAttribute(
-      'href',
-      '/u/writer_a',
-    )
+    expect(
+      await screen.findByRole('link', { name: '@writer_a' }),
+    ).toHaveAttribute('href', '/u/writer_a')
   })
   it('requires sign-in for reporting and does not submit anonymous requests', async () => {
     auth.client = { rpc: vi.fn() }
