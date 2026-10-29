@@ -18,10 +18,10 @@ feat/deardaily-2-editor-covers starts at the verified merged baseline. Current l
 - Open-source Tiptap editor: headings 1–3, paragraphs, bold/italic/underline/strike, lists/checklists, quotes, dividers, inline/fenced code, safe links, undo/redo, Markdown shortcuts, slash/block menu, selection toolbar, word count, Markdown append/import and export.
 - Preset cover palettes, allowlisted emoji page icons, preview/focus mode, local writing font and width. Font/width account sync belongs to advanced appearance, not this checkpoint.
 - Version 1 structured document, constrained client validation and safe React rendering with preserved text fallback. No arbitrary HTML renderer, CSS or tracking embeds. Documents are bounded by text size, JSON size, node count and depth. Unsupported import blocks are rejected or lose formatting with a warning; original imports are never deleted. Markdown support is a beta upstream extension; unsupported tables/HTML/images and underline round trips are not promised.
-- Cloud integration is gated by VITE_ENABLE_RICH_EDITOR=false. Existing plaintext paths remain active without a new schema. Development-only /dev/editor-workshop uses synthetic in-memory writing, no hosted writes. Export before leaving.
+- Production cloud integration is gated by VITE_ENABLE_RICH_EDITOR=false; the owner approved localhost testing separately. Existing plaintext paths remain active without a new schema. Development-only /dev/editor-workshop uses synthetic in-memory writing, no hosted writes. Export before leaving.
 - Public copies include only deliberately confirmed structured content/icon/preset cover. No original_body, private tags, dates or mood enter the public snapshot. Chosen public covers replace repeated default artwork.
 
-## Exact proposed hosted change — NOT APPLIED
+## Rich-writing hosted change — applied with owner approval
 
 20261028000300_writing_documents.sql adds nullable writing_document, page_icon and cover_preset columns to sources and public snapshots, and a source-only original_body backup. It adds envelope/size/allowlist constraints and narrow column grants; no RLS policy is weakened. Original text is preserved on first legacy conversion; old clients cannot silently overwrite a rich source. Old-client plain publication updates clear stale structured public content. Existing version checks remain in place. There is no Storage bucket, public media access, user creation, deletion or migration-history repair.
 
@@ -43,3 +43,13 @@ Approval requires: passing all isolated pgTAP tests, independent review of this 
 ## Latest local verification
 
 Docker was started by the owner. Database-only local Supabase applied the pending local community and writing-document migrations without a reset. All 220 pgTAP checks passed; hosted schema was unchanged. All 119 frontend tests passed with one worker, TypeScript/lint/build passed. The parallel run timed out under local startup load. Signup tests now provide an explicitly mocked bot-check token; this is not real bot-protection verification. Account UI shows private email/confirmation/member information and honest recovery readiness. The editor bundle currently exceeds Vite’s 500 kB warning threshold; optimization remains pending.
+
+## October 29 verification and writing refinements
+
+The exact writing migration above (SHA256 f259a96641bebd65ade66e5471da4834993de3e419f9ffc419c1317bde9da8d7) passed all 220 local database checks and was applied transactionally to deardaily-dev after owner approval and conflict guards. No reset, authentication setting, Storage bucket or migration-history change occurred. 33 real hosted rich-writing checks passed with distinct server-validated A/B IDs: private isolation in both directions, anonymous source denial, legacy original-text preservation, stale-write rejection, explicit snapshot fields, private/public independence and unpublish revocation. Their exact fixtures were cleaned.
+
+The writing surface now uses a quiet document canvas, large title, selection toolbar, collapsed formatting/options and a separate details/publishing drawer. Preset covers and emoji remain available; uploads remain unavailable. Autosave fixes avoid untouched empty-page creation and canonicalize JSON fingerprints to prevent repeated saves caused by PostgreSQL JSON key ordering. Editor hydration suppresses update events so loading cannot autosave an empty document. A StrictMode teardown guard prevents accessing destroyed editor commands. Regression coverage includes hydration, teardown and fingerprints.
+
+Latest full validation before the teardown guard: 130 frontend tests, ESLint, TypeScript and build passed. Both hydration/StrictMode regression tests subsequently passed; final complete rerun passed 134 tests, TypeScript, lint and build. Build retains a 519.5 kB rich-editor chunk warning. Client image-signature validation is preparation only, not a secure upload implementation.
+
+Owner approved localhost-only community activation for final Phase 4 UI acceptance on October 29. Production/community signup flags remain disabled. Core real UI acceptance and exact synthetic cleanup completed; details are recorded in PHASE_4.md. Larger DearDaily 2 media, advanced appearance and signup stages remain incomplete.

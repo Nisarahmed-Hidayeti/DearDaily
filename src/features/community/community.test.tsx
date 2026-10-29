@@ -6,11 +6,13 @@ import {
   validUsername,
   readingTime,
   saveProfile,
+  removePublicProfile,
   storyPage,
 } from './communityApi'
 import { StoryCard } from './StoryCard'
 import ReportStory from './ReportStory'
 import Moderation from './Moderation'
+import ProfileSettings from './ProfileSettings'
 import type { SupabaseClient } from '@supabase/supabase-js'
 const auth = vi.hoisted(() => ({
   client: null as unknown,
@@ -203,17 +205,13 @@ describe('profile writes preserve hidden ownership', () => {
   })
   it('never claims success when the confirmation differs', async () => {
     const client = {
-      from: vi
-        .fn()
-        .mockReturnValue({
-          insert: vi.fn().mockResolvedValue({ error: null }),
-        }),
-      rpc: vi
-        .fn()
-        .mockResolvedValue({
-          data: { ...profile, bio: 'Old server version' },
-          error: null,
-        }),
+      from: vi.fn().mockReturnValue({
+        insert: vi.fn().mockResolvedValue({ error: null }),
+      }),
+      rpc: vi.fn().mockResolvedValue({
+        data: { ...profile, bio: 'Old server version' },
+        error: null,
+      }),
     } as unknown as SupabaseClient
     await expect(saveProfile(client, profile, null)).rejects.toThrow(
       'reconcile',
@@ -222,11 +220,9 @@ describe('profile writes preserve hidden ownership', () => {
   it('does not hide a write failure behind a later read', async () => {
     const rpc = vi.fn()
     const client = {
-      from: vi
-        .fn()
-        .mockReturnValue({
-          insert: vi.fn().mockResolvedValue({ error: { code: '42501' } }),
-        }),
+      from: vi.fn().mockReturnValue({
+        insert: vi.fn().mockResolvedValue({ error: { code: '42501' } }),
+      }),
       rpc,
     } as unknown as SupabaseClient
     await expect(saveProfile(client, profile, null)).rejects.toThrow(
@@ -234,4 +230,68 @@ describe('profile writes preserve hidden ownership', () => {
     )
     expect(rpc).not.toHaveBeenCalled()
   })
+})
+
+describe('public profile removal confirmation', () => {
+  it('uses an exact username and confirms removal through the safe own-profile RPC', async () => {
+    const eq = vi.fn().mockResolvedValue({ error: null })
+    const del = vi.fn(() => ({ eq }))
+    const rpc = vi.fn().mockResolvedValue({ data: null, error: null })
+    const client = {
+      from: vi.fn(() => ({ delete: del })),
+      rpc,
+    } as unknown as SupabaseClient
+    await removePublicProfile(client, 'synthetic_writer')
+    expect(eq).toHaveBeenCalledWith('username', 'synthetic_writer')
+    expect(rpc).toHaveBeenCalledWith('my_public_profile')
+  })
+  it('does not claim removal if the server still returns an own profile', async () => {
+    const client = {
+      from: () => ({ delete: () => ({ eq: async () => ({ error: null }) }) }),
+      rpc: async () => ({
+        data: { username: 'synthetic_writer' },
+        error: null,
+      }),
+    } as unknown as SupabaseClient
+    await expect(
+      removePublicProfile(client, 'synthetic_writer'),
+    ).rejects.toThrow('not confirmed')
+  })
+})
+
+it('removes an own public profile only after its confirmation dialog', async () => {
+  const eq = vi.fn().mockResolvedValue({ error: null })
+  const rpc = vi
+    .fn()
+    .mockResolvedValueOnce({
+      data: {
+        username: 'synthetic_writer',
+        display_name: 'Synthetic',
+        bio: '',
+        avatar: 'leaf',
+        visible: false,
+        joined_month: null,
+      },
+      error: null,
+    })
+    .mockResolvedValue({ data: null, error: null })
+  auth.client = { rpc, from: () => ({ delete: () => ({ eq }) }) }
+  render(
+    <MemoryRouter>
+      <ProfileSettings />
+    </MemoryRouter>,
+  )
+  await userEvent.click(
+    await screen.findByRole('button', { name: 'Remove public profile' }),
+  )
+  expect(eq).not.toHaveBeenCalled()
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Confirm profile removal' }),
+  )
+  expect(
+    await screen.findByText(
+      'Public profile removed. Your private account and journals remain unchanged.',
+    ),
+  ).toBeVisible()
+  expect(eq).toHaveBeenCalledWith('username', 'synthetic_writer')
 })

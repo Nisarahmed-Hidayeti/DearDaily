@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeading, Modal } from '../../components/Shared'
 import { useAuth } from '../auth/AuthProvider'
-import { avatars, myProfile, saveProfile } from './communityApi'
+import {
+  avatars,
+  myProfile,
+  saveProfile,
+  removePublicProfile,
+} from './communityApi'
 import type { PublicProfile } from './communityApi'
 const empty: PublicProfile = {
   username: '',
@@ -20,6 +25,7 @@ export default function ProfileSettings() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [confirm, setConfirm] = useState(false)
+  const [removing, setRemoving] = useState(false)
   useEffect(() => {
     let active = true
     if (!client) return
@@ -54,6 +60,23 @@ export default function ProfileSettings() {
     } finally {
       setBusy(false)
       setConfirm(false)
+    }
+  }
+  async function remove() {
+    if (!client || !previous || busy) return
+    setBusy(true)
+    try {
+      await removePublicProfile(client, previous)
+      setForm(empty)
+      setPrevious(null)
+      setMessage(
+        'Public profile removed. Your private account and journals remain unchanged.',
+      )
+    } catch (e) {
+      setMessage((e as Error).message)
+    } finally {
+      setBusy(false)
+      setRemoving(false)
     }
   }
   return (
@@ -159,6 +182,36 @@ export default function ProfileSettings() {
         <Link className="text-link" to={`/u/${previous}`}>
           View saved public profile
         </Link>
+      )}
+      {previous && (
+        <button
+          className="button secondary"
+          disabled={busy}
+          onClick={() => setRemoving(true)}
+        >
+          Remove public profile
+        </button>
+      )}
+      {removing && (
+        <Modal
+          title="Remove public profile?"
+          onClose={() => {
+            if (!busy) setRemoving(false)
+          }}
+        >
+          <p>
+            This deletes your public identity and removes its story bylines.
+            Published story text stays public until you unpublish it. Your
+            private account and journals stay saved.
+          </p>
+          <button
+            className="button"
+            disabled={busy}
+            onClick={() => void remove()}
+          >
+            Confirm profile removal
+          </button>
+        </Modal>
       )}
       {confirm && (
         <Modal

@@ -1,6 +1,6 @@
 # Phase 4 — staged community implementation
 
-Status: hosted database security gate PASSED; community activation and the complete new-page UI walkthrough remain unapproved/pending.
+Status: hosted database security gate PASSED; localhost community activation and synthetic core UI walkthrough completed October 29. Production activation/deployment remain unapproved.
 Implementation branch: feat/deardaily-phase-4. The owner subsequently requested keeping main fresh; tested code may be merged with community disabled and Netlify deployment skipped, without claiming Phase 4 acceptance. Phase 3 PR #3 was merged; main was clean/current at 22eabd9. No leftover Phase 3 changes were found.
 
 ## Local implementation
@@ -63,3 +63,15 @@ The rolling five-report limit, malformed reasons/explanation lengths and deletio
 Post-migration advisors show the disabled leaked-password warning; five expected authenticated SECURITY DEFINER warnings for the deliberately privileged, internally checked RPCs; five no-policy RLS notices for the private deny-by-default tables; two missing foreign-key indexes on moderation_audit; and four unused-index notices on new/empty tables. The previous public-story FK index warning is absent. These findings were reviewed, not suppressed; indexes/settings/history were not changed beyond the approved SQL. Additional index migrations need approval. No zero-warning or production-readiness claim.
 
 VITE_ENABLE_COMMUNITY stays false, public signup stays disabled, and no deployment or migration-history repair was performed. The full enabled-page UI acceptance flow requires separate activation approval; the database security pass does not override that instruction.
+
+## October 29 localhost acceptance
+
+The owner explicitly approved localhost-only community activation. Real User A login was restored through the owner’s existing login form; passwords were not inspected or stored by the agent. The existing 50 hosted A/B/anonymous/moderator checks remain the distinct-account security evidence; this additional UI walkthrough used User A.
+
+Synthetic real UI checks passed: private save/autosave/reload, rich public story rendering, explicit unpublish with source preservation, source deletion, hidden profile save, explicit profile opt-in, public profile rendering, confirmed public-profile removal, report submission, moderator queue, confirmed removal and audited decision. A catalog read verified private source=1, public copy=0 and removal audit=1 after moderation. No private journal was used as a fixture.
+
+Exact synthetic journal IDs 79f8ae68-a46b-42cb-bc91-d7792a7bfd90 and 0925f1bd-46e1-4e3a-a3b1-eff78326f7c6 were removed; profile synthetic_ui_1029 was removed through the ordinary owner API with safe own-profile confirmation. The moderation report/audit were cleaned transactionally by exact fixture ID and explanation after verifying the synthetic source title/body. Final catalog counts for both sources/snapshots, profile and report were all zero. No real entries/accounts or moderator membership were changed. Anonymous checks again denied private journals and hidden profile ownership, returned no removed snapshots, and confirmed hosted signup remains disabled.
+
+A new confirmed public-profile removal control deletes only the owner’s public identity, detaches story bylines through existing triggers, preserves story text/private journals, and verifies the server result before reporting success. Tests cover exact-row deletion, unsuccessful confirmation and the actual confirmation UI. No database migration was required.
+
+The revised writing canvas passed overflow checks at actual 360/768/1440 widths in all four themes using synthetic preview content; these layout checks do not certify every device or accessibility requirement. All 134 frontend tests, TypeScript, ESLint and production build passed. The previously passed 220 local database checks cover the unchanged SQL. Production remains at its approved baseline; new rich/community functionality is local-only. Known operational warnings/retention, backup recovery, email delivery and release-readiness tasks above remain open. No claim of perfect security or deployment readiness.

@@ -92,6 +92,18 @@ export async function saveProfile(
     )
   return saved
 }
+export async function removePublicProfile(
+  client: SupabaseClient,
+  username: string,
+) {
+  if (!validUsername(username)) throw new Error('Invalid profile username')
+  const { error } = await client
+    .from('public_profiles')
+    .delete()
+    .eq('username', username)
+  if (error || (await myProfile(client)))
+    throw new Error('Profile removal not confirmed. Reload before retrying.')
+}
 export async function storyPage(
   client: SupabaseClient,
   options: {
