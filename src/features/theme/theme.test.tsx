@@ -64,11 +64,11 @@ describe('theme preferences', () => {
       'data-theme',
       'paper-white',
     )
-    await userEvent.click(screen.getByRole('link', { name: 'Overview' }))
+    await userEvent.click(screen.getByRole('link', { name: 'Home' }))
     expect(
       screen.getByRole('region', { name: 'Writing activity calendar' }),
     ).toBeInTheDocument()
-    await userEvent.click(screen.getByRole('link', { name: 'Explore stories' }))
+    await userEvent.click(screen.getByRole('link', { name: 'Explore' }))
     await userEvent.click(
       screen.getByRole('link', { name: /There is no hurry to become/ }),
     )
@@ -150,7 +150,7 @@ describe('theme preferences', () => {
     const writes = vi.spyOn(Storage.prototype, 'setItem')
     renderApp()
     await userEvent.click(screen.getByRole('radio', { name: 'Obsidian Black' }))
-    await userEvent.click(screen.getByRole('link', { name: 'Write an entry' }))
+    await userEvent.click(screen.getByRole('link', { name: 'Write' }))
     await userEvent.type(screen.getByLabelText('Entry title'), 'Private title')
     await userEvent.type(
       screen.getByLabelText('Journal body'),

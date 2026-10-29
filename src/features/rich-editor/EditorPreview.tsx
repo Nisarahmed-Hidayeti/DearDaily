@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useWritingFocus } from './useWritingFocus'
+import { useState, useEffect } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { themes } from '../theme/themes'
 import type { ThemeId } from '../theme/themes'
 import { RichWriter } from './RichWriter'
@@ -13,10 +15,17 @@ export default function EditorPreview() {
   const [title, setTitle] = useState('The art of noticing')
   const [icon, setIcon] = useState('🌿')
   const [cover, setCover] = useState<CoverPreset>('dawn')
-  const [focus, setFocus] = useState(false)
+  const { focus, setFocus } = useWritingFocus()
   const [font, setFont] = useState('sans')
+  const preview = useOutletContext<{
+    setPreviewTheme?: (theme: ThemeId) => void
+  } | null>()
   const [theme, setTheme] = useState<ThemeId>('midnight-purple')
   const [width, setWidth] = useState('standard')
+  const setPreviewTheme = preview?.setPreviewTheme
+  useEffect(() => {
+    setPreviewTheme?.(theme)
+  }, [theme, setPreviewTheme])
   return (
     <div
       className={`page editor-lab notion-editor ${focus ? 'writer-focus' : ''}`}
@@ -24,6 +33,13 @@ export default function EditorPreview() {
       data-width={width}
       data-font={font}
     >
+      <button
+        className="focus-exit"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => setFocus(false)}
+      >
+        Exit Focus Mode <kbd>Esc</kbd>
+      </button>
       <p className="eyebrow">DearDaily / Editor workshop</p>
       <p className="auth-notice" role="status">
         Synthetic preview · writing stays in this tab. Cloud saving, uploaded
@@ -49,6 +65,7 @@ export default function EditorPreview() {
           <button
             className="button secondary"
             aria-pressed={focus}
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => setFocus(!focus)}
           >
             {focus ? 'Leave focus mode' : 'Focus mode'}

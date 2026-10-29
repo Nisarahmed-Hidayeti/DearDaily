@@ -7,7 +7,11 @@ import { listEntries } from '../journal/journalApi'
 import type { JournalEntry } from '../journal/journalApi'
 import { journalStats } from '../journal/journalStats'
 import ActivityHeatmap from './ActivityHeatmap'
-export default function CloudDashboard() {
+export default function CloudDashboard({
+  library = false,
+}: {
+  library?: boolean
+}) {
   const { client, session } = useAuth()
   const [rows, setRows] = useState<JournalEntry[]>([])
   const [status, setStatus] = useState('loading')
@@ -50,26 +54,28 @@ export default function CloudDashboard() {
       (!date || r.entry_date === date),
   )
   return (
-    <div className="page dashboard">
+    <div className={`page dashboard ${library ? 'journal-library' : ''}`}>
       <PageHeading
         eyebrow="Your journal / Overview"
-        title="A new day. A new page."
+        title={library ? 'My Journal' : 'A new day. A new page.'}
       >
         <Link className="button" to="/app/write">
           <Plus size={17} />
           New Entry
         </Link>
       </PageHeading>
-      <div className="dashboard-banner">
-        <Scene />
-        <div>
-          <p className="eyebrow">A gentle reminder</p>
-          <h2>Every day has a story.</h2>
-          <Link className="text-link" to="/app/write">
-            Take a moment to write
-          </Link>
+      {!library && (
+        <div className="dashboard-banner">
+          <Scene />
+          <div>
+            <p className="eyebrow">A gentle reminder</p>
+            <h2>Every day has a story.</h2>
+            <Link className="text-link" to="/app/write">
+              Take a moment to write
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
       {status === 'loading' && (
         <LoadingState>Loading your private entries…</LoadingState>
       )}
@@ -89,22 +95,26 @@ export default function CloudDashboard() {
       )}
       {status !== 'loading' && (
         <>
-          <div className="stats">
-            {[
-              [rows.length, 'Total entries'],
-              [stats.words, 'Words written'],
-              [stats.streak, 'Day writing streak'],
-            ].map(([value, label]) => (
-              <article className="panel stat" key={label}>
-                <BookOpen />
-                <div>
-                  <strong>{value}</strong>
-                  <span>{label}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-          <ActivityHeatmap activity={stats.activity} real />
+          {!library && (
+            <>
+              <div className="stats">
+                {[
+                  [rows.length, 'Total entries'],
+                  [stats.words, 'Words written'],
+                  [stats.streak, 'Day writing streak'],
+                ].map(([value, label]) => (
+                  <article className="panel stat" key={label}>
+                    <BookOpen />
+                    <div>
+                      <strong>{value}</strong>
+                      <span>{label}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <ActivityHeatmap activity={stats.activity} real />
+            </>
+          )}
           <section className="panel recent">
             <h2>Your pages</h2>
             <div className="filters">

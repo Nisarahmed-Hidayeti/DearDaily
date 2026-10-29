@@ -142,6 +142,7 @@ function ThemedRoutes() {
             />
           )}
           <Route path="/app" element={<Dashboard />} />
+          <Route path="/app/journal" element={<Dashboard library />} />
           <Route
             path="/account"
             element={

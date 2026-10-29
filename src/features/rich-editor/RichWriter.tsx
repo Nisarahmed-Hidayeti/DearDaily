@@ -1,12 +1,8 @@
+import { writingExtensions } from './extensions'
 import { LoadingState } from '../../components/Shared'
 import { useEffect, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { BubbleMenu } from '@tiptap/react/menus'
-import StarterKit from '@tiptap/starter-kit'
-import TaskList from '@tiptap/extension-task-list'
-import TaskItem from '@tiptap/extension-task-item'
-import Placeholder from '@tiptap/extension-placeholder'
-import { Markdown } from '@tiptap/markdown'
 import { documentText, safeWritingLink, validateDocument } from './document'
 import type { WritingDocument } from './document'
 import './writer.css'
@@ -25,22 +21,7 @@ export function RichWriter({
   const [importText, setImportText] = useState<string | null>(null)
   const [link, setLink] = useState<string | null>(null)
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-        link: {
-          openOnClick: false,
-          autolink: false,
-          isAllowedUri: (url) => safeWritingLink(url),
-        },
-      }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Placeholder.configure({
-        placeholder: 'Write something, or type / for commands…',
-      }),
-      Markdown,
-    ],
+    extensions: writingExtensions(),
     content: validateDocument(value).content,
     editable: !disabled,
     editorProps: {
@@ -51,9 +32,10 @@ export function RichWriter({
         spellcheck: 'true',
       },
       handleKeyDown: (view, event) => {
-        if (event.key === 'Escape') {
+        if (event.key === 'Escape' && slash) {
           setSlash(false)
-          return false
+          event.preventDefault()
+          return true
         }
         if (
           event.key === '/' &&
@@ -141,7 +123,12 @@ export function RichWriter({
     </>
   )
   return (
-    <div className="rich-writer">
+    <div
+      className="rich-writer"
+      onMouseDown={(event) => {
+        if ((event.target as Element).closest('button')) event.preventDefault()
+      }}
+    >
       <details className="writer-format-options">
         <summary>Formatting</summary>
         <div className="writer-toolbar" role="group" aria-label="Writing tools">

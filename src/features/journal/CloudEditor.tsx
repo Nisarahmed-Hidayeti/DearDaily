@@ -1,3 +1,4 @@
+import { useWritingFocus } from '../rich-editor/useWritingFocus'
 import { LoadingState } from '../../components/Shared'
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useAuth } from '../auth/AuthProvider'
@@ -35,7 +36,7 @@ function EntryForm({ existingId }: { existingId?: string }) {
   const state = useJournalEntry(existingId)
   const { draft, setDraft, ready, busy, error, dirty, row, published } = state
   const [preview, setPreview] = useState(false)
-  const [focus, setFocus] = useState(false)
+  const { focus, setFocus } = useWritingFocus()
   const [font, setFont] = useState('sans')
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [width, setWidth] = useState('standard')
@@ -77,15 +78,34 @@ function EntryForm({ existingId }: { existingId?: string }) {
   return (
     <div
       className={`page editor-page ${richEditorEnabled ? 'editor-lab notion-editor' : ''} ${focus ? 'writer-focus' : ''}`}
+      data-unsaved-writing={dirty || busy}
       data-font={font}
       data-width={width}
     >
+      <button
+        className="focus-exit"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => setFocus(false)}
+      >
+        Exit Focus Mode <kbd>Esc</kbd>
+      </button>
       {richEditorEnabled ? (
         <header className="writer-topbar">
-          <Link to="/app" className="writer-breadcrumb">
+          <Link to="/app/journal" className="writer-breadcrumb">
             Journal <span>/</span> <span>Private page</span>
           </Link>
           <div className="row">
+            <button
+              className="quiet"
+              aria-pressed={focus}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                setDetailsOpen(false)
+                setFocus(true)
+              }}
+            >
+              Focus mode
+            </button>
             <button
               className="quiet"
               aria-pressed={preview}
@@ -146,13 +166,6 @@ function EntryForm({ existingId }: { existingId?: string }) {
         <details className="writer-page-options">
           <summary>Page options</summary>
           <div className="writer-preferences">
-            <button
-              className="button secondary"
-              aria-pressed={focus}
-              onClick={() => setFocus(!focus)}
-            >
-              {focus ? 'Leave focus mode' : 'Focus mode'}
-            </button>
             <label>
               Writing font
               <select value={font} onChange={(e) => setFont(e.target.value)}>
