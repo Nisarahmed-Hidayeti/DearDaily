@@ -4,6 +4,7 @@ import { useAppearance } from './AppearanceProvider'
 import {
   appearanceTokens,
   themeBackgrounds,
+  themeAccents,
   defaultAppearance,
   type Appearance,
 } from './appearance'
@@ -50,7 +51,7 @@ export function AdvancedAppearance() {
               Accent color
               <input
                 type="color"
-                value={draft.accent ?? '#9c8bc8'}
+                value={draft.accent ?? themeAccents[theme]}
                 onChange={(e) => change({ accent: e.target.value })}
               />
             </label>
@@ -58,7 +59,7 @@ export function AdvancedAppearance() {
               Background color
               <input
                 type="color"
-                value={draft.background ?? '#11121a'}
+                value={draft.background ?? themeBackgrounds[theme]}
                 onChange={(e) => change({ background: e.target.value })}
               />
             </label>

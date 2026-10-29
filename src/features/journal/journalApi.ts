@@ -130,6 +130,8 @@ export async function removeEntry(
     .select('id')
     .single()
   if (error || data?.id !== id) throw new Error('Delete not confirmed')
+  // Deleting the entry queues exact private/public objects; never prune unrelated drafts.
+  await cleanQueuedPhotos(client).catch(() => {})
 }
 export async function listEntries(client: SupabaseClient, userId: string) {
   const rows: JournalEntry[] = []

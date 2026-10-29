@@ -139,10 +139,16 @@ function ThemedRoutes() {
               </>
             )}
             {import.meta.env.DEV && (
-              <Route
-                path="/dev/rich-check"
-                element={<RichWritingSecurityCheck />}
-              />
+              <>
+                <Route
+                  path="/dev/rich-check"
+                  element={<RichWritingSecurityCheck />}
+                />
+                <Route
+                  path="/dev/renaissance-check"
+                  element={<RichWritingSecurityCheck />}
+                />
+              </>
             )}
             <Route path="/app" element={<Dashboard />} />
             <Route path="/app/journal" element={<Dashboard library />} />

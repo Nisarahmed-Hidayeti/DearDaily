@@ -108,3 +108,70 @@ it('exports photo placeholders without private identifiers or mutating the docum
   expect(markdown).not.toContain(source.content[0].attrs.assetId)
   expect(source.content[0].attrs.assetId).toBeTruthy()
 })
+it('keeps constrained private and public image blocks through validation and reload', () => {
+  const attrs = {
+    assetId: '81000000-0000-4000-8000-000000000001',
+    publicId: null,
+    alt: 'A synthetic photograph',
+    width: 'medium',
+    align: 'center',
+  }
+  const doc = {
+    ...documentFromText('Keep these words'),
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Keep these words' }],
+        },
+        { type: 'journalImage', attrs },
+      ],
+    },
+  }
+  expect(validateDocument(doc).content.content?.[1].type).toBe('journalImage')
+  const e = new Editor({
+    extensions: writingExtensions(),
+    content: validateDocument(doc).content,
+  })
+  try {
+    expect(
+      validateDocument({ version: 1, content: e.getJSON() }).content
+        .content?.[1].attrs?.assetId,
+    ).toBe(attrs.assetId)
+  } finally {
+    e.destroy()
+  }
+  expect(
+    validateDocument({
+      ...doc,
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'journalImage',
+            attrs: {
+              ...attrs,
+              assetId: null,
+              publicId: '82000000-0000-4000-8000-000000000001',
+            },
+          },
+        ],
+      },
+    }).content.content?.[0].type,
+  ).toBe('journalImage')
+  expect(() =>
+    validateDocument({
+      ...doc,
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'journalImage',
+            attrs: { ...attrs, src: 'https://private.invalid/unsafe' },
+          },
+        ],
+      },
+    }),
+  ).toThrow()
+})

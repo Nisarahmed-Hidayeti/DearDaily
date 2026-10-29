@@ -1,3 +1,4 @@
+import { hostedRenaissanceChecks } from './hostedRenaissanceChecks'
 import { useRef, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -8,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import { hostedRichWritingChecks } from './hostedRichWritingChecks'
 
 export default function RichWritingSecurityCheck() {
+  const renaissance = location.pathname === '/dev/renaissance-check'
   const clients = useRef<Record<string, SupabaseClient>>({})
   const ids = useRef<Record<string, string>>({})
   const [receipts, setReceipts] = useState<Record<string, string>>({})
@@ -85,18 +87,15 @@ export default function RichWritingSecurityCheck() {
     setBusy(true)
     setMessage('Running synthetic hosted rich writing/privacy tests…')
     try {
-      const result = await hostedRichWritingChecks(
-        clients.current.A,
-        clients.current.B,
-        ids.current.A,
-        ids.current.B,
-      )
+      const result = await (
+        renaissance ? hostedRenaissanceChecks : hostedRichWritingChecks
+      )(clients.current.A, clients.current.B, ids.current.A, ids.current.B)
       const out = result.passed
         ? await clients.current.B.auth.signOut({ scope: 'local' })
         : { error: null }
       setPassed(result.passed && !out.error)
       setMessage(
-        `${result.passed ? 'PASS' : 'FAIL'}: ${result.checks} hosted rich writing checks. Distinct authenticated IDs: ${ids.current.A !== ids.current.B ? 'PASS' : 'FAIL'}. Cleanup: ${result.cleanup ? 'PASS' : 'FAIL'}. User B logout: ${!result.passed ? 'session retained for retry' : out.error ? 'FAIL' : 'PASS'}.${result.failure ? ' Stage: ' + result.stage + '. ' + result.failure : ''} Synthetic entry IDs: ${result.fixtureStoryIds.join(', ')}.`,
+        `${result.passed ? 'PASS' : 'FAIL'}: ${result.checks} hosted ${renaissance ? 'Renaissance media' : 'rich writing'} checks. Distinct authenticated IDs: ${ids.current.A !== ids.current.B ? 'PASS' : 'FAIL'}. Cleanup: ${result.cleanup ? 'PASS' : 'FAIL'}. User B logout: ${!result.passed ? 'session retained for retry' : out.error ? 'FAIL' : 'PASS'}.${result.failure ? ' Stage: ' + result.stage + '. ' + result.failure : ''} Synthetic entry IDs: ${result.fixtureStoryIds.join(', ')}.`,
       )
     } catch {
       setMessage(
@@ -155,12 +154,12 @@ export default function RichWritingSecurityCheck() {
       return
     }
     // Ownership of this same session transfers to the normal app SDK. No password is retained.
-    navigate('/app', { replace: true })
+    navigate(renaissance ? '/app/write' : '/app', { replace: true })
   }
   return (
     <div className="page">
       <PageHeading
-        eyebrow="Development / Real hosted rich writing verification"
+        eyebrow={`Development / Real hosted ${renaissance ? 'Renaissance media' : 'rich writing'} verification`}
         title="Two accounts. Two private spaces."
       />
       <p>
@@ -202,7 +201,7 @@ export default function RichWritingSecurityCheck() {
               name="password"
               type="password"
               required
-              autoComplete="off"
+              autoComplete="current-password"
               disabled={busy || Boolean(receipts[label])}
             />
           </label>
@@ -239,7 +238,9 @@ export default function RichWritingSecurityCheck() {
         disabled={busy || Object.keys(receipts).length !== 2 || passed}
         onClick={() => void run()}
       >
-        Run rich writing privacy and snapshot checks
+        {renaissance
+          ? 'Run Renaissance media and privacy checks'
+          : 'Run rich writing privacy and snapshot checks'}
       </button>
       <p role="status">{message}</p>
       {passed && (

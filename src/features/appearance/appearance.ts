@@ -66,6 +66,12 @@ const blend = (a: string, b: string, weight: number) =>
         .padStart(2, '0'),
     )
     .join('')
+export const themeAccents = {
+  'midnight-purple': '#b888f8',
+  'forest-green': '#8ccba5',
+  'paper-white': '#70532c',
+  'obsidian-black': '#c4c4c4',
+}
 export const themeBackgrounds = {
   'midnight-purple': '#090a12',
   'forest-green': '#09120f',

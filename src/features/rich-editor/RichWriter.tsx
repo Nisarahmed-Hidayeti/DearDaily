@@ -252,7 +252,7 @@ function ValidatedRichWriter({
       if (editor.isDestroyed) return
       if (editor.state.doc.textBetween(range.from, range.to) !== expected)
         range = { from: range.to, to: range.to }
-      editor.commands.insertContentAt(
+      const inserted = editor.commands.insertContentAt(
         range,
         {
           type: 'journalImage',
@@ -266,7 +266,10 @@ function ValidatedRichWriter({
         },
         { updateSelection: false },
       )
-      setError('')
+      if (!inserted)
+        throw Error(
+          'Photo uploaded, but insertion was not confirmed. Your writing is unchanged.',
+        )
     } catch (e) {
       if (!editor.isDestroyed)
         setError(
