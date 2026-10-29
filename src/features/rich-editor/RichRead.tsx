@@ -1,3 +1,4 @@
+import { MediaImage } from '../media/MediaImage'
 import './writer.css'
 import { createElement, type ReactNode } from 'react'
 import type { JSONContent } from '@tiptap/core'
@@ -5,9 +6,11 @@ import { validateDocument, type WritingDocument } from './document'
 export function RichRead({
   document,
   fallback,
+  privateMedia = false,
 }: {
   document: unknown
   fallback: string
+  privateMedia?: boolean
 }) {
   let valid: WritingDocument | null = null
   try {
@@ -18,6 +21,22 @@ export function RichRead({
   if (!valid) return <p style={{ whiteSpace: 'pre-wrap' }}>{fallback}</p>
 
   const render = (node: JSONContent, key: number): ReactNode => {
+    if (node.type === 'journalImage')
+      return (
+        <figure
+          key={key}
+          className="journal-image-block"
+          data-width={node.attrs!.width}
+          data-align={node.attrs!.align}
+        >
+          <MediaImage
+            assetId={privateMedia ? node.attrs!.assetId : undefined}
+            publicId={node.attrs!.publicId}
+            alt={node.attrs!.alt}
+          />
+          {node.attrs!.alt && <figcaption>{node.attrs!.alt}</figcaption>}
+        </figure>
+      )
     if (node.type === 'text') {
       let text: ReactNode = node.text
       for (const [i, mark] of (node.marks ?? []).entries()) {

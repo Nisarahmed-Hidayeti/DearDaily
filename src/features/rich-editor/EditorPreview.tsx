@@ -1,10 +1,12 @@
+import { PageAppearance } from './PageAppearance'
+import { PageCover } from './PageCover'
 import { useWritingFocus } from './useWritingFocus'
 import { useState, useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { themes } from '../theme/themes'
 import type { ThemeId } from '../theme/themes'
 import { RichWriter } from './RichWriter'
-import { coverPresets, documentFromText, pageIcons } from './document'
+import { documentFromText } from './document'
 import type { CoverPreset } from './document'
 export default function EditorPreview() {
   const [document, setDocument] = useState(() =>
@@ -88,46 +90,17 @@ export default function EditorPreview() {
         </div>
       </details>
       <section className="writer-document">
-        {cover !== 'none' && (
-          <div
-            className="writer-cover"
-            data-cover={cover}
-            role="img"
-            aria-label={`${cover} preset cover`}
-          />
-        )}
-        <details className="writer-customize">
-          <summary>Personalize this page</summary>
-          <fieldset>
-            <legend>Cover palette</legend>
-            {coverPresets.map((p) => (
-              <button
-                key={p}
-                aria-pressed={cover === p}
-                onClick={() => setCover(p)}
-              >
-                {p === 'none' ? 'Remove cover' : p}
-              </button>
-            ))}
-          </fieldset>
-          <fieldset>
-            <legend>Page icon</legend>
-            {pageIcons.map((p) => (
-              <button
-                key={p}
-                aria-label={`Use ${p} as page icon`}
-                aria-pressed={icon === p}
-                onClick={() => setIcon(p)}
-              >
-                {p}
-              </button>
-            ))}
-            <button onClick={() => setIcon('')}>Remove icon</button>
-          </fieldset>
-          <p>
-            Custom photo covers and repositioning need the secure media stage.
-          </p>
-        </details>
+        <PageCover document={document} preset={cover} />
+        <PageAppearance
+          document={document}
+          preset={cover}
+          icon={icon}
+          onApply={(style) => {
+            setDocument(style.document)
+            setCover(style.preset ?? 'none')
+            setIcon(style.icon ?? '')
+          }}
+        />
         <div className="writer-sheet">
           {icon && (
             <div className="writer-icon" aria-label="Page icon">

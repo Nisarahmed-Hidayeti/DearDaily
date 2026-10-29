@@ -1,3 +1,7 @@
+import { mediaEnabled, uploadPhoto, documentAssetIds } from '../media/mediaApi'
+import { useAppearance } from '../appearance/AppearanceProvider'
+import { PageAppearance } from '../rich-editor/PageAppearance'
+import { PageCover } from '../rich-editor/PageCover'
 import { useWritingFocus } from '../rich-editor/useWritingFocus'
 import { LoadingState } from '../../components/Shared'
 import { useState, useEffect, lazy, Suspense } from 'react'
@@ -21,12 +25,7 @@ const RichWriter = lazy(() =>
   })),
 )
 import { RichRead } from '../rich-editor/RichRead'
-import {
-  coverPresets,
-  pageIcons,
-  documentFromText,
-  documentText,
-} from '../rich-editor/document'
+import { documentFromText, documentText } from '../rich-editor/document'
 
 export default function CloudEditor() {
   const { id } = useParams()
@@ -37,9 +36,12 @@ function EntryForm({ existingId }: { existingId?: string }) {
   const { draft, setDraft, ready, busy, error, dirty, row, published } = state
   const [preview, setPreview] = useState(false)
   const { focus, setFocus } = useWritingFocus()
-  const [font, setFont] = useState('sans')
+  const { appearance } = useAppearance()
+  const [fontChoice, setFont] = useState<string | null>(null)
+  const font = fontChoice ?? appearance.font
   const [detailsOpen, setDetailsOpen] = useState(false)
-  const [width, setWidth] = useState('standard')
+  const [widthChoice, setWidth] = useState<string | null>(null)
+  const width = widthChoice ?? appearance.width
   const [online, setOnline] = useState(navigator.onLine)
   useEffect(() => {
     const update = () => setOnline(navigator.onLine)
@@ -58,6 +60,7 @@ function EntryForm({ existingId }: { existingId?: string }) {
   const { client } = useAuth()
   const [profile, setProfile] = useState<PublicProfile | null>(null)
   const [byline, setByline] = useState(false)
+  const [approvePhotos, setApprovePhotos] = useState(false)
   const [publicCategory, setPublicCategory] = useState('Uncategorized')
   const [publicTags, setPublicTags] = useState('')
   useEffect(() => {
@@ -216,53 +219,39 @@ function EntryForm({ existingId }: { existingId?: string }) {
         <section className="writing-paper">
           {richEditorEnabled && (
             <>
-              {draft.cover_preset && draft.cover_preset !== 'none' && (
-                <div
-                  className="writer-cover"
-                  data-cover={draft.cover_preset}
-                  role="img"
-                  aria-label={`${draft.cover_preset} cover`}
+              <PageCover
+                privateMedia
+                document={draft.writing_document}
+                preset={draft.cover_preset}
+              />
+              {!preview && (
+                <PageAppearance
+                  onUpload={
+                    mediaEnabled && row && client
+                      ? (file) =>
+                          uploadPhoto(
+                            client,
+                            row.id,
+                            file,
+                            documentAssetIds(draft.writing_document).length,
+                          )
+                      : undefined
+                  }
+                  disabled={!ready}
+                  document={draft.writing_document}
+                  preset={draft.cover_preset}
+                  icon={draft.page_icon}
+                  onApply={(style) =>
+                    patch({
+                      writing_document: style.document,
+                      cover_preset: style.preset,
+                      page_icon: style.icon,
+                    })
+                  }
                 />
               )}
               {draft.page_icon && (
                 <div className="writer-icon">{draft.page_icon}</div>
-              )}
-              {!preview && (
-                <details className="writer-customize">
-                  <summary>Cover and page icon</summary>
-                  <fieldset disabled={!ready}>
-                    <legend>Cover palette</legend>
-                    {coverPresets.map((p) => (
-                      <button
-                        key={p}
-                        aria-pressed={draft.cover_preset === p}
-                        onClick={() => patch({ cover_preset: p })}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                  </fieldset>
-                  <fieldset disabled={!ready}>
-                    <legend>Page icon</legend>
-                    {pageIcons.map((p) => (
-                      <button
-                        key={p}
-                        aria-label={`Use ${p}`}
-                        aria-pressed={draft.page_icon === p}
-                        onClick={() => patch({ page_icon: p })}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                    <button onClick={() => patch({ page_icon: null })}>
-                      Remove icon
-                    </button>
-                  </fieldset>
-                  <p>
-                    Photo uploads require approved private storage and are not
-                    available yet.
-                  </p>
-                </details>
               )}
             </>
           )}
@@ -283,6 +272,7 @@ function EntryForm({ existingId }: { existingId?: string }) {
             <article className="entry-preview">
               <h2>{draft.title || 'Untitled entry'}</h2>
               <RichRead
+                privateMedia
                 document={draft.writing_document}
                 fallback={draft.body || 'Your words will appear here.'}
               />
@@ -313,6 +303,17 @@ function EntryForm({ existingId }: { existingId?: string }) {
                   }
                 >
                   <RichWriter
+                    onUpload={
+                      mediaEnabled && row && client
+                        ? (file) =>
+                            uploadPhoto(
+                              client,
+                              row.id,
+                              file,
+                              documentAssetIds(draft.writing_document).length,
+                            )
+                        : undefined
+                    }
                     disabled={!ready}
                     value={
                       draft.writing_document ?? documentFromText(draft.body)
@@ -476,7 +477,10 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 !draft.body.trim()
               }
               aria-describedby="publish-explanation"
-              onClick={() => setConfirmation('publish')}
+              onClick={() => {
+                setApprovePhotos(false)
+                setConfirmation('publish')
+              }}
             >
               {published ? 'Update public story' : 'Publish story'}
             </button>
@@ -585,15 +589,35 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 </fieldset>
               )}
               <h3>{row?.title}</h3>
+              <PageCover
+                privateMedia
+                document={row?.writing_document}
+                preset={row?.cover_preset}
+              />
+              {documentAssetIds(row?.writing_document).length > 0 && (
+                <label className="row">
+                  <input
+                    type="checkbox"
+                    checked={approvePhotos}
+                    onChange={(e) => setApprovePhotos(e.target.checked)}
+                  />
+                  I approve publishing these photos and their alt text. Public
+                  links may remain valid for up to 60 seconds after
+                  unpublishing; downloaded copies cannot be recalled.
+                </label>
+              )}
               {richEditorEnabled && (
                 <>
                   <p>
                     These page details will also be public:{' '}
                     {row?.page_icon ?? 'no icon'} ·{' '}
-                    {row?.cover_preset ?? 'no cover'}. No private mood, date or
-                    tags are copied.
+                    {row?.writing_document?.page?.cover ??
+                      row?.cover_preset ??
+                      'no cover'}
+                    . No private mood, date or tags are copied.
                   </p>
                   <RichRead
+                    privateMedia
                     document={row?.writing_document}
                     fallback={row?.body ?? ''}
                   />
@@ -617,11 +641,21 @@ function EntryForm({ existingId }: { existingId?: string }) {
             disabled={
               busy ||
               (confirmation === 'publish' &&
+                (dirty ||
+                  (documentAssetIds(row?.writing_document).length > 0 &&
+                    !approvePhotos))) ||
+              (confirmation === 'publish' &&
                 (publicTags.split(',').filter((t) => t.trim()).length > 5 ||
                   publicTags.split(',').some((t) => t.trim().length > 30)))
             }
             onClick={async () => {
               const kind = confirmation
+              if (
+                kind === 'publish' &&
+                documentAssetIds(row?.writing_document).length > 0 &&
+                !approvePhotos
+              )
+                return
               const done = await state.action(
                 kind,
                 communityEnabled

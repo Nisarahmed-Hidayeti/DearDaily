@@ -10,7 +10,7 @@ export function useWritingFocus() {
       // Dismiss an inner dialog or writing menu first, without exiting focus.
       if (
         document.querySelector(
-          'dialog[open], .block-picker, .writer-link, .markdown-import',
+          'dialog[open], .block-picker, .block-actions-menu, .writer-link, .markdown-import',
         )
       )
         return

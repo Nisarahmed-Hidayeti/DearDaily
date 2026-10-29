@@ -1,3 +1,9 @@
+import {
+  documentAssetIds,
+  preparePublicPhotos,
+  cleanQueuedPhotos,
+} from '../media/mediaApi'
+import { validateDocument } from '../rich-editor/document'
 import { communityEnabled, storyFields } from '../community/communityApi'
 import type { StoryMetadata } from '../community/communityApi'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -162,12 +168,19 @@ export async function publishStory(
   exists: boolean,
   metadata?: StoryMetadata,
 ) {
+  const publicDocument = documentAssetIds(entry.writing_document).length
+    ? validateDocument(
+        await preparePublicPhotos(client, entry.id, entry.version),
+      )
+    : entry.writing_document
   const fields = {
     title: entry.title,
     body: entry.body,
     ...(richEditorEnabled
       ? {
-          writing_document: entry.writing_document ?? null,
+          writing_document: publicDocument
+            ? validateDocument(publicDocument)
+            : null,
           page_icon: entry.page_icon ?? null,
           cover_preset: entry.cover_preset ?? null,
         }
@@ -185,6 +198,7 @@ export async function publishStory(
     .single()
   if (error || data?.id !== entry.id)
     throw new Error('Publication not confirmed')
+  void cleanQueuedPhotos(client).catch(() => {})
   return data as PublicStory
 }
 export async function unpublishStory(client: SupabaseClient, id: string) {
@@ -195,6 +209,7 @@ export async function unpublishStory(client: SupabaseClient, id: string) {
     .select('id')
     .single()
   if (error || data?.id !== id) throw new Error('Unpublish not confirmed')
+  void cleanQueuedPhotos(client).catch(() => {})
 }
 export function exportMarkdown(draft: Draft, publicOnly = false) {
   const text =

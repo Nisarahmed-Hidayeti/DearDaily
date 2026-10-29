@@ -95,10 +95,10 @@ it('dismisses the slash menu before Escape exits immersive focus', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Focus mode' }))
   await userEvent.keyboard('/')
   expect(
-    screen.getByRole('group', { name: 'Insert a block' }),
+    screen.getByRole('listbox', { name: 'Block commands' }),
   ).toBeInTheDocument()
   await userEvent.keyboard('{Escape}')
-  expect(screen.queryByRole('group', { name: 'Insert a block' })).toBeNull()
+  expect(screen.queryByRole('listbox', { name: 'Block commands' })).toBeNull()
   expect(document.querySelector('.writer-focus')).not.toBeNull()
   await userEvent.keyboard('{Escape}')
   expect(document.querySelector('.writer-focus')).toBeNull()

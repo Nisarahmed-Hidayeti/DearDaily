@@ -1,7 +1,15 @@
+import { isMediaId } from '../media/mediaApi'
+import { isPhotoCover, type PhotoCoverId } from './covers'
 import type { JSONContent } from '@tiptap/core'
 
 export interface WritingDocument {
   version: 1
+  page?: {
+    cover: PhotoCoverId | 'upload'
+    position: number
+    assetId?: string
+    publicId?: string
+  }
   content: JSONContent
 }
 export const pageIcons = [
@@ -56,6 +64,27 @@ export function validateDocument(value: unknown): WritingDocument {
   const doc = value as WritingDocument
   if (doc.version !== 1 || doc.content?.type !== 'doc')
     throw new Error('Unsupported document version.')
+  if (Object.keys(doc).some((k) => !['version', 'content', 'page'].includes(k)))
+    throw new Error('Unsupported document metadata.')
+  if (
+    doc.page &&
+    ((!isPhotoCover(doc.page.cover) && doc.page.cover !== 'upload') ||
+      !Number.isFinite(doc.page.position) ||
+      doc.page.position < 0 ||
+      doc.page.position > 100 ||
+      Object.keys(doc.page).some(
+        (k) => !['cover', 'position', 'assetId', 'publicId'].includes(k),
+      ))
+  )
+    throw new Error('Invalid page cover.')
+  if (
+    doc.page?.cover === 'upload' &&
+    ((!isMediaId(doc.page.assetId) && !isMediaId(doc.page.publicId)) ||
+      (!!doc.page.assetId && !!doc.page.publicId))
+  )
+    throw new Error('Invalid uploaded cover.')
+  const mediaIds = new Set<string>()
+  let imageCount = 0
   let nodes = 0,
     text = 0
   const children: Record<string, string[]> = {
@@ -89,6 +118,7 @@ export function validateDocument(value: unknown): WritingDocument {
     text: [],
     hardBreak: [],
     horizontalRule: [],
+    journalImage: [],
   }
   function visit(node: JSONContent, depth: number) {
     if (
@@ -111,17 +141,34 @@ export function validateDocument(value: unknown): WritingDocument {
     if (text > 100000) throw new Error('Keep entries under 100,000 characters.')
     const attrs = node.attrs ?? {}
     const allowed =
-      node.type === 'heading'
-        ? ['level']
-        : node.type === 'orderedList'
-          ? ['start', 'type']
-          : node.type === 'taskItem'
-            ? ['checked']
-            : node.type === 'codeBlock'
-              ? ['language']
-              : []
+      node.type === 'journalImage'
+        ? ['assetId', 'publicId', 'alt', 'width', 'align']
+        : node.type === 'heading'
+          ? ['level']
+          : node.type === 'orderedList'
+            ? ['start', 'type']
+            : node.type === 'taskItem'
+              ? ['checked']
+              : node.type === 'codeBlock'
+                ? ['language']
+                : []
     if (Object.keys(attrs).some((k) => !allowed.includes(k)))
       throw new Error('Unsupported block attributes.')
+    if (
+      node.type === 'journalImage' &&
+      ((!isMediaId(attrs.assetId) && !isMediaId(attrs.publicId)) ||
+        (!!attrs.assetId && !!attrs.publicId) ||
+        typeof attrs.alt !== 'string' ||
+        attrs.alt.length > 300 ||
+        !['small', 'medium', 'wide'].includes(attrs.width) ||
+        !['left', 'center', 'right'].includes(attrs.align))
+    )
+      throw new Error('Invalid photo block.')
+    if (node.type === 'journalImage') {
+      if (++imageCount > 10)
+        throw new Error('A page can contain at most 10 photos.')
+      mediaIds.add(attrs.assetId ?? attrs.publicId)
+    }
     if (node.type === 'heading' && ![1, 2, 3].includes(attrs.level))
       throw new Error('Unsupported heading.')
     if (node.type === 'taskItem' && typeof attrs.checked !== 'boolean')
@@ -177,6 +224,10 @@ export function validateDocument(value: unknown): WritingDocument {
     }
   }
   visit(doc.content, 0)
+  if (doc.page?.cover === 'upload')
+    mediaIds.add(doc.page.assetId ?? doc.page.publicId!)
+  if (mediaIds.size > 10)
+    throw new Error('A page can contain at most 10 photos including its cover.')
   return structuredClone(doc)
 }
 export function documentFromText(text: string): WritingDocument {
