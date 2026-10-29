@@ -151,7 +151,7 @@ function ValidatedRichWriter({
       },
     },
     onSelectionUpdate: ({ editor: current }) => {
-      if (slashRef.current) syncSlash(current)
+      if (slashRef.current && current.view.hasFocus()) syncSlash(current)
     },
     onUpdate: ({ editor: current }) => {
       syncSlash(current)
@@ -202,17 +202,26 @@ function ValidatedRichWriter({
       )
         close()
     }
+    const reposition = () => {
+      const current = editorRef.current,
+        menu = slashRef.current
+      if (!current || current.isDestroyed || !menu) return
+      setSlash({
+        ...menu,
+        ...menuPosition(current.view.coordsAtPos(current.state.selection.to)),
+      })
+    }
     const scroll = (event: Event) => {
       if (!(
         event.target instanceof Element && event.target.closest('.block-picker')
       ))
-        close()
+        reposition()
     }
-    window.addEventListener('resize', close)
+    window.addEventListener('resize', reposition)
     document.addEventListener('scroll', scroll, true)
     document.addEventListener('pointerdown', outside)
     return () => {
-      window.removeEventListener('resize', close)
+      window.removeEventListener('resize', reposition)
       document.removeEventListener('scroll', scroll, true)
       document.removeEventListener('pointerdown', outside)
     }
@@ -394,7 +403,7 @@ function ValidatedRichWriter({
         ref={fileInput}
         type="file"
         accept="image/jpeg,image/png,image/webp"
-        className="sr-only"
+        hidden
         aria-label="Upload a private photo"
         onChange={(event) => {
           const file = event.target.files?.[0]

@@ -886,3 +886,7 @@
     width: 85%;
   }
 }
+.writer-focus .block-gutter,
+.writer-focus .image-block-controls {
+  display: none;
+}

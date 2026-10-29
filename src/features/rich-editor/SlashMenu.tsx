@@ -49,6 +49,7 @@ export function SlashMenu({
             key={item.id}
             id={`block-command-${i}`}
             role="option"
+            aria-label={`${item.label} ${item.hint}`}
             aria-selected={i === state.index}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => onChoose(item.id)}
