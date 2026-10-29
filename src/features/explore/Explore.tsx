@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { PageHeading } from '../../components/Shared'
+import { LoadingState, PageHeading } from '../../components/Shared'
 import { RichRead } from '../rich-editor/RichRead'
 import { useAuth } from '../auth/AuthProvider'
 import { journalEnabled, readStories } from '../journal/journalApi'
@@ -70,7 +70,9 @@ function PublicStories() {
       <p className="page-subtitle">
         Stories deliberately shared by their writers.
       </p>
-      {status === 'loading' && <p role="status">Loading public stories…</p>}
+      {status === 'loading' && (
+        <LoadingState>Loading public stories…</LoadingState>
+      )}
       {status === 'error' && (
         <div role="alert">
           Could not load public stories.
@@ -205,7 +207,7 @@ export function PublishedStory() {
         Back to stories
       </Link>
       {status === 'loading' ? (
-        <p role="status">Loading story…</p>
+        <LoadingState>Loading story…</LoadingState>
       ) : status === 'error' ? (
         <p role="alert">
           Could not confirm whether this story is still public. Reload to retry.

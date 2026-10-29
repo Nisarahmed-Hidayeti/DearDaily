@@ -1,3 +1,4 @@
+import { LoadingState } from '../../components/Shared'
 import { useEffect, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { BubbleMenu } from '@tiptap/react/menus'
@@ -92,7 +93,7 @@ export function RichWriter({
     )
       editor.commands.setContent(value.content, { emitUpdate: false })
   }, [editor, value])
-  if (!editor) return <p>Preparing your writing space…</p>
+  if (!editor) return <LoadingState>Preparing your writing space…</LoadingState>
   const command = (name: string) => {
     const chain = editor.chain().focus()
     if (name === 'heading') chain.toggleHeading({ level: 2 }).run()

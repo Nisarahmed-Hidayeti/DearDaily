@@ -53,3 +53,11 @@ The writing surface now uses a quiet document canvas, large title, selection too
 Latest full validation before the teardown guard: 130 frontend tests, ESLint, TypeScript and build passed. Both hydration/StrictMode regression tests subsequently passed; final complete rerun passed 134 tests, TypeScript, lint and build. Build retains a 519.5 kB rich-editor chunk warning. Client image-signature validation is preparation only, not a secure upload implementation.
 
 Owner approved localhost-only community activation for final Phase 4 UI acceptance on October 29. Production/community signup flags remain disabled. Core real UI acceptance and exact synthetic cleanup completed; details are recorded in PHASE_4.md. Larger DearDaily 2 media, advanced appearance and signup stages remain incomplete.
+
+## Popup and loading polish
+
+Dialogs explicitly center with automatic margins, bounded viewport height and internal scrolling. Headers/close buttons align on narrow screens; surfaces use restrained borders and shadows. Modal/backdrop, block menus and details panels have short opacity/transform entrances. Shared loading states and save/load indicators use a small orbit; all new motion is limited to no-preference media queries and the existing reduced-motion override. Writing content itself is not animated. Dialog cleanup restores focus to its original control, and titles use unique accessible IDs.
+
+Browser checks passed for centered, in-viewport, focus-contained synthetic dialogs at 360/768/1440 in every theme (12 combinations); Escape closed the popup and restored the trigger’s focus. No hosted data/settings change or deployment was required.
+
+The editor’s Share & details panel is also centered and viewport-bounded (verified at all three widths). Page entrance animations no longer retain a final transform, which had incorrectly anchored fixed panels to the document instead of the viewport. Final validation: 134 tests, ESLint, TypeScript and build passed; no SQL changes.

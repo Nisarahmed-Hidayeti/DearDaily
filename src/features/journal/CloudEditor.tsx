@@ -1,3 +1,4 @@
+import { LoadingState } from '../../components/Shared'
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import {
@@ -122,7 +123,11 @@ function EntryForm({ existingId }: { existingId?: string }) {
         </>
       )}
       <p className="draft-notice" role="status">
-        <LockKeyhole size={14} />
+        {busy || !ready ? (
+          <span className="loading-orbit" aria-hidden="true" />
+        ) : (
+          <LockKeyhole size={14} />
+        )}
         {!online
           ? 'Offline · your unsaved writing is still in this tab. Export a copy before leaving.'
           : busy
@@ -289,7 +294,11 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 Journal body
               </label>
               {richEditorEnabled ? (
-                <Suspense fallback={<p>Preparing your writing space…</p>}>
+                <Suspense
+                  fallback={
+                    <LoadingState>Preparing your writing space…</LoadingState>
+                  }
+                >
                   <RichWriter
                     disabled={!ready}
                     value={
@@ -346,7 +355,12 @@ function EntryForm({ existingId }: { existingId?: string }) {
           <section className="panel">
             <h2>The little details</h2>
             <p>
-              <LockKeyhole size={14} /> Private source entry
+              {busy || !ready ? (
+                <span className="loading-orbit" aria-hidden="true" />
+              ) : (
+                <LockKeyhole size={14} />
+              )}{' '}
+              Private source entry
             </p>
             <fieldset disabled={!ready}>
               <legend>How are you feeling?</legend>

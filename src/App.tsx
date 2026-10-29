@@ -1,3 +1,4 @@
+import { LoadingState } from './components/Shared'
 import RichWritingSecurityCheck from './features/auth/RichWritingSecurityCheck'
 import CommunityPreview from './features/community/CommunityPreview'
 import CommunitySecurityCheck from './features/auth/CommunitySecurityCheck'
@@ -66,7 +67,11 @@ function ThemedRoutes() {
             <Route
               path="/dev/editor-workshop"
               element={
-                <Suspense fallback={<p>Preparing your writing space…</p>}>
+                <Suspense
+                  fallback={
+                    <LoadingState>Preparing your writing space…</LoadingState>
+                  }
+                >
                   <EditorWorkshop />
                 </Suspense>
               }

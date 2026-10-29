@@ -1,6 +1,6 @@
 import { BookOpen, ArrowUpRight, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useId } from 'react'
 import type { ReactNode } from 'react'
 export function Logo() {
   return (
@@ -65,21 +65,27 @@ export function Modal({
   children: ReactNode
   onClose: () => void
 }) {
+  const titleId = useId()
   const ref = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const dialog = ref.current
+    const previousFocus = document.activeElement
     dialog?.showModal()
-    return () => dialog?.close()
+    return () => {
+      dialog?.close()
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
+        previousFocus.focus()
+    }
   }, [])
   return (
     <dialog
       ref={ref}
       className="modal"
-      aria-labelledby="modal-title"
+      aria-labelledby={titleId}
       onCancel={onClose}
     >
-      <div className="row spread">
-        <h2 id="modal-title">{title}</h2>
+      <div className="modal-header">
+        <h2 id={titleId}>{title}</h2>
         <button
           autoFocus
           className="icon-button"
@@ -105,5 +111,14 @@ export function ArrowLink({
       {children}
       <ArrowUpRight size={16} />
     </Link>
+  )
+}
+
+export function LoadingState({ children }: { children: ReactNode }) {
+  return (
+    <p className="loading-state" role="status">
+      <span className="loading-orbit" aria-hidden="true" />
+      <span>{children}</span>
+    </p>
   )
 }

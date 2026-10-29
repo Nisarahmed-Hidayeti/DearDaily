@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
-import { PageHeading } from '../../components/Shared'
+import { LoadingState, PageHeading } from '../../components/Shared'
 import {
   avatars,
   communityEnabled,
@@ -69,7 +69,7 @@ export default function PublicProfile() {
         Back to Explore
       </Link>
       {status === 'loading' ? (
-        <p role="status">Loading profile…</p>
+        <LoadingState>Loading profile…</LoadingState>
       ) : status === 'error' ? (
         <p role="alert">Profile unavailable. Reload to retry.</p>
       ) : profile ? (

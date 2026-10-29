@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BookOpen, Plus } from 'lucide-react'
-import { PageHeading, Scene } from '../../components/Shared'
+import { LoadingState, PageHeading, Scene } from '../../components/Shared'
 import { useAuth } from '../auth/AuthProvider'
 import { listEntries } from '../journal/journalApi'
 import type { JournalEntry } from '../journal/journalApi'
@@ -71,7 +71,7 @@ export default function CloudDashboard() {
         </div>
       </div>
       {status === 'loading' && (
-        <p role="status">Loading your private entries…</p>
+        <LoadingState>Loading your private entries…</LoadingState>
       )}
       {status === 'error' && (
         <div role="alert">
