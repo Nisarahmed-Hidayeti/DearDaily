@@ -36,7 +36,7 @@ export function RichWriter({
       TaskList,
       TaskItem.configure({ nested: true }),
       Placeholder.configure({
-        placeholder: 'Let the day unfold. Type / for a block…',
+        placeholder: 'Write something, or type / for commands…',
       }),
       Markdown,
     ],
@@ -67,6 +67,7 @@ export function RichWriter({
       },
     },
     onUpdate: ({ editor: current }) => {
+      if (disabled) return
       try {
         onChange(validateDocument({ version: 1, content: current.getJSON() }))
         setError('')
@@ -80,12 +81,13 @@ export function RichWriter({
     },
   })
   useEffect(() => {
-    editor?.setEditable(!disabled)
+    if (editor && !editor.isDestroyed) editor.setEditable(!disabled, false)
   }, [editor, disabled])
   // Only a confirmed reload changes value independently; never reset typing or history.
   useEffect(() => {
     if (
       editor &&
+      !editor.isDestroyed &&
       JSON.stringify(editor.getJSON()) !== JSON.stringify(value.content)
     )
       editor.commands.setContent(value.content, { emitUpdate: false })
@@ -139,59 +141,63 @@ export function RichWriter({
   )
   return (
     <div className="rich-writer">
-      <div className="writer-toolbar" role="group" aria-label="Writing tools">
-        {tools}
-        <label>
-          <span className="sr-only">Block style</span>
-          <select
+      <details className="writer-format-options">
+        <summary>Formatting</summary>
+        <div className="writer-toolbar" role="group" aria-label="Writing tools">
+          {tools}
+          <label>
+            <span className="sr-only">Block style</span>
+            <select
+              disabled={disabled}
+              value={
+                editor.isActive('heading')
+                  ? `h${editor.getAttributes('heading').level}`
+                  : 'paragraph'
+              }
+              onChange={(e) => {
+                const v = e.target.value
+                if (v === 'paragraph')
+                  editor.chain().focus().setParagraph().run()
+                else
+                  editor
+                    .chain()
+                    .focus()
+                    .setHeading({ level: Number(v.slice(1)) as 1 | 2 | 3 })
+                    .run()
+              }}
+            >
+              <option value="paragraph">Text</option>
+              <option value="h1">Heading 1</option>
+              <option value="h2">Heading 2</option>
+              <option value="h3">Heading 3</option>
+            </select>
+          </label>
+          <button
+            type="button"
             disabled={disabled}
-            value={
-              editor.isActive('heading')
-                ? `h${editor.getAttributes('heading').level}`
-                : 'paragraph'
-            }
-            onChange={(e) => {
-              const v = e.target.value
-              if (v === 'paragraph') editor.chain().focus().setParagraph().run()
-              else
-                editor
-                  .chain()
-                  .focus()
-                  .setHeading({ level: Number(v.slice(1)) as 1 | 2 | 3 })
-                  .run()
-            }}
+            aria-expanded={slash}
+            onClick={() => setSlash(!slash)}
           >
-            <option value="paragraph">Text</option>
-            <option value="h1">Heading 1</option>
-            <option value="h2">Heading 2</option>
-            <option value="h3">Heading 3</option>
-          </select>
-        </label>
-        <button
-          type="button"
-          disabled={disabled}
-          aria-expanded={slash}
-          onClick={() => setSlash(!slash)}
-        >
-          + Block
-        </button>
-        <button
-          type="button"
-          aria-label="Undo"
-          disabled={disabled || !editor.can().undo()}
-          onClick={() => editor.chain().focus().undo().run()}
-        >
-          ↶
-        </button>
-        <button
-          type="button"
-          aria-label="Redo"
-          disabled={disabled || !editor.can().redo()}
-          onClick={() => editor.chain().focus().redo().run()}
-        >
-          ↷
-        </button>
-      </div>
+            + Block
+          </button>
+          <button
+            type="button"
+            aria-label="Undo"
+            disabled={disabled || !editor.can().undo()}
+            onClick={() => editor.chain().focus().undo().run()}
+          >
+            ↶
+          </button>
+          <button
+            type="button"
+            aria-label="Redo"
+            disabled={disabled || !editor.can().redo()}
+            onClick={() => editor.chain().focus().redo().run()}
+          >
+            ↷
+          </button>
+        </div>
+      </details>
       <BubbleMenu editor={editor}>
         <div
           className="writer-toolbar writer-bubble"
@@ -269,35 +275,39 @@ export function RichWriter({
           unsupported content.
         </p>
       )}
-      <div className="writer-utilities">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => setImportText('')}
-        >
-          Import Markdown
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            const url = URL.createObjectURL(
-              new Blob([editor.getMarkdown()], {
-                type: 'text/markdown;charset=utf-8',
-              }),
-            )
-            const a = document.createElement('a')
-            a.href = url
-            a.download = 'deardaily-writing.md'
-            a.click()
-            window.setTimeout(() => URL.revokeObjectURL(url), 1000)
-          }}
-        >
-          Export Markdown
-        </button>
-        <output>
-          {documentText(value).trim().split(/\s+/).filter(Boolean).length} words
-        </output>
-      </div>
+      <details className="writer-file-options">
+        <summary>Import / export</summary>
+        <div className="writer-utilities">
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => setImportText('')}
+          >
+            Import Markdown
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const url = URL.createObjectURL(
+                new Blob([editor.getMarkdown()], {
+                  type: 'text/markdown;charset=utf-8',
+                }),
+              )
+              const a = document.createElement('a')
+              a.href = url
+              a.download = 'deardaily-writing.md'
+              a.click()
+              window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+            }}
+          >
+            Export Markdown
+          </button>
+          <output>
+            {documentText(value).trim().split(/\s+/).filter(Boolean).length}{' '}
+            words
+          </output>
+        </div>
+      </details>
       {importText !== null && (
         <div className="markdown-import">
           <label>

@@ -35,7 +35,8 @@ function EntryForm({ existingId }: { existingId?: string }) {
   const { draft, setDraft, ready, busy, error, dirty, row, published } = state
   const [preview, setPreview] = useState(false)
   const [focus, setFocus] = useState(false)
-  const [font, setFont] = useState('serif')
+  const [font, setFont] = useState('sans')
+  const [detailsOpen, setDetailsOpen] = useState(false)
   const [width, setWidth] = useState('standard')
   const [online, setOnline] = useState(navigator.onLine)
   useEffect(() => {
@@ -74,23 +75,52 @@ function EntryForm({ existingId }: { existingId?: string }) {
     setDraft((current) => ({ ...current, ...values }))
   return (
     <div
-      className={`page editor-page ${richEditorEnabled ? 'editor-lab' : ''} ${focus ? 'writer-focus' : ''}`}
+      className={`page editor-page ${richEditorEnabled ? 'editor-lab notion-editor' : ''} ${focus ? 'writer-focus' : ''}`}
       data-font={font}
       data-width={width}
     >
-      <PageHeading
-        eyebrow="Your private journal"
-        title="Make room for your thoughts."
-      >
-        <button
-          className="button secondary"
-          aria-pressed={preview}
-          onClick={() => setPreview(!preview)}
-        >
-          <Eye size={16} />
-          {preview ? 'Keep writing' : 'Preview'}
-        </button>
-      </PageHeading>
+      {richEditorEnabled ? (
+        <header className="writer-topbar">
+          <Link to="/app" className="writer-breadcrumb">
+            Journal <span>/</span> <span>Private page</span>
+          </Link>
+          <div className="row">
+            <button
+              className="quiet"
+              aria-pressed={preview}
+              onClick={() => setPreview(!preview)}
+            >
+              {preview ? 'Edit' : 'Preview'}
+            </button>
+            <button
+              className="quiet"
+              aria-expanded={detailsOpen}
+              onClick={() => {
+                setFocus(false)
+                setDetailsOpen(!detailsOpen)
+              }}
+            >
+              Share & details
+            </button>
+          </div>
+        </header>
+      ) : (
+        <>
+          <PageHeading
+            eyebrow="Your private journal"
+            title="Make room for your thoughts."
+          >
+            <button
+              className="button secondary"
+              aria-pressed={preview}
+              onClick={() => setPreview(!preview)}
+            >
+              <Eye size={16} />
+              {preview ? 'Keep writing' : 'Preview'}
+            </button>
+          </PageHeading>
+        </>
+      )}
       <p className="draft-notice" role="status">
         <LockKeyhole size={14} />
         {!online
@@ -108,30 +138,33 @@ function EntryForm({ existingId }: { existingId?: string }) {
                     : 'A new private page · start writing'}
       </p>
       {richEditorEnabled && (
-        <div className="writer-preferences">
-          <button
-            className="button secondary"
-            aria-pressed={focus}
-            onClick={() => setFocus(!focus)}
-          >
-            {focus ? 'Leave focus mode' : 'Focus mode'}
-          </button>
-          <label>
-            Writing font
-            <select value={font} onChange={(e) => setFont(e.target.value)}>
-              <option value="serif">Serif</option>
-              <option value="sans">Sans serif</option>
-            </select>
-          </label>
-          <label>
-            Page width
-            <select value={width} onChange={(e) => setWidth(e.target.value)}>
-              <option value="narrow">Narrow</option>
-              <option value="standard">Standard</option>
-              <option value="wide">Wide</option>
-            </select>
-          </label>
-        </div>
+        <details className="writer-page-options">
+          <summary>Page options</summary>
+          <div className="writer-preferences">
+            <button
+              className="button secondary"
+              aria-pressed={focus}
+              onClick={() => setFocus(!focus)}
+            >
+              {focus ? 'Leave focus mode' : 'Focus mode'}
+            </button>
+            <label>
+              Writing font
+              <select value={font} onChange={(e) => setFont(e.target.value)}>
+                <option value="serif">Serif</option>
+                <option value="sans">Sans serif</option>
+              </select>
+            </label>
+            <label>
+              Page width
+              <select value={width} onChange={(e) => setWidth(e.target.value)}>
+                <option value="narrow">Narrow</option>
+                <option value="standard">Standard</option>
+                <option value="wide">Wide</option>
+              </select>
+            </label>
+          </div>
+        </details>
       )}
       {error && (
         <div role="alert" className="auth-notice">
@@ -244,7 +277,9 @@ function EntryForm({ existingId }: { existingId?: string }) {
               <input
                 id="entry-title"
                 className="title-input"
-                placeholder="A new day, a new page…"
+                placeholder={
+                  richEditorEnabled ? 'Untitled' : 'A new day, a new page…'
+                }
                 value={draft.title}
                 maxLength={200}
                 disabled={!ready}
@@ -287,7 +322,27 @@ function EntryForm({ existingId }: { existingId?: string }) {
             </output>
           </div>
         </section>
-        <aside className="entry-settings">
+        <aside
+          className="entry-settings"
+          hidden={richEditorEnabled && !detailsOpen}
+          aria-label="Page details and publishing"
+        >
+          {richEditorEnabled && (
+            <>
+              <button className="quiet" onClick={() => setDetailsOpen(false)}>
+                Close details
+              </button>
+              <label>
+                Journal date
+                <input
+                  type="date"
+                  value={draft.entry_date}
+                  disabled={!ready}
+                  onChange={(e) => patch({ entry_date: e.target.value })}
+                />
+              </label>
+            </>
+          )}
           <section className="panel">
             <h2>The little details</h2>
             <p>

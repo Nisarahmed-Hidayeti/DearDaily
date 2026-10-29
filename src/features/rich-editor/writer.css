@@ -280,3 +280,159 @@
 .editor-page.writer-focus .editor-layout {
   grid-template-columns: minmax(0, 1fr);
 }
+/* Document-first writing: controls recede until deliberately opened. */
+.notion-editor {
+  padding-top: 16px;
+  position: relative;
+}
+.writer-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.writer-breadcrumb {
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.writer-topbar .quiet {
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid transparent;
+  font-size: 12px;
+}
+.writer-topbar .quiet:hover {
+  background: var(--surface);
+  border-color: var(--border);
+}
+.notion-editor .draft-notice {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin-block: 8px 28px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.notion-editor .editor-layout {
+  display: block;
+}
+.notion-editor .writing-paper {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: clamp(12px, 3vw, 40px) clamp(4px, 3vw, 40px);
+  overflow: visible;
+}
+.notion-editor .paper-meta {
+  display: none;
+}
+.notion-editor .title-input {
+  font-family: var(--sans, Inter, sans-serif);
+  font-size: clamp(34px, 5vw, 48px);
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 12px 0 20px;
+  background: transparent;
+  border: 0;
+}
+.notion-editor .rich-writer .tiptap {
+  padding: 0;
+  font-size: 17px;
+  line-height: 1.85;
+  min-height: 55vh;
+}
+.notion-editor .paper-footer {
+  border: 0;
+  opacity: 0.75;
+  padding-top: 24px;
+}
+.notion-editor .writer-cover {
+  border-radius: 8px;
+  margin-bottom: 28px;
+}
+.notion-editor .writer-icon {
+  font-size: 58px;
+  margin-block: 20px 8px;
+}
+.writer-page-options {
+  margin-bottom: 12px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 12px;
+}
+.writer-page-options > .writer-preferences {
+  justify-content: flex-end;
+  padding: 16px;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.writer-format-options > summary,
+.writer-file-options > summary {
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+.writer-format-options .writer-toolbar {
+  position: static;
+  margin: 8px 0 16px;
+}
+.writer-file-options {
+  margin-top: 24px;
+}
+.notion-editor .entry-settings:not([hidden]) {
+  display: block;
+  position: fixed;
+  right: 16px;
+  top: 100px;
+  bottom: 24px;
+  width: min(360px, calc(100vw - 32px));
+  overflow: auto;
+  z-index: 25;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 16px 60px #0004;
+}
+.notion-editor .entry-settings[hidden] {
+  display: none;
+}
+.notion-editor .entry-settings > .quiet {
+  display: block;
+  margin-left: auto;
+  margin-bottom: 20px;
+}
+.app-main:has(.notion-editor) > .demo-notice {
+  display: none;
+}
+@media (max-width: 560px) {
+  .notion-editor {
+    padding-inline: 20px;
+  }
+  .writer-topbar {
+    gap: 8px;
+  }
+  .writer-topbar .row {
+    gap: 0;
+  }
+  .writer-breadcrumb {
+    font-size: 11px;
+    gap: 7px;
+  }
+  .notion-editor .entry-settings:not([hidden]) {
+    top: 70px;
+    bottom: 84px;
+  }
+}

@@ -213,3 +213,14 @@ export function exportMarkdown(draft: Draft, publicOnly = false) {
   link.click()
   window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
+
+/** JSONB reorders object keys; object ordering must never trigger another save. */
+export function draftFingerprint(draft: Draft): string {
+  return JSON.stringify(draft, (_key, value) =>
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? Object.fromEntries(
+          Object.entries(value).sort(([a], [b]) => a.localeCompare(b)),
+        )
+      : value,
+  )
+}

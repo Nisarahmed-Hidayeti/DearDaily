@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { themes } from '../theme/themes'
+import type { ThemeId } from '../theme/themes'
 import { RichWriter } from './RichWriter'
 import { coverPresets, documentFromText, pageIcons } from './document'
 import type { CoverPreset } from './document'
@@ -12,11 +14,13 @@ export default function EditorPreview() {
   const [icon, setIcon] = useState('🌿')
   const [cover, setCover] = useState<CoverPreset>('dawn')
   const [focus, setFocus] = useState(false)
-  const [font, setFont] = useState('serif')
+  const [font, setFont] = useState('sans')
+  const [theme, setTheme] = useState<ThemeId>('midnight-purple')
   const [width, setWidth] = useState('standard')
   return (
     <div
-      className={`page editor-lab ${focus ? 'writer-focus' : ''}`}
+      className={`page editor-lab notion-editor ${focus ? 'writer-focus' : ''}`}
+      data-theme={theme}
       data-width={width}
       data-font={font}
     >
@@ -26,30 +30,46 @@ export default function EditorPreview() {
         photos and public publishing are not connected yet. Export before
         leaving.
       </p>
-      <div className="writer-preferences">
-        <button
-          className="button secondary"
-          aria-pressed={focus}
-          onClick={() => setFocus(!focus)}
-        >
-          {focus ? 'Leave focus mode' : 'Focus mode'}
-        </button>
-        <label>
-          Writing font
-          <select value={font} onChange={(e) => setFont(e.target.value)}>
-            <option value="serif">Serif</option>
-            <option value="sans">Sans serif</option>
-          </select>
-        </label>
-        <label>
-          Page width
-          <select value={width} onChange={(e) => setWidth(e.target.value)}>
-            <option value="narrow">Narrow</option>
-            <option value="standard">Standard</option>
-            <option value="wide">Wide</option>
-          </select>
-        </label>
-      </div>
+      <details>
+        <summary>Page options</summary>
+        <div className="writer-preferences">
+          <label>
+            Visual preview theme
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as ThemeId)}
+            >
+              {themes.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            className="button secondary"
+            aria-pressed={focus}
+            onClick={() => setFocus(!focus)}
+          >
+            {focus ? 'Leave focus mode' : 'Focus mode'}
+          </button>
+          <label>
+            Writing font
+            <select value={font} onChange={(e) => setFont(e.target.value)}>
+              <option value="serif">Serif</option>
+              <option value="sans">Sans serif</option>
+            </select>
+          </label>
+          <label>
+            Page width
+            <select value={width} onChange={(e) => setWidth(e.target.value)}>
+              <option value="narrow">Narrow</option>
+              <option value="standard">Standard</option>
+              <option value="wide">Wide</option>
+            </select>
+          </label>
+        </div>
+      </details>
       <section className="writer-document">
         {cover !== 'none' && (
           <div

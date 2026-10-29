@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import {
   draftOf,
+  draftFingerprint,
   loadEntry,
   newDraft,
   readStories,
@@ -19,14 +20,20 @@ export function useJournalEntry(existingId?: string) {
   const [id] = useState(() => existingId ?? crypto.randomUUID())
   const [draft, setDraft] = useState<Draft>(newDraft)
   const [row, setRow] = useState<JournalEntry | null>(null)
-  const [confirmed, setConfirmed] = useState(() => JSON.stringify(newDraft()))
+  const [confirmed, setConfirmed] = useState(() => draftFingerprint(newDraft()))
   const [ready, setReady] = useState(!existingId)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [published, setPublished] = useState(false)
   const epoch = useRef(0)
   const lock = useRef(false)
-  const dirty = JSON.stringify(draft) !== confirmed
+  const emptyNewPage =
+    !row &&
+    !draft.title.trim() &&
+    !draft.body.trim() &&
+    !draft.page_icon &&
+    (!draft.cover_preset || draft.cover_preset === 'none')
+  const dirty = !emptyNewPage && draftFingerprint(draft) !== confirmed
   useEffect(() => {
     const lifetime = epoch
     return () => {
@@ -43,7 +50,7 @@ export function useJournalEntry(existingId?: string) {
       const stories = await readStories(client, id)
       if (generation !== epoch.current) return
       setDraft(draftOf(entry))
-      setConfirmed(JSON.stringify(draftOf(entry)))
+      setConfirmed(draftFingerprint(draftOf(entry)))
       setRow(entry)
       setPublished(stories.length > 0)
       setReady(true)
@@ -89,7 +96,7 @@ export function useJournalEntry(existingId?: string) {
           )
         }
         setRow(result)
-        setConfirmed(JSON.stringify(draftOf(result)))
+        setConfirmed(draftFingerprint(draftOf(result)))
         // Only status is merged; words typed during the request are preserved.
         if (saved) setDraft((current) => ({ ...current, status: 'saved' }))
       } catch {
@@ -106,9 +113,10 @@ export function useJournalEntry(existingId?: string) {
   )
   useEffect(() => {
     if (!ready || !dirty || busy || error) return
+    if (!row && !draft.title.trim() && !draft.body.trim()) return
     const timer = window.setTimeout(() => void save(), 1200)
     return () => window.clearTimeout(timer)
-  }, [ready, dirty, busy, error, save])
+  }, [ready, dirty, busy, error, save, row, draft.title, draft.body])
   useEffect(() => {
     if (!dirty && !busy) return
     const before = (event: BeforeUnloadEvent) => {

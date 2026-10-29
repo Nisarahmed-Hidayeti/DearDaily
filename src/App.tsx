@@ -1,3 +1,4 @@
+import RichWritingSecurityCheck from './features/auth/RichWritingSecurityCheck'
 import CommunityPreview from './features/community/CommunityPreview'
 import CommunitySecurityCheck from './features/auth/CommunitySecurityCheck'
 import { communityEnabled } from './features/community/communityApi'
@@ -128,6 +129,12 @@ function ThemedRoutes() {
                 }
               />
             </>
+          )}
+          {import.meta.env.DEV && (
+            <Route
+              path="/dev/rich-check"
+              element={<RichWritingSecurityCheck />}
+            />
           )}
           <Route path="/app" element={<Dashboard />} />
           <Route
