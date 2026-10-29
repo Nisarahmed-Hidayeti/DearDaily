@@ -1,3 +1,5 @@
+import { appearanceEnabled } from '../appearance/appearance'
+import { photographicCovers } from '../rich-editor/covers'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeading, Modal } from '../../components/Shared'
@@ -10,6 +12,7 @@ import {
 } from './communityApi'
 import type { PublicProfile } from './communityApi'
 const empty: PublicProfile = {
+  ...(appearanceEnabled ? { cover_id: null } : {}),
   username: '',
   display_name: '',
   bio: '',
@@ -20,6 +23,7 @@ const empty: PublicProfile = {
 export default function ProfileSettings() {
   const { client } = useAuth()
   const [form, setForm] = useState(empty)
+  const [savedProfile, setSavedProfile] = useState(empty)
   const [previous, setPrevious] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -33,6 +37,7 @@ export default function ProfileSettings() {
       .then((p) => {
         if (active) {
           setForm(p ?? empty)
+          setSavedProfile(p ?? empty)
           setPrevious(p?.username ?? null)
           setReady(true)
         }
@@ -51,6 +56,7 @@ export default function ProfileSettings() {
     try {
       const p = await saveProfile(client, form, previous)
       setForm(p)
+      setSavedProfile(p)
       setPrevious(p.username)
       setMessage(
         'Profile saved. Hidden or renamed profiles detach existing story bylines; they are never reattached automatically.',
@@ -68,6 +74,7 @@ export default function ProfileSettings() {
     try {
       await removePublicProfile(client, previous)
       setForm(empty)
+      setSavedProfile(empty)
       setPrevious(null)
       setMessage(
         'Public profile removed. Your private account and journals remain unchanged.',
@@ -80,7 +87,7 @@ export default function ProfileSettings() {
     }
   }
   return (
-    <div className="page">
+    <div className="page profile-settings">
       <PageHeading
         eyebrow="Public identity / Optional"
         title="Share a name. Keep your privacy."
@@ -143,6 +150,27 @@ export default function ProfileSettings() {
               ))}
             </select>
           </label>
+          <label>
+            Public profile banner
+            <select
+              disabled={!appearanceEnabled}
+              value={form.cover_id ?? ''}
+              onChange={(e) => patch({ cover_id: e.target.value || null })}
+            >
+              <option value="">No banner</option>
+              {photographicCovers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {!appearanceEnabled && (
+            <p className="tiny muted">
+              Banner synchronization awaits the reviewed settings migration.
+              Your existing profile controls remain available.
+            </p>
+          )}
           <label className="row">
             <input
               type="checkbox"
@@ -165,7 +193,16 @@ export default function ProfileSettings() {
             />
             Make this public profile visible
           </label>
-          <button className="button">Review profile changes</button>
+          <div className="row">
+            <button className="button">Review profile changes</button>
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => setForm(savedProfile)}
+            >
+              Cancel edits
+            </button>
+          </div>
         </fieldset>
       </form>
       <p role="status">{message}</p>

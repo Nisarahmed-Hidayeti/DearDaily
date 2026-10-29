@@ -7,7 +7,7 @@ import {
   Sprout,
   ArrowDown,
 } from 'lucide-react'
-import { Logo, Scene } from '../../components/Shared'
+import { Logo } from '../../components/Shared'
 export default function Landing() {
   return (
     <div className="landing">
@@ -23,13 +23,36 @@ export default function Landing() {
             Sign in
           </Link>
           <Link className="button small" to="/auth/sign-up">
-            Sign up <ArrowRight size={15} />
+            Beta access <ArrowRight size={15} />
           </Link>
         </div>
       </nav>
       <main id="main" tabIndex={-1}>
         <section className="hero">
-          <Scene className="hero-scene" />
+          <div
+            className="hero-memories"
+            aria-label="A collection of small moments"
+          >
+            <figure className="memory-forest">
+              <img
+                src="/covers/forest-light.jpg"
+                alt="Sunlight falling between forest trees"
+                fetchPriority="high"
+              />
+              <figcaption>01 / Notice the ordinary</figcaption>
+            </figure>
+            <figure className="memory-cafe">
+              <img
+                src="/covers/cafe-memory.jpg"
+                alt="Coffee and books by a quiet café window"
+                loading="lazy"
+              />
+              <figcaption>02 / Keep a little of it</figcaption>
+            </figure>
+            <span className="memory-margin">
+              A personal collection of days.
+            </span>
+          </div>
           <div className="hero-content">
             <p className="eyebrow">
               <span className="little-line" />A little space for your inner

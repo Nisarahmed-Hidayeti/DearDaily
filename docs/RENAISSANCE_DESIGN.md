@@ -25,3 +25,7 @@ Automated checks cover explicit preference persistence, automatic defaults, unav
 The broader Renaissance brief remains open: caret-positioned searchable slash menus, block drag/reorder, secure custom media uploads, curated licensed photographic covers/repositioning, synchronized advanced appearance, full application art direction and production release gates are not claimed complete by this navigation checkpoint. Existing security/operations findings remain in PHASE_4.md and DEARDAILY_2.md.
 
 Final local gate: 144 frontend tests, TypeScript, ESLint and production build passed. Additional browser checks confirmed all four primary destinations, explicit expansion after reload, and preserved live editor focus/selection when toggling the rail. The account sign-out shortcut now confirms before discarding unconfirmed writing; direct navigation retains the existing unsaved-change guard. All original account/journal regression tests still pass. The existing approximately 520 kB rich-editor chunk warning remains; no new database test claim is made for unchanged SQL.
+
+## Complete Renaissance continuation
+
+The subsequent editor, cover, media, account appearance and whole-site work is recorded in [RENAISSANCE_BETA_REVIEW.md](RENAISSANCE_BETA_REVIEW.md). That report supersedes the older checkpoint counts and distinguishes local validation from pending hosted approval.

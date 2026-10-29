@@ -1,3 +1,4 @@
+import { appearanceEnabled } from '../appearance/appearance'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PublicStory } from '../journal/journalApi'
 import { richPublicFields } from '../rich-editor/config'
@@ -16,6 +17,7 @@ export const avatars: Record<string, string> = {
   book: '▤',
 }
 export interface PublicProfile {
+  cover_id?: string | null
   username: string
   display_name: string
   bio: string
@@ -30,7 +32,8 @@ export interface StoryMetadata {
 }
 export type CommunityStory = PublicStory & Partial<StoryMetadata>
 export const profileFields =
-  'username,display_name,bio,avatar,visible,joined_month'
+  'username,display_name,bio,avatar,visible,joined_month' +
+  (appearanceEnabled ? ',cover_id' : '')
 export const storyFields: string =
   'id,title,body,published_at,public_username,public_category,public_tags' +
   richPublicFields

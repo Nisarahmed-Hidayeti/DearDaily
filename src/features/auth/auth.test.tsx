@@ -143,7 +143,9 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
       password: 'example-password',
     })
     expect(
-      screen.getByRole('heading', { name: 'Private account destination' }),
+      await screen.findByRole('heading', {
+        name: 'Private account destination',
+      }),
     ).toBeVisible()
   })
   it('does not expose provider errors or account existence', async () => {

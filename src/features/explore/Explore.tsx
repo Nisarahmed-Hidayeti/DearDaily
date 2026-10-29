@@ -1,3 +1,5 @@
+import { PublicAuthor } from '../community/PublicAuthor'
+import { PageCover } from '../rich-editor/PageCover'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { LoadingState, PageHeading } from '../../components/Shared'
@@ -171,20 +173,39 @@ export function PublishedStory() {
   const { client } = useAuth()
   const [story, setStory] = useState<CommunityStory | null>(null)
   const [status, setStatus] = useState('loading')
+  const [related, setRelated] = useState<CommunityStory[]>([])
   useEffect(() => {
     if (!client || !id) return
     let active = true
-    const load = () => {
-      void readStories(client, id)
-        .then((rows) => {
-          if (active) {
-            setStory(rows[0] ?? null)
-            setStatus('ready')
-          }
-        })
-        .catch(() => {
-          if (active) setStatus('error')
-        })
+    let sequence = 0
+    const load = async () => {
+      const request = ++sequence
+      try {
+        const rows = await readStories(client, id)
+        if (!active || request !== sequence) return
+        const current = rows[0] ?? null
+        setStory(current)
+        setStatus('ready')
+        setRelated([])
+        if (
+          current &&
+          'public_username' in current &&
+          current.public_username &&
+          communityEnabled
+        ) {
+          const result = await storyPage(client, {
+            username: current.public_username as string,
+            page: 0,
+          })
+          if (active && request === sequence)
+            setRelated(result.stories.filter((s) => s.id !== id).slice(0, 3))
+        }
+      } catch {
+        if (active && request === sequence) {
+          setStatus('error')
+          setRelated([])
+        }
+      }
     }
     load()
     window.addEventListener('focus', load)
@@ -206,7 +227,7 @@ export function PublishedStory() {
       <Link className="text-link" to="/explore">
         Back to stories
       </Link>
-      {status === 'loading' ? (
+      {status === 'loading' || (story && story.id !== id) ? (
         <LoadingState>Loading story…</LoadingState>
       ) : status === 'error' ? (
         <p role="alert">
@@ -219,22 +240,12 @@ export function PublishedStory() {
             {readingTime(story.body)} min read ·{' '}
             {new Date(story.published_at).toLocaleDateString()}
           </p>
-          {story.public_username ? (
-            <Link className="text-link" to={`/u/${story.public_username}`}>
-              @{story.public_username}
-            </Link>
-          ) : (
-            <p className="muted">Anonymous writer</p>
-          )}
+          <PublicAuthor username={story.public_username} />
           <h1>{story.title}</h1>
-          {story.cover_preset && story.cover_preset !== 'none' ? (
-            <div
-              className="writer-cover"
-              data-cover={story.cover_preset}
-              role="img"
-              aria-label={`${story.cover_preset} cover`}
-            />
-          ) : null}
+          <PageCover
+            document={story.writing_document}
+            preset={story.cover_preset}
+          />
           {story.page_icon && (
             <div className="writer-icon">{story.page_icon}</div>
           )}
@@ -249,6 +260,16 @@ export function PublishedStory() {
             ))}
           </div>
           {communityEnabled && <ReportStory id={story.id} />}
+          {!!related.length && (
+            <section className="more-by-author">
+              <h2>More from this author</h2>
+              <div className="story-grid">
+                {related.map((s) => (
+                  <StoryCard key={s.id} story={s} />
+                ))}
+              </div>
+            </section>
+          )}
         </>
       ) : (
         <h1>This story is not available.</h1>
