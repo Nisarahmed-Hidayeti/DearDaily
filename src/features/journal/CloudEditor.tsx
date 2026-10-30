@@ -1,4 +1,10 @@
-import { useState, useEffect } from 'react'
+import { mediaEnabled, uploadPhoto, documentAssetIds } from '../media/mediaApi'
+import { useAppearance } from '../appearance/AppearanceProvider'
+import { PageAppearance } from '../rich-editor/PageAppearance'
+import { PageCover } from '../rich-editor/PageCover'
+import { useWritingFocus } from '../rich-editor/useWritingFocus'
+import { LoadingState } from '../../components/Shared'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 import {
   communityEnabled,
@@ -12,6 +18,14 @@ import type { Mood } from '../../data/demo'
 import { Modal, PageHeading } from '../../components/Shared'
 import { exportMarkdown } from './journalApi'
 import { useJournalEntry } from './useJournalEntry'
+import { richEditorEnabled } from '../rich-editor/config'
+const RichWriter = lazy(() =>
+  import('../rich-editor/RichWriter').then((module) => ({
+    default: module.RichWriter,
+  })),
+)
+import { RichRead } from '../rich-editor/RichRead'
+import { documentFromText, documentText } from '../rich-editor/document'
 
 export default function CloudEditor() {
   const { id } = useParams()
@@ -21,6 +35,23 @@ function EntryForm({ existingId }: { existingId?: string }) {
   const state = useJournalEntry(existingId)
   const { draft, setDraft, ready, busy, error, dirty, row, published } = state
   const [preview, setPreview] = useState(false)
+  const { focus, setFocus } = useWritingFocus()
+  const { appearance } = useAppearance()
+  const [fontChoice, setFont] = useState<string | null>(null)
+  const font = fontChoice ?? appearance.font
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [widthChoice, setWidth] = useState<string | null>(null)
+  const width = widthChoice ?? appearance.width
+  const [online, setOnline] = useState(navigator.onLine)
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine)
+    window.addEventListener('online', update)
+    window.addEventListener('offline', update)
+    return () => {
+      window.removeEventListener('online', update)
+      window.removeEventListener('offline', update)
+    }
+  }, [])
   const [tag, setTag] = useState('')
   const [confirmation, setConfirmation] = useState<
     'publish' | 'unpublish' | 'delete' | null
@@ -29,6 +60,7 @@ function EntryForm({ existingId }: { existingId?: string }) {
   const { client } = useAuth()
   const [profile, setProfile] = useState<PublicProfile | null>(null)
   const [byline, setByline] = useState(false)
+  const [approvePhotos, setApprovePhotos] = useState(false)
   const [publicCategory, setPublicCategory] = useState('Uncategorized')
   const [publicTags, setPublicTags] = useState('')
   useEffect(() => {
@@ -47,34 +79,114 @@ function EntryForm({ existingId }: { existingId?: string }) {
   const patch = (values: Partial<typeof draft>) =>
     setDraft((current) => ({ ...current, ...values }))
   return (
-    <div className="page editor-page">
-      <PageHeading
-        eyebrow="Your private journal"
-        title="Make room for your thoughts."
+    <div
+      className={`page editor-page ${richEditorEnabled ? 'editor-lab notion-editor' : ''} ${focus ? 'writer-focus' : ''}`}
+      data-unsaved-writing={dirty || busy}
+      data-font={font}
+      data-width={width}
+    >
+      <button
+        className="focus-exit"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => setFocus(false)}
       >
-        <button
-          className="button secondary"
-          aria-pressed={preview}
-          onClick={() => setPreview(!preview)}
-        >
-          <Eye size={16} />
-          {preview ? 'Keep writing' : 'Preview'}
-        </button>
-      </PageHeading>
+        Exit Focus Mode <kbd>Esc</kbd>
+      </button>
+      {richEditorEnabled ? (
+        <header className="writer-topbar">
+          <Link to="/app/journal" className="writer-breadcrumb">
+            Journal <span>/</span> <span>Private page</span>
+          </Link>
+          <div className="row">
+            <button
+              className="quiet"
+              aria-pressed={focus}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                setDetailsOpen(false)
+                setFocus(true)
+              }}
+            >
+              Focus mode
+            </button>
+            <button
+              className="quiet"
+              aria-pressed={preview}
+              onClick={() => setPreview(!preview)}
+            >
+              {preview ? 'Edit' : 'Preview'}
+            </button>
+            <button
+              className="quiet"
+              aria-expanded={detailsOpen}
+              onClick={() => {
+                setFocus(false)
+                setDetailsOpen(!detailsOpen)
+              }}
+            >
+              Share & details
+            </button>
+          </div>
+        </header>
+      ) : (
+        <>
+          <PageHeading
+            eyebrow="Your private journal"
+            title="Make room for your thoughts."
+          >
+            <button
+              className="button secondary"
+              aria-pressed={preview}
+              onClick={() => setPreview(!preview)}
+            >
+              <Eye size={16} />
+              {preview ? 'Keep writing' : 'Preview'}
+            </button>
+          </PageHeading>
+        </>
+      )}
       <p className="draft-notice" role="status">
-        <LockKeyhole size={14} />
-        {busy
-          ? 'Saving or confirming your action…'
-          : !ready
-            ? 'Loading your entry…'
-            : error
-              ? 'Not confirmed — keep or export your words.'
-              : dirty
-                ? 'Unsaved changes · autosave pending'
-                : row
-                  ? 'Saved to your private account'
-                  : 'A new private page · start writing'}
+        {busy || !ready ? (
+          <span className="loading-orbit" aria-hidden="true" />
+        ) : (
+          <LockKeyhole size={14} />
+        )}
+        {!online
+          ? 'Offline · your unsaved writing is still in this tab. Export a copy before leaving.'
+          : busy
+            ? 'Saving or confirming your action…'
+            : !ready
+              ? 'Loading your entry…'
+              : error
+                ? 'Not confirmed — keep or export your words.'
+                : dirty
+                  ? 'Unsaved changes · autosave pending'
+                  : row
+                    ? 'Saved to your private account'
+                    : 'A new private page · start writing'}
       </p>
+      {richEditorEnabled && (
+        <details className="writer-page-options">
+          <summary>Page options</summary>
+          <div className="writer-preferences">
+            <label>
+              Writing font
+              <select value={font} onChange={(e) => setFont(e.target.value)}>
+                <option value="serif">Serif</option>
+                <option value="sans">Sans serif</option>
+              </select>
+            </label>
+            <label>
+              Page width
+              <select value={width} onChange={(e) => setWidth(e.target.value)}>
+                <option value="narrow">Narrow</option>
+                <option value="standard">Standard</option>
+                <option value="wide">Wide</option>
+              </select>
+            </label>
+          </div>
+        </details>
+      )}
       {error && (
         <div role="alert" className="auth-notice">
           <p>{error}</p>
@@ -105,6 +217,44 @@ function EntryForm({ existingId }: { existingId?: string }) {
       )}
       <div className="editor-layout">
         <section className="writing-paper">
+          {richEditorEnabled && (
+            <>
+              <PageCover
+                privateMedia
+                document={draft.writing_document}
+                preset={draft.cover_preset}
+              />
+              {!preview && (
+                <PageAppearance
+                  onUpload={
+                    mediaEnabled && row && client
+                      ? (file) =>
+                          uploadPhoto(
+                            client,
+                            row.id,
+                            file,
+                            documentAssetIds(draft.writing_document).length,
+                          )
+                      : undefined
+                  }
+                  disabled={!ready}
+                  document={draft.writing_document}
+                  preset={draft.cover_preset}
+                  icon={draft.page_icon}
+                  onApply={(style) =>
+                    patch({
+                      writing_document: style.document,
+                      cover_preset: style.preset,
+                      page_icon: style.icon,
+                    })
+                  }
+                />
+              )}
+              {draft.page_icon && (
+                <div className="writer-icon">{draft.page_icon}</div>
+              )}
+            </>
+          )}
           <div className="row spread paper-meta">
             <label>
               Entry date{' '}
@@ -121,9 +271,11 @@ function EntryForm({ existingId }: { existingId?: string }) {
           {preview ? (
             <article className="entry-preview">
               <h2>{draft.title || 'Untitled entry'}</h2>
-              <p style={{ whiteSpace: 'pre-wrap' }}>
-                {draft.body || 'Your words will appear here.'}
-              </p>
+              <RichRead
+                privateMedia
+                document={draft.writing_document}
+                fallback={draft.body || 'Your words will appear here.'}
+              />
             </article>
           ) : (
             <>
@@ -133,7 +285,9 @@ function EntryForm({ existingId }: { existingId?: string }) {
               <input
                 id="entry-title"
                 className="title-input"
-                placeholder="A new day, a new page…"
+                placeholder={
+                  richEditorEnabled ? 'Untitled' : 'A new day, a new page…'
+                }
                 value={draft.title}
                 maxLength={200}
                 disabled={!ready}
@@ -142,14 +296,46 @@ function EntryForm({ existingId }: { existingId?: string }) {
               <label className="sr-only" htmlFor="entry-body">
                 Journal body
               </label>
-              <textarea
-                id="entry-body"
-                placeholder="What’s on your mind today? Take your time. This space is yours."
-                value={draft.body}
-                maxLength={100000}
-                disabled={!ready}
-                onChange={(e) => patch({ body: e.target.value })}
-              />
+              {richEditorEnabled ? (
+                <Suspense
+                  fallback={
+                    <LoadingState>Preparing your writing space…</LoadingState>
+                  }
+                >
+                  <RichWriter
+                    onUpload={
+                      mediaEnabled && row && client
+                        ? (file) =>
+                            uploadPhoto(
+                              client,
+                              row.id,
+                              file,
+                              documentAssetIds(draft.writing_document).length,
+                            )
+                        : undefined
+                    }
+                    disabled={!ready}
+                    value={
+                      draft.writing_document ?? documentFromText(draft.body)
+                    }
+                    onChange={(document) =>
+                      patch({
+                        writing_document: document,
+                        body: documentText(document),
+                      })
+                    }
+                  />
+                </Suspense>
+              ) : (
+                <textarea
+                  id="entry-body"
+                  placeholder="What’s on your mind today? Take your time. This space is yours."
+                  value={draft.body}
+                  maxLength={100000}
+                  disabled={!ready}
+                  onChange={(e) => patch({ body: e.target.value })}
+                />
+              )}
             </>
           )}
           <div className="paper-footer">
@@ -159,11 +345,36 @@ function EntryForm({ existingId }: { existingId?: string }) {
             </output>
           </div>
         </section>
-        <aside className="entry-settings">
+        <aside
+          className="entry-settings"
+          hidden={richEditorEnabled && !detailsOpen}
+          aria-label="Page details and publishing"
+        >
+          {richEditorEnabled && (
+            <>
+              <button className="quiet" onClick={() => setDetailsOpen(false)}>
+                Close details
+              </button>
+              <label>
+                Journal date
+                <input
+                  type="date"
+                  value={draft.entry_date}
+                  disabled={!ready}
+                  onChange={(e) => patch({ entry_date: e.target.value })}
+                />
+              </label>
+            </>
+          )}
           <section className="panel">
             <h2>The little details</h2>
             <p>
-              <LockKeyhole size={14} /> Private source entry
+              {busy || !ready ? (
+                <span className="loading-orbit" aria-hidden="true" />
+              ) : (
+                <LockKeyhole size={14} />
+              )}{' '}
+              Private source entry
             </p>
             <fieldset disabled={!ready}>
               <legend>How are you feeling?</legend>
@@ -265,10 +476,23 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 !draft.title.trim() ||
                 !draft.body.trim()
               }
-              onClick={() => setConfirmation('publish')}
+              aria-describedby="publish-explanation"
+              onClick={() => {
+                setApprovePhotos(false)
+                setConfirmation('publish')
+              }}
             >
               {published ? 'Update public story' : 'Publish story'}
             </button>
+            <p id="publish-explanation" className="tiny muted">
+              {!row
+                ? 'Save your entry before publishing.'
+                : dirty
+                  ? 'Wait for your latest edits to save before publishing.'
+                  : !draft.title.trim() || !draft.body.trim()
+                    ? 'Add a title and some words before publishing.'
+                    : 'Review the complete public copy in the next step.'}
+            </p>
             {published && (
               <>
                 <Link
@@ -365,15 +589,51 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 </fieldset>
               )}
               <h3>{row?.title}</h3>
-              <p
-                style={{
-                  whiteSpace: 'pre-wrap',
-                  maxHeight: '40vh',
-                  overflow: 'auto',
-                }}
-              >
-                {row?.body}
-              </p>
+              <PageCover
+                privateMedia
+                document={row?.writing_document}
+                preset={row?.cover_preset}
+              />
+              {documentAssetIds(row?.writing_document).length > 0 && (
+                <label className="row">
+                  <input
+                    type="checkbox"
+                    checked={approvePhotos}
+                    onChange={(e) => setApprovePhotos(e.target.checked)}
+                  />
+                  I approve publishing these photos and their alt text. Public
+                  links may remain valid for up to 60 seconds after
+                  unpublishing; downloaded copies cannot be recalled.
+                </label>
+              )}
+              {richEditorEnabled && (
+                <>
+                  <p>
+                    These page details will also be public:{' '}
+                    {row?.page_icon ?? 'no icon'} ·{' '}
+                    {row?.writing_document?.page?.cover ??
+                      row?.cover_preset ??
+                      'no cover'}
+                    . No private mood, date or tags are copied.
+                  </p>
+                  <RichRead
+                    privateMedia
+                    document={row?.writing_document}
+                    fallback={row?.body ?? ''}
+                  />
+                </>
+              )}
+              {!richEditorEnabled && (
+                <p
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    maxHeight: '40vh',
+                    overflow: 'auto',
+                  }}
+                >
+                  {row?.body}
+                </p>
+              )}
             </article>
           )}
           <button
@@ -381,11 +641,21 @@ function EntryForm({ existingId }: { existingId?: string }) {
             disabled={
               busy ||
               (confirmation === 'publish' &&
+                (dirty ||
+                  (documentAssetIds(row?.writing_document).length > 0 &&
+                    !approvePhotos))) ||
+              (confirmation === 'publish' &&
                 (publicTags.split(',').filter((t) => t.trim()).length > 5 ||
                   publicTags.split(',').some((t) => t.trim().length > 30)))
             }
             onClick={async () => {
               const kind = confirmation
+              if (
+                kind === 'publish' &&
+                documentAssetIds(row?.writing_document).length > 0 &&
+                !approvePhotos
+              )
+                return
               const done = await state.action(
                 kind,
                 communityEnabled

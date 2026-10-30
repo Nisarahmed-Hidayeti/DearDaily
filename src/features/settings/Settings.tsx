@@ -1,3 +1,5 @@
+import { MediaMaintenance } from '../media/MediaMaintenance'
+import { AdvancedAppearance } from '../appearance/AdvancedAppearance'
 import {
   Check,
   Palette,
@@ -130,6 +132,8 @@ export default function Settings() {
           </button>
         )}
       </section>
+      <AdvancedAppearance />
+      <MediaMaintenance />
       <section className="panel settings-privacy">
         <LockKeyhole size={23} />
         <div>

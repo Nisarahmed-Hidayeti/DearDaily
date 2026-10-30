@@ -1107,12 +1107,17 @@ footer a:not(.logo) {
   position: fixed;
   inset: 0;
   z-index: 20;
-  max-width: 470px;
-  width: calc(100% - 40px);
+  margin: auto;
+  max-width: 520px;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  width: calc(100% - 32px);
   padding: 30px;
   background: var(--elevated);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  box-shadow: 0 24px 80px var(--shadow);
   color: var(--text);
 }
 .modal::backdrop {
@@ -1783,5 +1788,59 @@ main:focus {
 @media (max-width: 560px) {
   .sidebar nav[aria-label='Publishing navigation'] {
     display: none;
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.modal-header h2 {
+  margin: 0;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.modal-header .icon-button {
+  flex: 0 0 auto;
+  margin: -4px -4px 0 0;
+  border-radius: 50%;
+}
+.modal-header .icon-button:hover {
+  background: var(--surface);
+}
+.modal > .button,
+.modal form > .button {
+  margin-top: 12px;
+}
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  color: var(--muted);
+}
+.loading-orbit {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+}
+.draft-notice .loading-orbit {
+  width: 14px;
+  height: 14px;
+  flex-basis: 14px;
+}
+@media (max-width: 480px) {
+  .modal {
+    padding: 22px;
+    border-radius: 16px;
+  }
+  .modal h2 {
+    font-size: 22px;
   }
 }

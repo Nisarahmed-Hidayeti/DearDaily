@@ -9,7 +9,10 @@ import type {
 } from '@supabase/supabase-js'
 import { AuthProvider, useAuth } from './AuthProvider'
 import { AuthPage, RequireAccount } from './AuthPages'
-const flags = vi.hoisted(() => ({ allowSignup: false }))
+const flags = vi.hoisted(() => ({
+  allowSignup: false,
+  captchaSiteKey: null as string | null,
+}))
 vi.mock('../../lib/supabase/client', () => ({
   supabase: null,
   authConfig: flags,
@@ -18,6 +21,21 @@ vi.mock('../../lib/supabase/config', async (original) => ({
   ...(await original<typeof import('../../lib/supabase/config')>()),
   authRedirect: (path: string) => 'http://localhost:5173' + path,
 }))
+vi.mock('./BotCheck', async () => {
+  const { useEffect } = await import('react')
+  return {
+    default: function TestBotCheck({
+      onToken,
+    }: {
+      onToken: (value: string) => void
+    }) {
+      useEffect(() => {
+        onToken('synthetic-token')
+      }, [onToken])
+      return null
+    },
+  }
+})
 const sessionA = { user: { id: 'user-a' } } as Session
 const sessionB = { user: { id: 'user-b' } } as Session
 function mockClient(initial: Session | null = null) {
@@ -125,7 +143,9 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
       password: 'example-password',
     })
     expect(
-      screen.getByRole('heading', { name: 'Private account destination' }),
+      await screen.findByRole('heading', {
+        name: 'Private account destination',
+      }),
     ).toBeVisible()
   })
   it('does not expose provider errors or account existence', async () => {
@@ -217,6 +237,7 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
   })
   it('uses neutral signup confirmation even for obfuscated duplicate accounts', async () => {
     flags.allowSignup = true
+    flags.captchaSiteKey = 'synthetic-site-key'
     try {
       const mock = form('sign-up')
       await waitFor(() =>
@@ -240,13 +261,17 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
       expect(mock.auth.signUp).toHaveBeenCalledWith({
         email: 'test@example.test',
         password: 'new-example-password',
-        options: { emailRedirectTo: 'http://localhost:5173/auth/callback' },
+        options: {
+          emailRedirectTo: 'http://localhost:5173/auth/callback',
+          captchaToken: 'synthetic-token',
+        },
       })
       expect(screen.getByRole('status')).toHaveTextContent(
         'If registration is available',
       )
     } finally {
       flags.allowSignup = false
+      flags.captchaSiteKey = null
     }
   })
   it('restores a session, switches identities and unsubscribes on unmount', async () => {

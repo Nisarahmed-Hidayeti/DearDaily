@@ -1,5 +1,7 @@
+import { appearanceEnabled } from '../appearance/appearance'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PublicStory } from '../journal/journalApi'
+import { richPublicFields } from '../rich-editor/config'
 export const communityEnabled = import.meta.env.VITE_ENABLE_COMMUNITY === 'true'
 export const categories = [
   'Uncategorized',
@@ -15,6 +17,7 @@ export const avatars: Record<string, string> = {
   book: '▤',
 }
 export interface PublicProfile {
+  cover_id?: string | null
   username: string
   display_name: string
   bio: string
@@ -29,9 +32,11 @@ export interface StoryMetadata {
 }
 export type CommunityStory = PublicStory & Partial<StoryMetadata>
 export const profileFields =
-  'username,display_name,bio,avatar,visible,joined_month'
-export const storyFields =
-  'id,title,body,published_at,public_username,public_category,public_tags'
+  'username,display_name,bio,avatar,visible,joined_month' +
+  (appearanceEnabled ? ',cover_id' : '')
+export const storyFields: string =
+  'id,title,body,published_at,public_username,public_category,public_tags' +
+  richPublicFields
 export function validUsername(value: string) {
   return (
     /^[a-z][a-z0-9_]{2,23}$/.test(value) &&
@@ -90,6 +95,18 @@ export async function saveProfile(
     )
   return saved
 }
+export async function removePublicProfile(
+  client: SupabaseClient,
+  username: string,
+) {
+  if (!validUsername(username)) throw new Error('Invalid profile username')
+  const { error } = await client
+    .from('public_profiles')
+    .delete()
+    .eq('username', username)
+  if (error || (await myProfile(client)))
+    throw new Error('Profile removal not confirmed. Reload before retrying.')
+}
 export async function storyPage(
   client: SupabaseClient,
   options: {
@@ -102,7 +119,7 @@ export async function storyPage(
 ) {
   let query = client
     .from('public_stories')
-    .select(storyFields)
+    .select<string, CommunityStory>(storyFields)
     .order('published_at', { ascending: Boolean(options.oldest) })
     .order('id', { ascending: Boolean(options.oldest) })
   if (options.search?.trim())

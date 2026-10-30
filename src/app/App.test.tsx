@@ -35,7 +35,7 @@ describe('DearDaily prototype', () => {
     page('/app')
     expect(screen.getByText(/Fictional sample content/)).toBeInTheDocument()
     expect(screen.getByText('24')).toBeInTheDocument()
-    await userEvent.click(screen.getByRole('link', { name: 'Explore stories' }))
+    await userEvent.click(screen.getByRole('link', { name: 'Explore' }))
     expect(
       screen.getByRole('heading', { name: /Different lives/ }),
     ).toBeInTheDocument()
@@ -97,8 +97,8 @@ describe('DearDaily prototype', () => {
       screen.getByLabelText('Journal body'),
       'Temporary private thought',
     )
-    await userEvent.click(screen.getByRole('link', { name: 'Overview' }))
-    await userEvent.click(screen.getByRole('link', { name: 'Write an entry' }))
+    await userEvent.click(screen.getByRole('link', { name: 'Home' }))
+    await userEvent.click(screen.getByRole('link', { name: 'Write' }))
     expect(screen.getByLabelText('Journal body')).toHaveValue('')
   })
   it('has a 404 and honest unconfigured authentication page', async () => {
@@ -113,4 +113,15 @@ describe('DearDaily prototype', () => {
       'Account services are not configured yet',
     )
   })
+})
+
+it('provides a journal library destination without overview widgets', () => {
+  page('/app/journal')
+  expect(
+    screen.getByRole('heading', { name: 'My Journal' }),
+  ).toBeInTheDocument()
+  expect(screen.queryByText('24')).toBeNull()
+  expect(
+    document.querySelector('.journal-library .dashboard-banner'),
+  ).toBeNull()
 })

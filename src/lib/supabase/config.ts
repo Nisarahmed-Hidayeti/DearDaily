@@ -10,6 +10,7 @@ export interface AuthConfig {
   url: string
   key: string
   allowSignup: boolean
+  captchaSiteKey: string | null
 }
 export function readAuthConfig(
   env: Record<string, unknown>,
@@ -40,6 +41,7 @@ export function readAuthConfig(
       url: parsed.origin,
       key,
       allowSignup: env.VITE_ALLOW_SIGNUP === 'true',
+      captchaSiteKey: typeof env.VITE_TURNSTILE_SITE_KEY === 'string' && /^[A-Za-z0-9_-]{10,100}$/.test(env.VITE_TURNSTILE_SITE_KEY) ? env.VITE_TURNSTILE_SITE_KEY : null,
     }
   } catch {
     return null

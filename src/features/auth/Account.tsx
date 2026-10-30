@@ -82,6 +82,53 @@ export default function Account() {
           ? 'Account details and source entries are private. Public stories are separate copies you choose to publish.'
           : 'Account details are private. The dashboard and stories are still fictional samples.'}
       </p>
+      <div className="account-overview-grid">
+        <section className="panel account-identity">
+          <p className="eyebrow">Your identity</p>
+          <h2>A home for your everyday.</h2>
+          <dl>
+            <dt>Email address</dt>
+            <dd>{session!.user.email}</dd>
+            <dt>Email status</dt>
+            <dd>
+              {session!.user.email_confirmed_at
+                ? 'Confirmed'
+                : 'Confirmation pending'}
+            </dd>
+            <dt>Member since</dt>
+            <dd>
+              {new Date(session!.user.created_at).toLocaleDateString(
+                undefined,
+                { month: 'long', year: 'numeric' },
+              )}
+            </dd>
+          </dl>
+          <p className="tiny muted">
+            These account details are private. Your public identity is a
+            separate choice.
+          </p>
+        </section>
+        <section className="panel account-security">
+          <p className="eyebrow">Security & access</p>
+          <h2>Keep your space yours.</h2>
+          <p>
+            Use a unique password. Password changes use a verified recovery link
+            so this browser session alone cannot replace your credentials.
+          </p>
+          <Link className="button secondary" to="/auth/forgot-password">
+            Password recovery
+          </Link>
+          <p className="tiny muted">
+            Recovery requires working email delivery. Delivery and recovery are
+            still awaiting real verification; no successful email delivery is
+            assumed.
+          </p>
+          <p className="tiny muted">
+            Email-address changes and other-device session management are not
+            available yet.
+          </p>
+        </section>
+      </div>
       <form className="panel auth-card account-form" onSubmit={save}>
         <label>
           Display name (optional)

@@ -1,10 +1,21 @@
+import {
+  documentAssetIds,
+  preparePublicPhotos,
+  cleanQueuedPhotos,
+} from '../media/mediaApi'
+import { validateDocument } from '../rich-editor/document'
 import { communityEnabled, storyFields } from '../community/communityApi'
 import type { StoryMetadata } from '../community/communityApi'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Mood } from '../../data/demo'
+import type { WritingDocument, CoverPreset } from '../rich-editor/document'
+import { richEditorEnabled, richPublicFields } from '../rich-editor/config'
 
 export const journalEnabled = import.meta.env.VITE_ENABLE_JOURNALS === 'true'
 export interface Draft {
+  writing_document?: WritingDocument | null
+  page_icon?: string | null
+  cover_preset?: CoverPreset | null
   title: string
   body: string
   mood: Mood
@@ -21,18 +32,25 @@ export interface JournalEntry extends Draft {
   updated_at: string
 }
 export interface PublicStory {
+  writing_document?: WritingDocument | null
+  page_icon?: string | null
+  cover_preset?: CoverPreset | null
   id: string
   title: string
   body: string
   published_at: string
 }
-export const publicFields = 'id,title,body,published_at'
+export const publicFields: string =
+  'id,title,body,published_at' + richPublicFields
 const readableFields: string = communityEnabled ? storyFields : publicFields
 export function localDay(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 export function newDraft(): Draft {
   return {
+    ...(richEditorEnabled
+      ? { writing_document: null, page_icon: null, cover_preset: null }
+      : {}),
     title: '',
     body: '',
     mood: 'Calm',
@@ -44,6 +62,13 @@ export function newDraft(): Draft {
 }
 export function draftOf(row: Draft): Draft {
   return {
+    ...(richEditorEnabled
+      ? {
+          writing_document: row.writing_document ?? null,
+          page_icon: row.page_icon ?? null,
+          cover_preset: row.cover_preset ?? null,
+        }
+      : {}),
     title: row.title,
     body: row.body,
     mood: row.mood,
@@ -105,6 +130,8 @@ export async function removeEntry(
     .select('id')
     .single()
   if (error || data?.id !== id) throw new Error('Delete not confirmed')
+  // Deleting the entry queues exact private/public objects; never prune unrelated drafts.
+  await cleanQueuedPhotos(client).catch(() => {})
 }
 export async function listEntries(client: SupabaseClient, userId: string) {
   const rows: JournalEntry[] = []
@@ -143,9 +170,23 @@ export async function publishStory(
   exists: boolean,
   metadata?: StoryMetadata,
 ) {
+  const publicDocument = documentAssetIds(entry.writing_document).length
+    ? validateDocument(
+        await preparePublicPhotos(client, entry.id, entry.version),
+      )
+    : entry.writing_document
   const fields = {
     title: entry.title,
     body: entry.body,
+    ...(richEditorEnabled
+      ? {
+          writing_document: publicDocument
+            ? validateDocument(publicDocument)
+            : null,
+          page_icon: entry.page_icon ?? null,
+          cover_preset: entry.cover_preset ?? null,
+        }
+      : {}),
     ...(communityEnabled && metadata ? metadata : {}),
   }
   const query = exists
@@ -159,6 +200,7 @@ export async function publishStory(
     .single()
   if (error || data?.id !== entry.id)
     throw new Error('Publication not confirmed')
+  void cleanQueuedPhotos(client).catch(() => {})
   return data as PublicStory
 }
 export async function unpublishStory(client: SupabaseClient, id: string) {
@@ -169,6 +211,7 @@ export async function unpublishStory(client: SupabaseClient, id: string) {
     .select('id')
     .single()
   if (error || data?.id !== id) throw new Error('Unpublish not confirmed')
+  void cleanQueuedPhotos(client).catch(() => {})
 }
 export function exportMarkdown(draft: Draft, publicOnly = false) {
   const text =
@@ -186,4 +229,15 @@ export function exportMarkdown(draft: Draft, publicOnly = false) {
     : 'deardaily-private-entry.md'
   link.click()
   window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+/** JSONB reorders object keys; object ordering must never trigger another save. */
+export function draftFingerprint(draft: Draft): string {
+  return JSON.stringify(draft, (_key, value) =>
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? Object.fromEntries(
+          Object.entries(value).sort(([a], [b]) => a.localeCompare(b)),
+        )
+      : value,
+  )
 }

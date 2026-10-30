@@ -22,7 +22,7 @@
 @media (prefers-reduced-motion: no-preference) {
   .page,
   .hero-content {
-    animation: page-arrive 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation: page-arrive 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
   }
   .theme-option {
     animation: page-arrive 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -80,5 +80,45 @@
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
+  }
+}
+
+@keyframes modal-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes veil-arrive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes loading-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .modal[open] {
+    animation: modal-arrive 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .modal[open]::backdrop {
+    animation: veil-arrive 180ms ease-out;
+  }
+  .loading-orbit {
+    animation: loading-orbit 900ms linear infinite;
+  }
+  .notion-editor .entry-settings:not([hidden]),
+  .block-picker,
+  .writer-bubble {
+    animation: modal-arrive 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 }

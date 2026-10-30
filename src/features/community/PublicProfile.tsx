@@ -1,7 +1,8 @@
+import { photographicCovers } from '../rich-editor/covers'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
-import { PageHeading } from '../../components/Shared'
+import { LoadingState, PageHeading } from '../../components/Shared'
 import {
   avatars,
   communityEnabled,
@@ -69,11 +70,22 @@ export default function PublicProfile() {
         Back to Explore
       </Link>
       {status === 'loading' ? (
-        <p role="status">Loading profile…</p>
+        <LoadingState>Loading profile…</LoadingState>
       ) : status === 'error' ? (
         <p role="alert">Profile unavailable. Reload to retry.</p>
       ) : profile ? (
         <>
+          {photographicCovers.some((c) => c.id === profile.cover_id) && (
+            <div className="public-profile-banner">
+              <img
+                src={
+                  photographicCovers.find((c) => c.id === profile.cover_id)!.src
+                }
+                alt="Author-selected public banner"
+                loading="lazy"
+              />
+            </div>
+          )}
           <section className="profile-masthead panel">
             <span className="profile-avatar" aria-hidden="true">
               {avatars[profile.avatar]}
