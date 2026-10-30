@@ -35,7 +35,7 @@ function savedSidebar(): 'expanded' | 'collapsed' | null {
   }
 }
 export default function Shell() {
-  const { session, signOut } = useAuth()
+  const { session, signOut, loading } = useAuth()
   const { pathname } = useLocation()
   const writing =
     pathname === '/app/write' ||
@@ -237,17 +237,18 @@ export default function Shell() {
           </button>
         </header>
         {!writing &&
+          !pathname.startsWith('/dev/') &&
           (publicPage ? (
             <div className="demo-notice">
               Public stories · Shared explicitly by their writers
             </div>
-          ) : session && journalEnabled ? (
+          ) : session ? (
             <div className="demo-notice">
               Your private journal · Share only what you choose
             </div>
-          ) : (
+          ) : !loading ? (
             <DemoNotice />
-          ))}
+          ) : null)}
         <main id="main" tabIndex={-1}>
           <Outlet
             context={import.meta.env.DEV ? { setPreviewTheme } : undefined}

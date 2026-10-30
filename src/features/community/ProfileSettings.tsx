@@ -1,5 +1,5 @@
 import { appearanceEnabled } from '../appearance/appearance'
-import { photographicCovers } from '../rich-editor/covers'
+import { profileCovers } from '../rich-editor/covers'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHeading, Modal } from '../../components/Shared'
@@ -158,7 +158,7 @@ export default function ProfileSettings() {
               onChange={(e) => patch({ cover_id: e.target.value || null })}
             >
               <option value="">No banner</option>
-              {photographicCovers.map((c) => (
+              {profileCovers.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>

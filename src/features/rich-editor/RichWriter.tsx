@@ -66,7 +66,7 @@ function ValidatedRichWriter({
     if (id === 'image') {
       if (!onUpload) {
         setError(
-          'Save the entry first. Photo upload also requires approved private Storage setup.',
+          'Private photo upload is not enabled in this preview. Open your signed-in cloud editor.',
         )
         return
       }
@@ -393,6 +393,22 @@ function ValidatedRichWriter({
           </button>
         </div>
       </details>
+      <button
+        type="button"
+        className="inline-photo-upload quiet"
+        disabled={disabled || uploading || !onUpload}
+        title={
+          onUpload
+            ? 'JPEG, PNG or WebP · up to 5 MiB'
+            : 'Private photo setup is not available in this preview.'
+        }
+        onClick={() => {
+          pendingPhoto.current = null
+          fileInput.current?.click()
+        }}
+      >
+        ＋ Add photo from computer
+      </button>
       <BubbleMenu editor={editor}>
         <div
           className="writer-toolbar writer-bubble"
@@ -514,7 +530,8 @@ function ValidatedRichWriter({
           </button>
           {!onUpload && (
             <small>
-              Save the entry first; private photo setup must also be approved.
+              Private photo upload is unavailable in this preview. Open your
+              signed-in cloud editor.
             </small>
           )}
           <button

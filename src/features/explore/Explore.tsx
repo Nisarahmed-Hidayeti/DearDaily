@@ -1,3 +1,4 @@
+import { entryIcon } from '../rich-editor/emojis'
 import { PublicAuthor } from '../community/PublicAuthor'
 import { PageCover } from '../rich-editor/PageCover'
 import { useEffect, useState } from 'react'
@@ -246,8 +247,10 @@ export function PublishedStory() {
             document={story.writing_document}
             preset={story.cover_preset}
           />
-          {story.page_icon && (
-            <div className="writer-icon">{story.page_icon}</div>
+          {entryIcon(story.writing_document, story.page_icon) && (
+            <div className="writer-icon">
+              {entryIcon(story.writing_document, story.page_icon)}
+            </div>
           )}
           <article>
             <RichRead document={story.writing_document} fallback={story.body} />

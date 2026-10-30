@@ -24,6 +24,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmation, setConfirmation] = useState('')
+  const [recoveryCode, setRecoveryCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -35,7 +36,8 @@ export function AuthPage({ mode }: { mode: Mode }) {
     if (mode === 'reset-password' && !loading)
       window.history.replaceState(null, '', location.pathname)
   }, [mode, loading, location.pathname])
-  const signupClosed = mode === 'sign-up' && (!authConfig?.allowSignup || !captchaSiteKey)
+  const signupClosed =
+    mode === 'sign-up' && (!authConfig?.allowSignup || !captchaSiteKey)
   const resetUnavailable = mode === 'reset-password' && (!session || !recovery)
   const needsPassword = mode !== 'forgot-password'
   const needsConfirmation = mode === 'sign-up' || mode === 'reset-password'
@@ -50,7 +52,10 @@ export function AuthPage({ mode }: { mode: Mode }) {
       setError('The passwords do not match. Please try again.')
       return
     }
-    if (needsConfirmation && (password.length < 12 || password.length > 128)) { setError('Use a password between 12 and 128 characters.'); return }
+    if (needsConfirmation && (password.length < 12 || password.length > 128)) {
+      setError('Use a password between 12 and 128 characters.')
+      return
+    }
     setBusy(true)
     try {
       if (mode === 'sign-in') {
@@ -70,7 +75,10 @@ export function AuthPage({ mode }: { mode: Mode }) {
         const result = await client.auth.signUp({
           email: email.trim(),
           password,
-          options: { emailRedirectTo: authRedirect('/auth/callback'), captchaToken },
+          options: {
+            emailRedirectTo: authRedirect('/auth/callback'),
+            captchaToken,
+          },
         })
         if (result.error) throw result.error
         // Same response for new, duplicate and obfuscated accounts.
@@ -82,7 +90,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
       } else if (mode === 'forgot-password') {
         const result = await client.auth.resetPasswordForEmail(email.trim(), {
           redirectTo: authRedirect('/auth/reset-password'),
-          ...(needsBotCheck ? {captchaToken} : {}),
+          ...(needsBotCheck ? { captchaToken } : {}),
         })
         if (result.error) throw result.error
         setMessage(
@@ -104,12 +112,44 @@ export function AuthPage({ mode }: { mode: Mode }) {
           : 'We could not complete this request. Check your connection and try again later.',
       )
     } finally {
-      setCaptchaToken(''); setChallenge(current => current + 1)
+      setCaptchaToken('')
+      setChallenge((current) => current + 1)
+      setBusy(false)
+    }
+  }
+  async function verifyRecovery(event: React.SubmitEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!client || busy || loading || !/^\d{6,10}$/.test(recoveryCode.trim()))
+      return
+    setBusy(true)
+    setError('')
+    try {
+      beginSignIn()
+      const { data, error } = await client.auth.verifyOtp({
+        email: email.trim(),
+        token: recoveryCode.trim(),
+        type: 'recovery',
+      })
+      if (error || !data.session) throw new Error('Recovery unavailable')
+      setRecoveryCode('')
+      // Only the SDK PASSWORD_RECOVERY event unlocks password changes.
+    } catch {
+      setError(
+        'This recovery code could not be verified. Request a fresh code and try again.',
+      )
+    } finally {
       setBusy(false)
     }
   }
   async function google() {
-    if (!client || busy) return
+    if (
+      !client ||
+      busy ||
+      loading ||
+      signupClosed ||
+      !authConfig?.googleEnabled
+    )
+      return
     setBusy(true)
     setError('')
     try {
@@ -136,7 +176,12 @@ export function AuthPage({ mode }: { mode: Mode }) {
         <Link to="/">Back home</Link>
       </div>
       <section className="panel auth-card">
-        <p className="eyebrow">DearDaily / {authConfig?.allowSignup && captchaSiteKey ? 'Your private space' : 'Closed beta'}</p>
+        <p className="eyebrow">
+          DearDaily /{' '}
+          {authConfig?.allowSignup && captchaSiteKey
+            ? 'Your private space'
+            : 'Closed beta'}
+        </p>
         <h1>{titles[mode]}</h1>
         <p className="muted">
           Your account is personal. Your story stays yours.
@@ -149,17 +194,52 @@ export function AuthPage({ mode }: { mode: Mode }) {
         )}
         {signupClosed && (
           <p className="auth-notice">
-            Registration is currently closed while email delivery and account protections are being verified. Existing testers can still sign in.
+            Registration is currently closed while email delivery and account
+            protections are being verified. Existing testers can still sign in.
           </p>
         )}
         {resetUnavailable && !loading && !message && (
           <p className="auth-notice">
-            Open a fresh recovery link in the same browser and tab where you
-            requested it. For your safety, this page requires a recovery
-            session.
+            This tab has no verified recovery session. Email links must open in
+            the browser and tab where you requested them. If your email includes
+            a recovery code, enter it below instead. Password changes stay
+            locked until verification succeeds.
           </p>
         )}
         {loading && <p role="status">Restoring your session…</p>}
+        {resetUnavailable && !loading && (
+          <form onSubmit={verifyRecovery} aria-label="Verify password recovery">
+            <label>
+              Recovery email
+              <input
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={!client || busy}
+              />
+            </label>
+            <label>
+              Recovery code
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]{6,10}"
+                minLength={6}
+                maxLength={10}
+                required
+                value={recoveryCode}
+                onChange={(e) => setRecoveryCode(e.target.value)}
+                disabled={!client || busy}
+              />
+            </label>
+            <button className="button secondary" disabled={!client || busy}>
+              {busy ? 'Verifying…' : 'Verify recovery code'}
+            </button>
+          </form>
+        )}
         <form onSubmit={submit}>
           {mode !== 'reset-password' && (
             <label>
@@ -220,8 +300,17 @@ export function AuthPage({ mode }: { mode: Mode }) {
               {message}
             </p>
           )}
-          {needsBotCheck && !signupClosed && <BotCheck key={challenge} siteKey={captchaSiteKey!} onToken={setCaptchaToken}/>}
-          <button className="button" disabled={disabled || (needsBotCheck && !captchaToken)}>
+          {needsBotCheck && !signupClosed && (
+            <BotCheck
+              key={challenge}
+              siteKey={captchaSiteKey!}
+              onToken={setCaptchaToken}
+            />
+          )}
+          <button
+            className="button"
+            disabled={disabled || (needsBotCheck && !captchaToken)}
+          >
             {busy
               ? 'Please wait…'
               : {
@@ -236,12 +325,28 @@ export function AuthPage({ mode }: { mode: Mode }) {
         {(mode === 'sign-in' || mode === 'sign-up') && (
           <button
             className="button secondary"
-            disabled={!client || busy || loading || signupClosed}
+            disabled={
+              !client ||
+              busy ||
+              loading ||
+              signupClosed ||
+              !authConfig?.googleEnabled
+            }
+            aria-describedby={
+              !authConfig?.googleEnabled ? 'google-availability' : undefined
+            }
             onClick={google}
           >
             Continue with Google
           </button>
         )}
+        {(mode === 'sign-in' || mode === 'sign-up') &&
+          !authConfig?.googleEnabled && (
+            <p id="google-availability" className="tiny muted">
+              Google sign-in is being prepared. Existing testers can use email
+              and password.
+            </p>
+          )}
         <nav className="auth-links" aria-label="Account help">
           {mode !== 'sign-in' && <Link to="/auth/sign-in">Sign in</Link>}
           {mode === 'sign-in' && (

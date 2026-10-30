@@ -1,3 +1,4 @@
+import { entryIcon } from '../rich-editor/emojis'
 import { PublicAuthor } from './PublicAuthor'
 import { PageCover } from '../rich-editor/PageCover'
 import { Link } from 'react-router-dom'
@@ -16,7 +17,7 @@ export function StoryCard({ story: s }: { story: CommunityStory }) {
           <PageCover document={s.writing_document} preset={s.cover_preset} />
         ) : (
           <span className="story-icon-fallback" aria-hidden="true">
-            {s.page_icon || '✧'}
+            {entryIcon(s.writing_document, s.page_icon) || '✧'}
           </span>
         )}
       </Link>

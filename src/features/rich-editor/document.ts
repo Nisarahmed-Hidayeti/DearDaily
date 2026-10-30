@@ -1,9 +1,16 @@
+import { isPageEmoji } from './emojis'
+import {
+  validatePublicationPlan,
+  type PublicationPlan,
+} from '../journal/publicationPlan'
 import { isMediaId } from '../media/mediaApi'
 import { isPhotoCover, type PhotoCoverId } from './covers'
 import type { JSONContent } from '@tiptap/core'
 
 export interface WritingDocument {
   version: 1
+  publication?: PublicationPlan
+  icon?: string
   page?: {
     cover: PhotoCoverId | 'upload'
     position: number
@@ -64,8 +71,15 @@ export function validateDocument(value: unknown): WritingDocument {
   const doc = value as WritingDocument
   if (doc.version !== 1 || doc.content?.type !== 'doc')
     throw new Error('Unsupported document version.')
-  if (Object.keys(doc).some((k) => !['version', 'content', 'page'].includes(k)))
+  if (
+    Object.keys(doc).some(
+      (k) => !['version', 'content', 'page', 'publication', 'icon'].includes(k),
+    )
+  )
     throw new Error('Unsupported document metadata.')
+  if (doc.icon !== undefined && !isPageEmoji(doc.icon))
+    throw new Error('Invalid page icon.')
+  if (doc.publication !== undefined) validatePublicationPlan(doc.publication)
   if (
     doc.page &&
     ((!isPhotoCover(doc.page.cover) && doc.page.cover !== 'upload') ||
@@ -270,4 +284,11 @@ export function documentText(document: WritingDocument): string {
                 : '\n',
             )
   return block(validateDocument(document).content)
+}
+
+/** Only document content/page presentation may enter the public snapshot. */
+export function publicWritingDocument(value: unknown): WritingDocument {
+  const { publication: _privatePlan, ...document } = validateDocument(value)
+  void _privatePlan
+  return document
 }

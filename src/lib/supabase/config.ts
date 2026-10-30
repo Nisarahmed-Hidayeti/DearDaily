@@ -9,6 +9,7 @@ export const approvedOrigins = [
 export interface AuthConfig {
   url: string
   key: string
+  googleEnabled: boolean
   allowSignup: boolean
   captchaSiteKey: string | null
 }
@@ -41,7 +42,12 @@ export function readAuthConfig(
       url: parsed.origin,
       key,
       allowSignup: env.VITE_ALLOW_SIGNUP === 'true',
-      captchaSiteKey: typeof env.VITE_TURNSTILE_SITE_KEY === 'string' && /^[A-Za-z0-9_-]{10,100}$/.test(env.VITE_TURNSTILE_SITE_KEY) ? env.VITE_TURNSTILE_SITE_KEY : null,
+      googleEnabled: env.VITE_ENABLE_GOOGLE_AUTH === 'true',
+      captchaSiteKey:
+        typeof env.VITE_TURNSTILE_SITE_KEY === 'string' &&
+        /^[A-Za-z0-9_-]{10,100}$/.test(env.VITE_TURNSTILE_SITE_KEY)
+          ? env.VITE_TURNSTILE_SITE_KEY
+          : null,
     }
   } catch {
     return null

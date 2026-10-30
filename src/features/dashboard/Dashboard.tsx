@@ -1,3 +1,5 @@
+import { LoadingState } from '../../components/Shared'
+import { CloudUnavailable } from '../journal/CloudUnavailable'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
@@ -132,7 +134,9 @@ export default function Dashboard(props: {
   library?: boolean
 }) {
   const { session, loading } = useAuth()
-  if (journalEnabled && (session || loading))
+  if (loading) return <LoadingState>Restoring your account…</LoadingState>
+  if (session && !journalEnabled) return <CloudUnavailable />
+  if (session)
     return (
       <RequireAccount>
         <CloudDashboard library={props.library} />

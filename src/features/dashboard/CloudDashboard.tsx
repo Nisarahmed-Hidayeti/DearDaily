@@ -1,3 +1,4 @@
+import { entryIcon } from '../rich-editor/emojis'
 import { PageCover } from '../rich-editor/PageCover'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -200,7 +201,9 @@ export default function CloudDashboard({
                           preset={r.cover_preset}
                         />
                       ) : (
-                        <span>{r.page_icon || '✧'}</span>
+                        <span>
+                          {entryIcon(r.writing_document, r.page_icon) || '✧'}
+                        </span>
                       )}
                     </div>
                   )}
@@ -209,7 +212,11 @@ export default function CloudDashboard({
                       {r.entry_date} · {r.status}
                     </span>
                     <h3>
-                      {r.page_icon && <span>{r.page_icon} </span>}
+                      {entryIcon(r.writing_document, r.page_icon) && (
+                        <span>
+                          {entryIcon(r.writing_document, r.page_icon)}{' '}
+                        </span>
+                      )}
                       {r.title || 'Untitled entry'}
                     </h3>
                     <p>{r.body.slice(0, 150)}</p>
