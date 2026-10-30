@@ -25,6 +25,9 @@ export function useJournalEntry(existingId?: string) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [published, setPublished] = useState(false)
+  const [publicMetadata, setPublicMetadata] = useState<StoryMetadata | null>(
+    null,
+  )
   const epoch = useRef(0)
   const lock = useRef(false)
   const emptyNewPage =
@@ -32,6 +35,12 @@ export function useJournalEntry(existingId?: string) {
     !draft.title.trim() &&
     !draft.body.trim() &&
     !draft.page_icon &&
+    draft.mood === 'Calm' &&
+    draft.category === 'Personal' &&
+    draft.tags.length === 0 &&
+    !draft.writing_document?.icon &&
+    !draft.writing_document?.publication &&
+    !draft.writing_document?.page &&
     (!draft.cover_preset || draft.cover_preset === 'none')
   const dirty = !emptyNewPage && draftFingerprint(draft) !== confirmed
   useEffect(() => {
@@ -53,6 +62,9 @@ export function useJournalEntry(existingId?: string) {
       setConfirmed(draftFingerprint(draftOf(entry)))
       setRow(entry)
       setPublished(stories.length > 0)
+      setPublicMetadata(
+        (stories[0] as (typeof stories)[number] & StoryMetadata) ?? null,
+      )
       setReady(true)
     } catch {
       if (generation === epoch.current)
@@ -99,6 +111,7 @@ export function useJournalEntry(existingId?: string) {
         setConfirmed(draftFingerprint(draftOf(result)))
         // Only status is merged; words typed during the request are preserved.
         if (saved) setDraft((current) => ({ ...current, status: 'saved' }))
+        return result
       } catch {
         if (generation === epoch.current)
           setError(
@@ -157,7 +170,10 @@ export function useJournalEntry(existingId?: string) {
         if (metadata)
           await publishStory(client, userId, row, published, metadata)
         else await publishStory(client, userId, row, published)
-        if (generation === epoch.current) setPublished(true)
+        if (generation === epoch.current) {
+          setPublished(true)
+          if (metadata) setPublicMetadata(metadata)
+        }
       } else if (kind === 'unpublish') {
         await unpublishStory(client, id)
         if (generation === epoch.current) setPublished(false)
@@ -184,6 +200,7 @@ export function useJournalEntry(existingId?: string) {
     error,
     dirty,
     published,
+    publicMetadata,
     save,
     reload,
     action,

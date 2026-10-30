@@ -890,3 +890,239 @@
 .writer-focus .image-block-controls {
   display: none;
 }
+/* Metadata stays close to the document; only the mobile sheet overlays it. */
+.details-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.details-summary .quiet {
+  padding: 5px 0;
+  text-align: left;
+}
+.details-summary .quiet > span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+.details-summary .tag {
+  font-size: 11px;
+  padding: 2px 7px;
+}
+.details-summary .summary-save {
+  margin-left: auto;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.notion-editor.details-open {
+  max-width: 1440px;
+}
+.notion-editor.details-open .editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 24px;
+  align-items: start;
+}
+.notion-editor .entry-settings:not([hidden]) {
+  position: sticky;
+  inset: auto;
+  top: 16px;
+  margin: 0;
+  height: auto;
+  max-height: calc(100dvh - 32px);
+  width: auto;
+  padding: 12px 0 12px 18px;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+}
+.entry-settings .panel,
+.editor-details-sheet .panel {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.entry-settings fieldset,
+.editor-details-sheet fieldset {
+  margin: 14px 0;
+  padding: 0;
+  border: 0;
+}
+.entry-settings h2,
+.editor-details-sheet h2 {
+  font-size: 20px;
+}
+.entry-settings .moods,
+.editor-details-sheet .moods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.entry-settings .moods button,
+.editor-details-sheet .moods button {
+  padding: 6px 8px;
+  font-size: 12px;
+}
+.entry-settings .save-panel,
+.editor-details-sheet .save-panel {
+  padding: 12px 0 0;
+  border: 0;
+}
+.editor-details-sheet.modal {
+  inset: auto 0 0;
+  margin: 0 auto;
+  width: min(100%, 560px);
+  max-height: min(78dvh, calc(var(--available-height, 100dvh) - 16px));
+  border-radius: 16px 16px 0 0;
+  padding: 18px 20px max(20px, env(safe-area-inset-bottom));
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.editor-details-sheet input,
+.editor-details-sheet select {
+  font-size: 16px;
+}
+.editor-details-sheet .modal-header {
+  position: sticky;
+  top: -18px;
+  background: var(--bg);
+  z-index: 2;
+  padding: 10px 0;
+}
+.publication-receipt {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 14px;
+  font-size: 13px;
+}
+.publication-receipt dt {
+  color: var(--muted);
+}
+.publication-receipt dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.modal .entry-preview > .writer-cover {
+  height: 120px;
+}
+.confirmation-actions {
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+.writer-focus .details-summary {
+  display: none;
+}
+@media (max-width: 1100px) {
+  .notion-editor.details-open .editor-layout {
+    display: block;
+  }
+  .details-summary {
+    gap: 6px;
+  }
+  .details-summary .visibility {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .editor-details-sheet[open] {
+    animation: details-sheet-enter 180ms ease-out;
+  }
+  @keyframes details-sheet-enter {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+.editor-details-sheet .panel > h2 {
+  display: none;
+}
+.editor-details-sheet p {
+  margin: 8px 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.editor-details-sheet label {
+  min-width: 0;
+}
+.editor-details-sheet input:not([type='checkbox']),
+.editor-details-sheet select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.editor-details-sheet fieldset,
+.editor-details-sheet .tag-form {
+  min-width: 0;
+}
+.emoji-grid {
+  display: grid;
+  max-height: 230px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+  gap: 5px;
+  padding: 5px;
+}
+.emoji-grid button {
+  min-height: 36px;
+  font-size: 23px;
+}
+.emoji-grid button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.mobile-details-save {
+  display: none;
+}
+.editor-details-sheet {
+  scroll-padding: 105px 0 20px;
+}
+.editor-details-sheet .mobile-details-save {
+  display: block;
+  position: sticky;
+  top: 42px;
+  z-index: 2;
+  width: 100%;
+  padding: 7px 12px;
+  margin-bottom: 12px;
+}
+.editor-details-sheet .save-panel > .button:first-child {
+  display: none;
+}
+.inline-photo-upload {
+  margin: 0 0 12px;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.writer-focus .inline-photo-upload {
+  display: none;
+}
+.cover-gallery {
+  max-height: 280px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 3px;
+}
+.photo-credit summary {
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.modal input[type='search'] {
+  font-size: 16px;
+}

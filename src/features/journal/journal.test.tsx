@@ -134,3 +134,17 @@ describe('public export privacy boundary', () => {
     expect(html).not.toContain('entry_date')
   })
 })
+it('preserves metadata-only edits without creating an untouched blank page', async () => {
+  const { result } = renderHook(() => useJournalEntry())
+  expect(result.current.dirty).toBe(false)
+  await act(async () =>
+    result.current.setDraft({
+      ...newDraft(),
+      mood: 'Happy',
+      tags: ['remember'],
+    }),
+  )
+  expect(result.current.dirty).toBe(true)
+  await act(async () => result.current.setDraft(newDraft()))
+  expect(result.current.dirty).toBe(false)
+})

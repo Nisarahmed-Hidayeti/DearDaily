@@ -3,7 +3,10 @@ import {
   preparePublicPhotos,
   cleanQueuedPhotos,
 } from '../media/mediaApi'
-import { validateDocument } from '../rich-editor/document'
+import {
+  validateDocument,
+  publicWritingDocument,
+} from '../rich-editor/document'
 import { communityEnabled, storyFields } from '../community/communityApi'
 import type { StoryMetadata } from '../community/communityApi'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -181,7 +184,7 @@ export async function publishStory(
     ...(richEditorEnabled
       ? {
           writing_document: publicDocument
-            ? validateDocument(publicDocument)
+            ? publicWritingDocument(publicDocument)
             : null,
           page_icon: entry.page_icon ?? null,
           cover_preset: entry.cover_preset ?? null,

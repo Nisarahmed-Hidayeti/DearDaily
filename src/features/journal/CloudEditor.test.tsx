@@ -55,11 +55,9 @@ describe('real editor presentation', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Publish story' }))
     expect(publishStory).not.toHaveBeenCalled()
     expect(screen.getByRole('dialog')).toHaveTextContent(
-      'Everyone will be able to read',
+      'This public snapshot contains only',
     )
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Confirm publish' }),
-    )
+    await userEvent.click(screen.getByRole('button', { name: 'Publish now' }))
     await screen.findByRole('button', { name: 'Unpublish story' })
     expect(publishStory).toHaveBeenCalledWith(
       {},

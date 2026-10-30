@@ -6,7 +6,18 @@ const valid = {
 }
 describe('authentication configuration and redirect boundaries', () => {
   it('accepts a publishable development key and defaults registration closed', () => {
-    expect(readAuthConfig(valid)).toMatchObject({ allowSignup: false })
+    expect(readAuthConfig(valid)).toMatchObject({
+      allowSignup: false,
+      googleEnabled: false,
+    })
+  })
+  it('enables Google only with an explicit flag, independently of signup', () => {
+    expect(
+      readAuthConfig({ ...valid, VITE_ENABLE_GOOGLE_AUTH: 'true' }),
+    ).toMatchObject({ googleEnabled: true, allowSignup: false })
+    expect(
+      readAuthConfig({ ...valid, VITE_ENABLE_GOOGLE_AUTH: true }),
+    ).toMatchObject({ googleEnabled: false })
   })
   it.each([
     {},

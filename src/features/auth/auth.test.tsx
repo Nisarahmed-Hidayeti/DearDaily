@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from './AuthProvider'
 import { AuthPage, RequireAccount } from './AuthPages'
 const flags = vi.hoisted(() => ({
   allowSignup: false,
+  googleEnabled: false,
   captchaSiteKey: null as string | null,
 }))
 vi.mock('../../lib/supabase/client', () => ({
@@ -55,6 +56,12 @@ function mockClient(initial: Session | null = null) {
     signInWithPassword: vi
       .fn()
       .mockResolvedValue({ data: { session: sessionA }, error: null }),
+    verifyOtp: vi
+      .fn()
+      .mockResolvedValue({
+        data: { session: null },
+        error: { message: 'invalid' },
+      }),
     signUp: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
     resetPasswordForEmail: vi.fn().mockResolvedValue({ data: {}, error: null }),
     updateUser: vi.fn().mockResolvedValue({ data: {}, error: null }),
@@ -168,7 +175,19 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
       screen.queryByText(/secret-provider-message/),
     ).not.toBeInTheDocument()
   })
+  it('keeps an unconfigured Google provider disabled without blocking password login', async () => {
+    const mock = form('sign-in')
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Sign in' })).toBeEnabled(),
+    )
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Continue with Google' }),
+    )
+    expect(mock.auth.signInWithOAuth).not.toHaveBeenCalled()
+    expect(screen.getByText(/Google sign-in is being prepared/)).toBeVisible()
+  })
   it('requests only login scopes and an exact OAuth callback', async () => {
+    flags.googleEnabled = true
     const mock = form('sign-in')
     await waitFor(() =>
       expect(
@@ -178,6 +197,7 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
     await userEvent.click(
       screen.getByRole('button', { name: 'Continue with Google' }),
     )
+    flags.googleEnabled = false
     expect(mock.auth.signInWithOAuth).toHaveBeenCalledWith({
       provider: 'google',
       options: {
@@ -234,6 +254,29 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
     expect(screen.getByRole('status')).toHaveTextContent(
       'Your password was updated',
     )
+  })
+  it('does not unlock password changes for an invalid recovery code', async () => {
+    const mock = form('reset-password')
+    await waitFor(() =>
+      expect(screen.getByLabelText('Recovery email')).toBeEnabled(),
+    )
+    await userEvent.type(
+      screen.getByLabelText('Recovery email'),
+      'test@example.test',
+    )
+    await userEvent.type(screen.getByLabelText('Recovery code'), '123456')
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Verify recovery code' }),
+    )
+    expect(mock.auth.verifyOtp).toHaveBeenCalledWith({
+      email: 'test@example.test',
+      token: '123456',
+      type: 'recovery',
+    })
+    expect(
+      screen.getByRole('button', { name: 'Update password' }),
+    ).toBeDisabled()
+    expect(mock.auth.updateUser).not.toHaveBeenCalled()
   })
   it('uses neutral signup confirmation even for obfuscated duplicate accounts', async () => {
     flags.allowSignup = true

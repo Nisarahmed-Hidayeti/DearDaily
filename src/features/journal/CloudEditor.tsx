@@ -1,4 +1,12 @@
-import { mediaEnabled, uploadPhoto, documentAssetIds } from '../media/mediaApi'
+import { uploadEntryPhoto } from './entryPhotoUpload'
+import { entryIcon } from '../rich-editor/emojis'
+import { EntryDetails } from './EntryDetails'
+import {
+  defaultPublicationPlan,
+  publicationTags,
+  type PublicationPlan,
+} from './publicationPlan'
+import { mediaEnabled, documentAssetIds } from '../media/mediaApi'
 import { useAppearance } from '../appearance/AppearanceProvider'
 import { PageAppearance } from '../rich-editor/PageAppearance'
 import { PageCover } from '../rich-editor/PageCover'
@@ -59,10 +67,7 @@ function EntryForm({ existingId }: { existingId?: string }) {
   const navigate = useNavigate()
   const { client } = useAuth()
   const [profile, setProfile] = useState<PublicProfile | null>(null)
-  const [byline, setByline] = useState(false)
   const [approvePhotos, setApprovePhotos] = useState(false)
-  const [publicCategory, setPublicCategory] = useState('Uncategorized')
-  const [publicTags, setPublicTags] = useState('')
   useEffect(() => {
     let active = true
     if (communityEnabled && client)
@@ -78,9 +83,46 @@ function EntryForm({ existingId }: { existingId?: string }) {
   const count = draft.body.trim() ? draft.body.trim().split(/\s+/).length : 0
   const patch = (values: Partial<typeof draft>) =>
     setDraft((current) => ({ ...current, ...values }))
+  const plan =
+    draft.writing_document?.publication ??
+    (state.publicMetadata
+      ? {
+          category: state.publicMetadata.public_category ?? 'Uncategorized',
+          tags: state.publicMetadata.public_tags?.join(', ') ?? '',
+          byline: !!state.publicMetadata.public_username,
+        }
+      : defaultPublicationPlan)
+  const { category: publicCategory, tags: publicTags, byline } = plan
+  const patchPlan = (values: Partial<PublicationPlan>) =>
+    setDraft((current) => ({
+      ...current,
+      writing_document: {
+        ...(current.writing_document ?? documentFromText(current.body)),
+        publication: { ...plan, ...values },
+      },
+    }))
+  const toggleDetails = () => {
+    const next = !detailsOpen
+    // Lazily retain choices from an older published copy when its editor is opened.
+    if (
+      next &&
+      richEditorEnabled &&
+      !draft.writing_document?.publication &&
+      state.publicMetadata
+    )
+      patchPlan({})
+    setFocus(false)
+    setDetailsOpen(next)
+  }
+  let invalidPublicTags = false
+  try {
+    publicationTags(publicTags)
+  } catch {
+    invalidPublicTags = true
+  }
   return (
     <div
-      className={`page editor-page ${richEditorEnabled ? 'editor-lab notion-editor' : ''} ${focus ? 'writer-focus' : ''}`}
+      className={`page editor-page ${richEditorEnabled ? 'editor-lab notion-editor' : ''} ${focus ? 'writer-focus' : ''} ${detailsOpen ? 'details-open' : ''}`}
       data-unsaved-writing={dirty || busy}
       data-font={font}
       data-width={width}
@@ -119,10 +161,7 @@ function EntryForm({ existingId }: { existingId?: string }) {
             <button
               className="quiet"
               aria-expanded={detailsOpen}
-              onClick={() => {
-                setFocus(false)
-                setDetailsOpen(!detailsOpen)
-              }}
+              onClick={toggleDetails}
             >
               Share & details
             </button>
@@ -165,6 +204,38 @@ function EntryForm({ existingId }: { existingId?: string }) {
                     ? 'Saved to your private account'
                     : 'A new private page · start writing'}
       </p>
+      {richEditorEnabled && (
+        <div className="details-summary" aria-label="Entry details summary">
+          <button
+            className="quiet"
+            aria-expanded={detailsOpen}
+            onClick={toggleDetails}
+          >
+            The little details{' '}
+            <span>
+              {draft.mood} · {draft.category}
+            </span>
+          </button>
+          {draft.tags.slice(0, 3).map((t) => (
+            <span className="tag" key={t}>
+              #{t}
+            </span>
+          ))}
+          {draft.tags.length > 3 && (
+            <span className="tiny">+{draft.tags.length - 3} tags</span>
+          )}
+          <span className="visibility">
+            {published ? 'Private draft · Public copy live' : 'Private draft'}
+          </span>
+          <button
+            className="quiet summary-save"
+            disabled={!ready || busy}
+            onClick={() => void state.save(true)}
+          >
+            {busy ? 'Saving…' : 'Save now'}
+          </button>
+        </div>
+      )}
       {richEditorEnabled && (
         <details className="writer-page-options">
           <summary>Page options</summary>
@@ -227,20 +298,21 @@ function EntryForm({ existingId }: { existingId?: string }) {
               {!preview && (
                 <PageAppearance
                   onUpload={
-                    mediaEnabled && row && client
+                    mediaEnabled && client
                       ? (file) =>
-                          uploadPhoto(
+                          uploadEntryPhoto(
                             client,
-                            row.id,
                             file,
                             documentAssetIds(draft.writing_document).length,
+                            row,
+                            () => state.save(),
                           )
                       : undefined
                   }
                   disabled={!ready}
                   document={draft.writing_document}
                   preset={draft.cover_preset}
-                  icon={draft.page_icon}
+                  icon={entryIcon(draft.writing_document, draft.page_icon)}
                   onApply={(style) =>
                     patch({
                       writing_document: style.document,
@@ -250,8 +322,10 @@ function EntryForm({ existingId }: { existingId?: string }) {
                   }
                 />
               )}
-              {draft.page_icon && (
-                <div className="writer-icon">{draft.page_icon}</div>
+              {entryIcon(draft.writing_document, draft.page_icon) && (
+                <div className="writer-icon">
+                  {entryIcon(draft.writing_document, draft.page_icon)}
+                </div>
               )}
             </>
           )}
@@ -304,13 +378,14 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 >
                   <RichWriter
                     onUpload={
-                      mediaEnabled && row && client
+                      mediaEnabled && client
                         ? (file) =>
-                            uploadPhoto(
+                            uploadEntryPhoto(
                               client,
-                              row.id,
                               file,
                               documentAssetIds(draft.writing_document).length,
+                              row,
+                              () => state.save(),
                             )
                         : undefined
                     }
@@ -345,16 +420,21 @@ function EntryForm({ existingId }: { existingId?: string }) {
             </output>
           </div>
         </section>
-        <aside
-          className="entry-settings"
-          hidden={richEditorEnabled && !detailsOpen}
-          aria-label="Page details and publishing"
+        <EntryDetails
+          open={!richEditorEnabled || detailsOpen}
+          onClose={() => setDetailsOpen(false)}
         >
           {richEditorEnabled && (
+            <button
+              className="button mobile-details-save"
+              disabled={!ready || busy}
+              onClick={() => void state.save(true)}
+            >
+              {busy ? 'Saving…' : 'Save details'}
+            </button>
+          )}
+          {richEditorEnabled && (
             <>
-              <button className="quiet" onClick={() => setDetailsOpen(false)}>
-                Close details
-              </button>
               <label>
                 Journal date
                 <input
@@ -448,6 +528,56 @@ function EntryForm({ existingId }: { existingId?: string }) {
               ))}
             </select>
           </section>
+          {communityEnabled && richEditorEnabled && (
+            <fieldset disabled={busy || !ready}>
+              <legend>Public copy settings</legend>
+              <label>
+                Public category
+                <select
+                  value={publicCategory}
+                  onChange={(e) => patchPlan({ category: e.target.value })}
+                >
+                  {categories.map((c) => (
+                    <option key={c}>{c}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Public tags (up to 5, comma separated)
+                <input
+                  maxLength={154}
+                  value={publicTags}
+                  onChange={(e) => patchPlan({ tags: e.target.value })}
+                />
+              </label>
+              {profile?.visible ? (
+                <label className="row">
+                  <input
+                    type="checkbox"
+                    checked={byline}
+                    onChange={(e) => patchPlan({ byline: e.target.checked })}
+                  />
+                  Attribute this story to @{profile.username}
+                </label>
+              ) : (
+                <p>
+                  Anonymous writer. Opt into a public profile separately to add
+                  a byline.
+                </p>
+              )}
+              <p>
+                Only these selected details are public. Each update replaces the
+                public metadata shown here; private tags and category are never
+                copied automatically.
+              </p>
+            </fieldset>
+          )}
+          {invalidPublicTags && (
+            <p role="alert">
+              Choose up to five public tags, each under 31 characters. Private
+              saving is still available.
+            </p>
+          )}
           <div className="save-panel">
             <button
               className="button"
@@ -474,10 +604,12 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 busy ||
                 dirty ||
                 !draft.title.trim() ||
-                !draft.body.trim()
+                !draft.body.trim() ||
+                invalidPublicTags
               }
               aria-describedby="publish-explanation"
               onClick={() => {
+                setDetailsOpen(false)
                 setApprovePhotos(false)
                 setConfirmation('publish')
               }}
@@ -504,7 +636,10 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 <button
                   className="button secondary"
                   disabled={busy}
-                  onClick={() => setConfirmation('unpublish')}
+                  onClick={() => {
+                    setDetailsOpen(false)
+                    setConfirmation('unpublish')
+                  }}
                 >
                   Unpublish story
                 </button>
@@ -514,19 +649,22 @@ function EntryForm({ existingId }: { existingId?: string }) {
               <button
                 className="button secondary"
                 disabled={busy}
-                onClick={() => setConfirmation('delete')}
+                onClick={() => {
+                  setDetailsOpen(false)
+                  setConfirmation('delete')
+                }}
               >
                 Delete entry
               </button>
             )}
           </div>
-        </aside>
+        </EntryDetails>
       </div>
       {confirmation && (
         <Modal
           title={
             confirmation === 'publish'
-              ? 'Publish this story?'
+              ? 'Ready to publish?'
               : confirmation === 'unpublish'
                 ? 'Unpublish this story?'
                 : 'Delete this entry?'
@@ -537,57 +675,26 @@ function EntryForm({ existingId }: { existingId?: string }) {
         >
           <p>
             {confirmation === 'publish'
-              ? 'Everyone will be able to read this title and the complete text below. Public copies may be saved or shared by readers. Only continue if you want these words public.'
+              ? 'This public snapshot contains only the title, writing, page icon, cover and the choices shown below. Your private mood, date and private tags stay private.'
               : confirmation === 'unpublish'
                 ? 'Remove the public copy from DearDaily. Your private entry stays saved. This cannot remove copies already saved by other people.'
                 : 'Permanently delete your entry and its public copy, if any. Export a copy first if you need it.'}
           </p>
           {confirmation === 'publish' && (
             <article className="entry-preview">
-              {communityEnabled && (
-                <fieldset disabled={busy}>
-                  <legend>Deliberately public details</legend>
-                  <label>
-                    Public category
-                    <select
-                      value={publicCategory}
-                      onChange={(e) => setPublicCategory(e.target.value)}
-                    >
-                      {categories.map((c) => (
-                        <option key={c}>{c}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Public tags (up to 5, comma separated)
-                    <input
-                      maxLength={154}
-                      value={publicTags}
-                      onChange={(e) => setPublicTags(e.target.value)}
-                    />
-                  </label>
-                  {profile?.visible ? (
-                    <label className="row">
-                      <input
-                        type="checkbox"
-                        checked={byline}
-                        onChange={(e) => setByline(e.target.checked)}
-                      />
-                      Attribute this story to @{profile.username}
-                    </label>
-                  ) : (
-                    <p>
-                      Anonymous writer. Opt into a public profile separately to
-                      add a byline.
-                    </p>
-                  )}
-                  <p>
-                    Only these selected details are public. Each update replaces
-                    the public metadata shown here; private tags and category
-                    are never copied automatically.
-                  </p>
-                </fieldset>
-              )}
+              <dl className="publication-receipt">
+                <dt>Public category</dt>
+                <dd>{publicCategory}</dd>
+                <dt>Public tags</dt>
+                <dd>{publicTags.trim() || 'None'}</dd>
+                <dt>Public identity</dt>
+                <dd>
+                  {byline && profile?.visible
+                    ? `@${profile.username}`
+                    : 'Anonymous writer'}
+                </dd>
+              </dl>
+
               <h3>{row?.title}</h3>
               <PageCover
                 privateMedia
@@ -610,17 +717,26 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 <>
                   <p>
                     These page details will also be public:{' '}
-                    {row?.page_icon ?? 'no icon'} ·{' '}
+                    {entryIcon(row?.writing_document, row?.page_icon) ??
+                      'no icon'}{' '}
+                    ·{' '}
                     {row?.writing_document?.page?.cover ??
                       row?.cover_preset ??
                       'no cover'}
                     . No private mood, date or tags are copied.
                   </p>
-                  <RichRead
-                    privateMedia
-                    document={row?.writing_document}
-                    fallback={row?.body ?? ''}
-                  />
+                  <p>
+                    {row?.body.slice(0, 180)}
+                    {(row?.body.length ?? 0) > 180 ? '…' : ''}
+                  </p>
+                  <details>
+                    <summary>Review complete writing and inline photos</summary>
+                    <RichRead
+                      privateMedia
+                      document={row?.writing_document}
+                      fallback={row?.body ?? ''}
+                    />
+                  </details>
                 </>
               )}
               {!richEditorEnabled && (
@@ -636,46 +752,56 @@ function EntryForm({ existingId }: { existingId?: string }) {
               )}
             </article>
           )}
-          <button
-            className="button"
-            disabled={
-              busy ||
-              (confirmation === 'publish' &&
-                (dirty ||
-                  (documentAssetIds(row?.writing_document).length > 0 &&
-                    !approvePhotos))) ||
-              (confirmation === 'publish' &&
-                (publicTags.split(',').filter((t) => t.trim()).length > 5 ||
-                  publicTags.split(',').some((t) => t.trim().length > 30)))
-            }
-            onClick={async () => {
-              const kind = confirmation
-              if (
-                kind === 'publish' &&
-                documentAssetIds(row?.writing_document).length > 0 &&
-                !approvePhotos
-              )
-                return
-              const done = await state.action(
-                kind,
-                communityEnabled
-                  ? {
-                      public_username:
-                        byline && profile?.visible ? profile.username : null,
-                      public_category: publicCategory,
-                      public_tags: publicTags
-                        .split(',')
-                        .map((t) => t.trim())
-                        .filter(Boolean),
-                    }
-                  : undefined,
-              )
-              setConfirmation(null)
-              if (done && kind === 'delete') navigate('/app', { replace: true })
-            }}
-          >
-            Confirm {confirmation}
-          </button>
+          {error && <p role="alert">{error}</p>}
+          <div className="row confirmation-actions">
+            <button
+              className="button secondary"
+              disabled={busy}
+              onClick={() => setConfirmation(null)}
+            >
+              Cancel
+            </button>
+            <button
+              className="button"
+              disabled={
+                busy ||
+                (confirmation === 'publish' &&
+                  (dirty ||
+                    (documentAssetIds(row?.writing_document).length > 0 &&
+                      !approvePhotos))) ||
+                (confirmation === 'publish' && invalidPublicTags)
+              }
+              onClick={async () => {
+                const kind = confirmation
+                if (
+                  kind === 'publish' &&
+                  documentAssetIds(row?.writing_document).length > 0 &&
+                  !approvePhotos
+                )
+                  return
+                const done = await state.action(
+                  kind,
+                  communityEnabled && kind === 'publish'
+                    ? {
+                        public_username:
+                          byline && profile?.visible ? profile.username : null,
+                        public_category: publicCategory,
+                        public_tags: publicationTags(publicTags),
+                      }
+                    : undefined,
+                )
+                if (done) setConfirmation(null)
+                if (done && kind === 'delete')
+                  navigate('/app', { replace: true })
+              }}
+            >
+              {confirmation === 'publish'
+                ? busy
+                  ? 'Publishing…'
+                  : 'Publish now'
+                : `Confirm ${confirmation}`}
+            </button>
+          </div>
         </Modal>
       )}
     </div>

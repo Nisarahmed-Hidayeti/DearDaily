@@ -12,5 +12,10 @@ export default defineConfig({
       },
     },
   },
-  test: { environment: 'jsdom', setupFiles: './src/test-setup.ts', css: false },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/test-setup.ts',
+    css: false,
+    maxWorkers: 4,
+  },
 })

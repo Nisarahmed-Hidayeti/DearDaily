@@ -1,7 +1,7 @@
 import { BookOpen, ArrowUpRight, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useEffect, useRef, useId } from 'react'
-import type { ReactNode } from 'react'
+import type { ReactNode, CSSProperties } from 'react'
 export function Logo() {
   return (
     <Link className="logo" to="/" aria-label="DearDaily home">
@@ -16,8 +16,8 @@ export function DemoNotice() {
   return (
     <div className="demo-notice">
       <span className="status-dot" />
-      Phase 1 preview{' '}
-      <span>· Fictional sample content · Journal drafts are temporary</span>
+      Sample space{' '}
+      <span>· Fictional sample content · Writing is not saved</span>
     </div>
   )
 }
@@ -60,7 +60,11 @@ export function Modal({
   title,
   children,
   onClose,
+  className = '',
+  style,
 }: {
+  className?: string
+  style?: CSSProperties
   title: string
   children: ReactNode
   onClose: () => void
@@ -80,7 +84,8 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className="modal"
+      className={`modal ${className}`}
+      style={style}
       aria-labelledby={titleId}
       onCancel={onClose}
     >

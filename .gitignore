@@ -28,3 +28,14 @@ dist-ssr
 .env.*
 !.env.example
 coverage/
+
+# Private credentials
+.env
+.env.*
+!.env.example
+
+# Generated files
+node_modules/
+dist/
+coverage/
+*.log

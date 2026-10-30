@@ -1,3 +1,4 @@
+import { publishStory, type JournalEntry } from '../journal/journalApi'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { authConfig } from '../../lib/supabase/client'
 export async function hostedRenaissanceChecks(
@@ -126,6 +127,12 @@ export async function hostedRenaissanceChecks(
     )
     stage = 'private rich save and ownership'
     const document = {
+      icon: '🐱',
+      publication: {
+        category: 'Travel',
+        tags: 'synthetic-public',
+        byline: false,
+      },
       version: 1,
       content: {
         type: 'doc',
@@ -197,7 +204,7 @@ export async function hostedRenaissanceChecks(
       version: saved.data.version,
     })
     check(!prepared.error && prepared.data?.document)
-    const publicId = prepared.data.document.page.publicId
+    let publicId = prepared.data.document.page.publicId
     check(
       typeof publicId === 'string' &&
         publicId !== media &&
@@ -216,14 +223,29 @@ export async function hostedRenaissanceChecks(
         })
       ).error,
     )
-    const published = await A.from('public_stories').insert({
-      id: ids[0],
-      user_id: a,
-      title: 'Synthetic Renaissance public copy',
-      body: 'Synthetic approved public words',
-      writing_document: prepared.data.document,
-    })
-    check(!published.error)
+    const privateRow = await A.from('journal_entries')
+      .select('*')
+      .eq('id', ids[0])
+      .single()
+    check(
+      !privateRow.error &&
+        privateRow.data.writing_document.publication.category === 'Travel',
+    )
+    const published = await publishStory(
+      A,
+      a,
+      privateRow.data as JournalEntry,
+      false,
+      {
+        public_category: 'Travel',
+        public_tags: ['synthetic-public'],
+        public_username: null,
+      },
+    )
+    publicId = published.writing_document!.page!.publicId!
+    check(!Object.hasOwn(published.writing_document!, 'publication'))
+    check(published.writing_document?.icon === '🐱')
+
     check(
       (
         await anon.storage
