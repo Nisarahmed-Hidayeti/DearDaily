@@ -42,3 +42,15 @@ References:
 ### SMTP checkpoint
 
 Owner verified the DearDaily Gmail sender and saved approved Brevo SMTP settings directly in Supabase. Initial recovery requests failed with HTTP 500 (email sending error); a mismatched SMTP login was identified without copying secrets. After the owner corrected it, a controlled User B recovery request returned HTTP 200. Inbox receipt, sender identity, spam placement and completed recovery remain pending; HTTP acceptance alone is not delivery proof. The diagnostic request is not the browser PKCE recovery test. Request a fresh browser-initiated link for the actual password-reset flow, with the owner entering/submitting the replacement password privately.
+
+### November 7 Turnstile checkpoint
+
+Owner created the Cloudflare widget; its success heading was verified without reading the Secret Key. The public Site Key was added only to ignored `.env.local`; signup remains false. The localhost login loads the Turnstile script, but successful challenge completion and hosted verification are not yet established. The current live login has no CAPTCHA UI and Google is disabled. Do not save hosted CAPTCHA settings until a separately approved compatible authentication build is deployed and checked; the shared backend change could otherwise break live password login. No Secret Key, hosted auth setting, production environment variable or deployment was changed during this checkpoint.
+
+Owner previously confirmed actual recovery-code password update and subsequent new-password login. Fresh email signup, new Google registration and abuse-control integration tests remain outstanding.
+
+### November 7 local verification follow-up
+
+The real configured Turnstile widget completed in the local in-app browser: the UI displayed “Verification complete” and enabled password sign-in. Google OAuth for the existing owner returned to the private account page, and sign-out returned to sign-in. These checks do not establish new-user registration or hosted CAPTCHA enforcement (still disabled).
+
+The widget now has safe numeric error reporting, bounded script/challenge loading feedback, expiration handling and a manual retry that invalidates the previous token and ignores callbacks from discarded widgets. Four component regressions plus the existing authentication/configuration suite passed (37 tests). No test key or challenge bypass was introduced. Cloudflare documents browser/network errors and supports diagnostic callbacks: https://developers.cloudflare.com/turnstile/troubleshooting/client-side-errors/ .

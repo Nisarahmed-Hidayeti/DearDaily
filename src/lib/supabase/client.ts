@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
+import { persistentAuthStorage } from './sessionStorage'
 import { readAuthConfig } from './config'
 
 export const authConfig = readAuthConfig(import.meta.env)
 // Supabase owns session storage, refresh, PKCE, and callback verification.
-// Tab-scoped sessionStorage keeps localStorage limited to the guest theme.
+// Auth persists across tabs until explicit sign-out. Private content stays in Supabase.
 function configuredClient() {
   if (!authConfig) return null
   try {
@@ -13,7 +14,7 @@ function configuredClient() {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        storage: window.sessionStorage,
+        storage: persistentAuthStorage,
       },
     })
   } catch {
