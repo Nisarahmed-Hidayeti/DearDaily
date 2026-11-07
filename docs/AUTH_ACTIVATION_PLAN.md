@@ -89,3 +89,13 @@ The Google account also completed an actual local cloud-editor acceptance flow: 
 Current checks: 211 frontend tests across 36 files passed; TypeScript, ESLint and production build passed. After adding the dev-only media-run control, TypeScript and the 12 focused harness/projection tests passed again. Existing 264 pgTAP and 35 local Auth integration checks remain valid; no database migration changed.
 
 Remaining launch work: controlled hosted rate-limit enforcement evidence, Google general-audience readiness, remaining release/policy/operational review, and explicit approval for signup activation and any further deployment. The email account's external verification/login and Google's distinct new-account authentication are verified; no claim of completed public release is made. Test sessions are held only in the development tab's memory, never exported. Local code changes have not been pushed or deployed.
+
+### November 8 release follow-up
+
+Owner authorized pushing and deployment once requested work and checks are complete, with registration as first priority. A controlled hosted `/verify` probe used only random nonexistent signup hashes: 32 HTTP 403 responses followed by HTTP 429 on request 33, no sessions. No real OTP, email message, account or authentication setting changed. Verification rate limiting is now observed; do not generalize this to untested endpoint quotas.
+
+Google Audience currently shows External / Testing, with Publish app disabled pending branding. Homepage/privacy/terms fields are empty. Public privacy and beta-terms routes were prepared locally, linked from the homepage and signup, and submitted to the owner for review before publishing. No Google audience/configuration changes were saved.
+
+Account recovery instructions no longer claim delivery remains untested. Account sign-out now navigates home only on confirmed success, with two regression tests. Existing motion is shorter and card movement quieter; reduced-motion rules remain in place. All 213 frontend tests passed; TypeScript/lint/build passed. Loaded-theme browser checks verified 96 route/viewport combinations across all four themes with no horizontal overflow; original Midnight preference restored on the approved Google test account. Initial loading/fallback measurements were discarded from theme evidence. No claim of physical keyboard testing.
+
+Docker is currently stopped and noninteractive startup requires a system password. Owner was asked to start it; previous pgTAP results are historical, not a fresh run. Signup stays closed pending the release steps in REGISTRATION_LAUNCH_GATE.md. No hosted schema/Storage changes, merge, push or deployment occurred in this follow-up.

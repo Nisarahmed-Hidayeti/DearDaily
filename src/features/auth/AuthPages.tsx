@@ -203,6 +203,12 @@ export function AuthPage({ mode }: { mode: Mode }) {
         <p className="muted">
           Your account is personal. Your story stays yours.
         </p>
+        {mode === 'sign-up' && (
+          <p className="tiny muted">
+            Read our <Link to="/privacy">privacy notice</Link> and{' '}
+            <Link to="/terms">beta terms</Link> before creating an account.
+          </p>
+        )}
         {!client && (
           <p role="status" className="auth-notice">
             Account services are not configured yet. You can still explore the

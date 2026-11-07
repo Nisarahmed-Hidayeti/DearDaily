@@ -74,7 +74,7 @@ export default function Account() {
   return (
     <div className="page">
       <PageHeading
-        eyebrow="Your account / Closed beta"
+        eyebrow="Your account / Security & privacy"
         title="A space that belongs to you."
       />
       <p className="muted">
@@ -112,16 +112,15 @@ export default function Account() {
           <p className="eyebrow">Security & access</p>
           <h2>Keep your space yours.</h2>
           <p>
-            Use a unique password. Password changes use a verified recovery link
-            so this browser session alone cannot replace your credentials.
+            Use a unique password. A recovery code sent to your email verifies
+            your identity before you can set a new password.
           </p>
           <Link className="button secondary" to="/auth/forgot-password">
             Password recovery
           </Link>
           <p className="tiny muted">
-            Recovery requires working email delivery. Delivery and recovery are
-            still awaiting real verification; no successful email delivery is
-            assumed.
+            Check your inbox and spam folder for the newest code. Never share
+            recovery codes or passwords.
           </p>
           <p className="tiny muted">
             Email-address changes and other-device session management are not
@@ -176,15 +175,18 @@ export default function Account() {
         <button
           className="button secondary"
           onClick={async () => {
-            await signOut()
-            navigate('/', { replace: true })
+            if (await signOut()) navigate('/', { replace: true })
+            else
+              setMessage(
+                'Sign-out could not be confirmed. Reconnect and try again.',
+              )
           }}
         >
           Sign out
         </button>
       </div>
       <p className="auth-footnote">
-        Sign-out ends this browser session. Other devices remain signed in.
+        Sign-out ends this browser session. Other devices remain signed in.{' '}
         {journalEnabled
           ? 'Your saved entries remain in your account after signing out.'
           : 'Journal persistence is planned for Phase 3.'}

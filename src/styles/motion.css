@@ -22,10 +22,10 @@
 @media (prefers-reduced-motion: no-preference) {
   .page,
   .hero-content {
-    animation: page-arrive 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation: page-arrive 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
   }
   .theme-option {
-    animation: page-arrive 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation: page-arrive 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
   .theme-option:nth-of-type(2) {
     animation-delay: 0.06s;
@@ -47,14 +47,14 @@
   }
   .story-card {
     transition:
-      transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
-      border-color 0.3s,
-      box-shadow 0.3s;
+      transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1),
+      border-color 0.18s,
+      box-shadow 0.18s;
   }
   .story-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
     border-color: var(--border-strong);
-    box-shadow: 0 16px 32px var(--shadow);
+    box-shadow: 0 6px 16px var(--shadow);
   }
   .art-arrow {
     transition: transform 0.3s;
