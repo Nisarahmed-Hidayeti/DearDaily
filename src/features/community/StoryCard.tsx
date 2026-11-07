@@ -22,6 +22,11 @@ export function StoryCard({ story: s }: { story: CommunityStory }) {
         )}
       </Link>
       <div className="story-content">
+        {entryIcon(s.writing_document, s.page_icon) && (
+          <span className="story-page-icon" aria-label="Story page icon">
+            {entryIcon(s.writing_document, s.page_icon)}
+          </span>
+        )}
         <p className="eyebrow">{s.public_category ?? 'Published story'}</p>
         <h2>
           <Link to={`/explore/published/${s.id}`}>{s.title}</Link>

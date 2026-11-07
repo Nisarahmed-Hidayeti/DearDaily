@@ -233,6 +233,7 @@ function ValidatedRichWriter({
       from: editor.state.selection.to,
       to: editor.state.selection.to,
     }
+    range = { from: range.to, to: range.to }
     pendingPhoto.current = null
     const expected = editor.state.doc.textBetween(range.from, range.to)
     const map = ({
@@ -325,7 +326,9 @@ function ValidatedRichWriter({
       }}
     >
       <details className="writer-format-options">
-        <summary>Formatting</summary>
+        <summary aria-label="Text tools" title="Text tools">
+          Aa
+        </summary>
         <div className="writer-toolbar" role="group" aria-label="Writing tools">
           {tools}
           <label>

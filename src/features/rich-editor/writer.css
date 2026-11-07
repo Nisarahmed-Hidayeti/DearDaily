@@ -1126,3 +1126,75 @@
 .modal input[type='search'] {
   font-size: 16px;
 }
+
+/* Page icons sit in a centered box at the cover's lower-left edge. */
+.writer-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  position: relative;
+  margin: 0 0 14px 16px;
+  line-height: 1;
+  z-index: 1;
+}
+.writer-cover + .writer-icon {
+  margin-top: -30px;
+}
+.story-content {
+  position: relative;
+}
+.story-page-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  font-size: 28px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+@media (min-width: 1101px) {
+  .editor-lab {
+    --writing-width: 900px;
+  }
+}
+
+.page-appearance-controls:has(.page-style-icon) {
+  position: relative;
+  z-index: 2;
+  padding-left: 16px;
+}
+.editor-cover-action + .page-appearance-controls:has(.page-style-icon),
+.writer-cover + .page-appearance-controls:has(.page-style-icon) {
+  margin-top: -28px;
+}
+.page-appearance-controls .page-style-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  font-size: 42px;
+  line-height: 1;
+  padding: 0;
+  border: none;
+  background: var(--surface);
+  border-radius: 14px;
+}
+
+.editor-cover-action {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.editor-cover-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.editor-cover-action > .writer-cover {
+  margin-bottom: 0;
+}

@@ -1,5 +1,4 @@
 import { PageAppearance } from './PageAppearance'
-import { PageCover } from './PageCover'
 import { useWritingFocus } from './useWritingFocus'
 import { useState, useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
@@ -90,8 +89,8 @@ export default function EditorPreview() {
         </div>
       </details>
       <section className="writer-document">
-        <PageCover document={document} preset={cover} />
         <PageAppearance
+          showCover
           document={document}
           preset={cover}
           icon={icon}
@@ -102,11 +101,6 @@ export default function EditorPreview() {
           }}
         />
         <div className="writer-sheet">
-          {icon && (
-            <div className="writer-icon" aria-label="Page icon">
-              {icon}
-            </div>
-          )}
           <label className="sr-only" htmlFor="workshop-title">
             Entry title
           </label>

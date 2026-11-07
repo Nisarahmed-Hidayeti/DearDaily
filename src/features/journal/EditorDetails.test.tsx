@@ -215,3 +215,27 @@ it('retains legacy explicit public choices privately without copying private tag
     ),
   )
 })
+it('preserves legacy plaintext when adding and removing a page icon', async () => {
+  vi.mocked(loadEntry).mockResolvedValue({ ...fixture, writing_document: null })
+  show()
+  await screen.findByText('Saved to your private account')
+  const editor = await screen.findByRole(
+    'textbox',
+    { name: 'Journal body' },
+    { timeout: 4000 },
+  )
+  expect(editor).toHaveTextContent(fixture.body)
+  await userEvent.click(
+    screen.getByRole('button', { name: /Cover & page icon/ }),
+  )
+  await userEvent.type(
+    screen.getByRole('searchbox', { name: 'Search page icons' }),
+    'kitten',
+  )
+  await userEvent.click(screen.getByRole('button', { name: 'Use 🐱' }))
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Apply page style' }),
+  )
+  expect(editor).toHaveTextContent(fixture.body)
+  expect(screen.getByRole('textbox', { name: 'Journal body' })).toBe(editor)
+})

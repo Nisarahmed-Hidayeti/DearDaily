@@ -1,11 +1,23 @@
-import { BookOpen, ArrowUpRight, X } from 'lucide-react'
+import { ArrowUpRight, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useEffect, useRef, useId } from 'react'
 import type { ReactNode, CSSProperties } from 'react'
 export function Logo() {
   return (
     <Link className="logo" to="/" aria-label="DearDaily home">
-      <BookOpen size={23} />
+      <svg
+        width="25"
+        height="25"
+        viewBox="0 0 32 32"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M16 3C17.5 10.5 21.5 14.5 29 16C21.5 17.5 17.5 21.5 16 29C14.5 21.5 10.5 17.5 3 16C10.5 14.5 14.5 10.5 16 3Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+      </svg>
       <span>
         DearDaily<span className="accent">.</span>
       </span>
