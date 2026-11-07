@@ -21,7 +21,12 @@ export function AuthPage({ mode }: { mode: Mode }) {
     useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(() =>
+    mode === 'reset-password' &&
+    typeof location.state?.recoveryEmail === 'string'
+      ? location.state.recoveryEmail
+      : '',
+  )
   const [password, setPassword] = useState('')
   const [confirmation, setConfirmation] = useState('')
   const [recoveryCode, setRecoveryCode] = useState('')
@@ -93,9 +98,9 @@ export function AuthPage({ mode }: { mode: Mode }) {
           ...(needsBotCheck ? { captchaToken } : {}),
         })
         if (result.error) throw result.error
-        setMessage(
-          'If this address can receive recovery email, a link will arrive shortly. Open it in this browser and tab.',
-        )
+        navigate('/auth/reset-password', {
+          state: { recoveryEmail: email.trim() },
+        })
       } else {
         const result = await client.auth.updateUser({ password })
         if (result.error) throw result.error
@@ -200,10 +205,9 @@ export function AuthPage({ mode }: { mode: Mode }) {
         )}
         {resetUnavailable && !loading && !message && (
           <p className="auth-notice">
-            This tab has no verified recovery session. Email links must open in
-            the browser and tab where you requested them. If your email includes
-            a recovery code, enter it below instead. Password changes stay
-            locked until verification succeeds.
+            If this address can receive recovery email, a code will arrive
+            shortly. Enter the code below—there is no need to click the email
+            link. Password changes stay locked until verification succeeds.
           </p>
         )}
         {loading && <p role="status">Restoring your session…</p>}

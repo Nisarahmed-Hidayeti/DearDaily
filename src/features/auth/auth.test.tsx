@@ -56,12 +56,10 @@ function mockClient(initial: Session | null = null) {
     signInWithPassword: vi
       .fn()
       .mockResolvedValue({ data: { session: sessionA }, error: null }),
-    verifyOtp: vi
-      .fn()
-      .mockResolvedValue({
-        data: { session: null },
-        error: { message: 'invalid' },
-      }),
+    verifyOtp: vi.fn().mockResolvedValue({
+      data: { session: null },
+      error: { message: 'invalid' },
+    }),
     signUp: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
     resetPasswordForEmail: vi.fn().mockResolvedValue({ data: {}, error: null }),
     updateUser: vi.fn().mockResolvedValue({ data: {}, error: null }),
@@ -85,6 +83,10 @@ function form(
       <AuthProvider client={mock.client}>
         <Routes>
           <Route path="/" element={<AuthPage mode={mode} />} />
+          <Route
+            path="/auth/reset-password"
+            element={<AuthPage key="reset" mode="reset-password" />}
+          />
           <Route
             path="/account"
             element={<h1>Private account destination</h1>}
@@ -222,9 +224,14 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
       'test@example.test',
       { redirectTo: 'http://localhost:5173/auth/reset-password' },
     )
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'If this address can receive',
+    expect(
+      await screen.findByRole('form', { name: 'Verify password recovery' }),
+    ).toBeVisible()
+    expect(screen.getByLabelText('Recovery email')).toHaveValue(
+      'test@example.test',
     )
+    expect(screen.getByLabelText('New password')).toBeDisabled()
+    expect(screen.getByText(/If this address can receive/)).toBeVisible()
   })
   it('requires a verified recovery event, not just an existing session', async () => {
     const mock = form('reset-password', mockClient(sessionA))
