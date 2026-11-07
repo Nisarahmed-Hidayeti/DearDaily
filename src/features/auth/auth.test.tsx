@@ -177,6 +177,29 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
       screen.queryByText(/secret-provider-message/),
     ).not.toBeInTheDocument()
   })
+  it('distinguishes rejected security verification without exposing provider details', async () => {
+    const mock = mockClient()
+    mock.auth.signInWithPassword.mockResolvedValue({
+      error: { code: 'captcha_failed', message: 'private provider details' },
+    })
+    form('sign-in', mock)
+    await waitFor(() =>
+      expect(screen.getByLabelText('Email address')).toBeEnabled(),
+    )
+    await userEvent.type(
+      screen.getByLabelText('Email address'),
+      'test@example.test',
+    )
+    await userEvent.type(screen.getByLabelText('Password'), 'example-password')
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Security verification was rejected',
+    )
+    expect(screen.getByRole('alert')).not.toHaveTextContent(
+      'private provider details',
+    )
+    expect(screen.queryByText(/Unable to sign in/)).not.toBeInTheDocument()
+  })
   it('keeps an unconfigured Google provider disabled without blocking password login', async () => {
     const mock = form('sign-in')
     await waitFor(() =>
