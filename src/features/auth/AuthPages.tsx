@@ -173,6 +173,9 @@ export function AuthPage({ mode }: { mode: Mode }) {
         options: {
           redirectTo: authRedirect('/auth/callback'),
           scopes: 'openid email profile',
+          ...(mode === 'sign-up'
+            ? { queryParams: { prompt: 'select_account' } }
+            : {}),
         },
       })
       if (error) throw error

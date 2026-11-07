@@ -1,3 +1,6 @@
+import { approvedPublicProjection } from './publicStoryProjection'
+import { richEditorEnabled } from '../rich-editor/config'
+import { communityEnabled } from '../community/communityApi'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { authConfig } from '../../lib/supabase/client'
@@ -170,7 +173,7 @@ export async function hostedJournalChecks(
         visible[0].body === 'Deliberately published synthetic words',
     )
     check(
-      Object.keys(visible[0]).sort().join(',') === 'body,id,published_at,title',
+      approvedPublicProjection(visible[0], richEditorEnabled, communityEnabled),
     )
     check((await readStories(anon, bid)).length === 0)
     const wildcard = await anon.from('public_stories').select('*').eq('id', aid)

@@ -308,6 +308,34 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
     ).toBeDisabled()
     expect(mock.auth.updateUser).not.toHaveBeenCalled()
   })
+  it('opens an account chooser for Google registration without adding broader scopes', async () => {
+    flags.allowSignup = true
+    flags.googleEnabled = true
+    flags.captchaSiteKey = 'synthetic-site-key'
+    try {
+      const mock = form('sign-up')
+      await waitFor(() =>
+        expect(
+          screen.getByRole('button', { name: 'Continue with Google' }),
+        ).toBeEnabled(),
+      )
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Continue with Google' }),
+      )
+      expect(mock.auth.signInWithOAuth).toHaveBeenCalledWith({
+        provider: 'google',
+        options: {
+          redirectTo: 'http://localhost:5173/auth/callback',
+          scopes: 'openid email profile',
+          queryParams: { prompt: 'select_account' },
+        },
+      })
+    } finally {
+      flags.allowSignup = false
+      flags.googleEnabled = false
+      flags.captchaSiteKey = null
+    }
+  })
   it('uses neutral signup confirmation even for obfuscated duplicate accounts', async () => {
     flags.allowSignup = true
     flags.captchaSiteKey = 'synthetic-site-key'
