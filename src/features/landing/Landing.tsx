@@ -8,7 +8,9 @@ import {
   ArrowDown,
 } from 'lucide-react'
 import { Logo } from '../../components/Shared'
+import { useAuth } from '../auth/AuthProvider'
 export default function Landing() {
+  const { session, loading } = useAuth()
   return (
     <div className="landing">
       <nav className="public-nav">
@@ -19,12 +21,29 @@ export default function Landing() {
           <a href="#features">Features</a>
         </div>
         <div className="row">
-          <Link className="quiet" to="/auth/sign-in">
-            Sign in
-          </Link>
-          <Link className="button small" to="/auth/sign-up">
-            Beta access <ArrowRight size={15} />
-          </Link>
+          {loading ? (
+            <span className="muted" role="status">
+              Restoring your account…
+            </span>
+          ) : session ? (
+            <>
+              <Link className="quiet" to="/account">
+                Your account
+              </Link>
+              <Link className="button small" to="/app">
+                My journal <ArrowRight size={15} />
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="quiet" to="/auth/sign-in">
+                Sign in
+              </Link>
+              <Link className="button small" to="/auth/sign-up">
+                Get started <ArrowRight size={15} />
+              </Link>
+            </>
+          )}
         </div>
       </nav>
       <main id="main" tabIndex={-1}>
@@ -72,8 +91,12 @@ export default function Landing() {
               <br className="desktop-break" /> and share the stories you choose.
             </p>
             <div className="row hero-actions">
-              <Link className="button" to="/app/write">
-                Start writing <ArrowRight size={18} />
+              <Link
+                className="button"
+                to={session ? '/app/write' : '/auth/sign-up'}
+              >
+                {session ? 'Continue writing' : 'Start writing'}{' '}
+                <ArrowRight size={18} />
               </Link>
               <Link className="button secondary" to="/explore">
                 Explore stories
@@ -132,13 +155,18 @@ export default function Landing() {
             <br />
             <em>See where it takes you.</em>
           </h2>
-          <Link className="button" to="/app/write">
+          <Link
+            className="button"
+            to={session ? '/app/write' : '/auth/sign-up'}
+          >
             Find your first words <ArrowRight size={18} />
           </Link>
           <p className="muted">
-            {journalEnabled
-              ? 'Sign in to save private entries and deliberately share stories.'
-              : 'Explore the frontend preview. Drafts are temporary.'}
+            {session
+              ? 'Your private pages are waiting for you.'
+              : journalEnabled
+                ? 'Sign in to save private entries and deliberately share stories.'
+                : 'Explore the frontend preview. Drafts are temporary.'}
           </p>
         </section>
       </main>
@@ -146,7 +174,7 @@ export default function Landing() {
         <Logo />
         <p>Every day has a story.</p>
         <Link to="/app">
-          Try the demo <ArrowRight size={14} />
+          {session ? 'My journal' : 'Try the demo'} <ArrowRight size={14} />
         </Link>
         <Link to="/app/settings">
           Appearance <ArrowRight size={14} />

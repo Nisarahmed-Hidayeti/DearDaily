@@ -12,14 +12,14 @@ describe('dated activity calendar', () => {
     ],
     [
       [0, 1, 2, 3, 4, 8, 8],
-      [0, 1, 1, 2, 2, 4, 4],
+      [0, 4, 4, 4, 4, 4, 4],
     ],
     [
       [0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0],
     ],
   ])(
-    'scales saved entries to each writer’s visible maximum: %j',
+    'uses the same completed-day color regardless of entry count: %j',
     (counts, levels) => {
       render(
         <ActivityHeatmap
