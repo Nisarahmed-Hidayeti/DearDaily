@@ -30,3 +30,39 @@ it('does not contact Spotify before consent and explains the session-only bounda
   ).toHaveAttribute('href', 'https://charts.spotify.com/')
   expect(document.querySelector('iframe')).toBeNull()
 })
+
+it('does not auto-load saved public music or expose private sharing controls', async () => {
+  render(
+    <WritingMusic
+      publicCopy
+      value={{
+        provider: 'spotify',
+        kind: 'track',
+        id: '4uLU6hMCjMI75M1A2tKUQC',
+      }}
+    />,
+  )
+  await userEvent.click(screen.getByRole('button', { name: '♫ Soundtrack' }))
+  expect(
+    screen.getByRole('link', { name: /Open selected music/ }),
+  ).toHaveAttribute(
+    'href',
+    'https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC',
+  )
+  expect(screen.queryByRole('checkbox')).toBeNull()
+  expect(screen.queryByLabelText('Spotify link')).toBeNull()
+  expect(document.querySelector('iframe')).toBeNull()
+})
+
+it('rejects malicious API music without crashing the journal', async () => {
+  render(
+    <WritingMusic
+      publicCopy
+      value={{ provider: 'spotify', kind: 'track', id: 'javascript:alert(1)' }}
+    />,
+  )
+  await userEvent.click(
+    screen.getByRole('button', { name: /Add writing music/ }),
+  )
+  expect(screen.queryByRole('link', { name: /Open selected music/ })).toBeNull()
+})

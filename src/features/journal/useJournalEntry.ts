@@ -14,10 +14,11 @@ import {
 } from './journalApi'
 import type { Draft, JournalEntry } from './journalApi'
 
-export function useJournalEntry(existingId?: string) {
+export function useJournalEntry(existingId?: string, newId?: string) {
   const { client, session } = useAuth()
   const userId = session!.user.id
-  const [id] = useState(() => existingId ?? crypto.randomUUID())
+  const [id] = useState(() => existingId ?? newId ?? crypto.randomUUID())
+  const [loadInitially] = useState(Boolean(existingId))
   const [draft, setDraft] = useState<Draft>(newDraft)
   const [row, setRow] = useState<JournalEntry | null>(null)
   const [confirmed, setConfirmed] = useState(() => draftFingerprint(newDraft()))
@@ -30,11 +31,13 @@ export function useJournalEntry(existingId?: string) {
   )
   const epoch = useRef(0)
   const lock = useRef(false)
+  const pendingSave = useRef<Promise<JournalEntry | undefined> | null>(null)
   const emptyNewPage =
     !row &&
     !draft.title.trim() &&
     !draft.body.trim() &&
     !draft.page_icon &&
+    !draft.music &&
     draft.mood === 'Calm' &&
     draft.category === 'Personal' &&
     draft.tags.length === 0 &&
@@ -76,12 +79,13 @@ export function useJournalEntry(existingId?: string) {
   useEffect(() => {
     const generation = epoch.current
     void Promise.resolve().then(() => {
-      if (existingId && generation === epoch.current) void reload()
+      if (loadInitially && generation === epoch.current) void reload()
     })
-  }, [existingId, reload])
+  }, [loadInitially, reload])
   const save = useCallback(
-    async (saved = false) => {
-      if (!client || !ready || lock.current) return
+    (saved = false): Promise<JournalEntry | undefined> => {
+      if (lock.current) return pendingSave.current ?? Promise.resolve(undefined)
+      if (!client || !ready) return Promise.resolve(undefined)
       const generation = epoch.current
       const snapshot = {
         ...draft,
@@ -90,37 +94,42 @@ export function useJournalEntry(existingId?: string) {
       lock.current = true
       setBusy(true)
       setError('')
-      try {
-        const result = await saveEntry(
-          client,
-          userId,
-          id,
-          snapshot,
-          row?.version ?? null,
-        )
-        if (generation !== epoch.current) return
-        // Canonical URL survives reload without remounting and losing in-flight edits.
-        if (window.location.pathname === '/app/write') {
-          window.history.replaceState(
-            window.history.state,
-            '',
-            '/app/write/' + id,
+      const request = (async () => {
+        try {
+          const result = await saveEntry(
+            client,
+            userId,
+            id,
+            snapshot,
+            row?.version ?? null,
           )
+          if (generation !== epoch.current) return
+          // Canonical URL survives reload without remounting and losing in-flight edits.
+          if (window.location.pathname === '/app/write') {
+            window.history.replaceState(
+              window.history.state,
+              '',
+              '/app/write/' + id,
+            )
+          }
+          setRow(result)
+          setConfirmed(draftFingerprint(draftOf(result)))
+          // Only status is merged; words typed during the request are preserved.
+          if (saved) setDraft((current) => ({ ...current, status: 'saved' }))
+          return result
+        } catch {
+          if (generation === epoch.current)
+            setError(
+              'Save not confirmed. Your words are still here. Export a copy, then reload to reconcile a conflict or retry.',
+            )
+        } finally {
+          lock.current = false
+          pendingSave.current = null
+          if (generation === epoch.current) setBusy(false)
         }
-        setRow(result)
-        setConfirmed(draftFingerprint(draftOf(result)))
-        // Only status is merged; words typed during the request are preserved.
-        if (saved) setDraft((current) => ({ ...current, status: 'saved' }))
-        return result
-      } catch {
-        if (generation === epoch.current)
-          setError(
-            'Save not confirmed. Your words are still here. Export a copy, then reload to reconcile a conflict or retry.',
-          )
-      } finally {
-        lock.current = false
-        if (generation === epoch.current) setBusy(false)
-      }
+      })()
+      pendingSave.current = request
+      return request
     },
     [client, ready, draft, userId, id, row],
   )

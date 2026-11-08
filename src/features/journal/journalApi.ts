@@ -4,6 +4,14 @@ import {
   cleanQueuedPhotos,
 } from '../media/mediaApi'
 import {
+  persistentMusicEnabled,
+  musicFields,
+  publicMusic,
+  validateMusic,
+  type PrivateMusic,
+  type StoryMusic,
+} from '../music/music'
+import {
   validateDocument,
   publicWritingDocument,
 } from '../rich-editor/document'
@@ -16,6 +24,7 @@ import { richEditorEnabled, richPublicFields } from '../rich-editor/config'
 
 export const journalEnabled = import.meta.env.VITE_ENABLE_JOURNALS === 'true'
 export interface Draft {
+  music?: PrivateMusic | null
   writing_document?: WritingDocument | null
   page_icon?: string | null
   cover_preset?: CoverPreset | null
@@ -35,6 +44,7 @@ export interface JournalEntry extends Draft {
   updated_at: string
 }
 export interface PublicStory {
+  music?: StoryMusic | null
   writing_document?: WritingDocument | null
   page_icon?: string | null
   cover_preset?: CoverPreset | null
@@ -44,13 +54,14 @@ export interface PublicStory {
   published_at: string
 }
 export const publicFields: string =
-  'id,title,body,published_at' + richPublicFields
+  'id,title,body,published_at' + richPublicFields + musicFields
 const readableFields: string = communityEnabled ? storyFields : publicFields
 export function localDay(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 export function newDraft(): Draft {
   return {
+    ...(persistentMusicEnabled ? { music: null } : {}),
     ...(richEditorEnabled
       ? { writing_document: null, page_icon: null, cover_preset: null }
       : {}),
@@ -65,6 +76,7 @@ export function newDraft(): Draft {
 }
 export function draftOf(row: Draft): Draft {
   return {
+    ...(persistentMusicEnabled ? { music: row.music ?? null } : {}),
     ...(richEditorEnabled
       ? {
           writing_document: row.writing_document ?? null,
@@ -102,6 +114,7 @@ export async function saveEntry(
   draft: Draft,
   version: number | null,
 ) {
+  if (draft.music) validateMusic(draft.music, true)
   const query =
     version === null
       ? client.from('journal_entries').insert({ ...draft, id, user_id: userId })
@@ -179,6 +192,7 @@ export async function publishStory(
       )
     : entry.writing_document
   const fields = {
+    ...(persistentMusicEnabled ? { music: publicMusic(entry.music) } : {}),
     title: entry.title,
     body: entry.body,
     ...(richEditorEnabled

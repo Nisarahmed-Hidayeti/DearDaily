@@ -1,5 +1,6 @@
 import { uploadEntryPhoto } from './entryPhotoUpload'
 import { WritingMusic } from '../music/WritingMusic'
+import { persistentMusicEnabled, publicMusic, musicUrl } from '../music/music'
 import { entryIcon } from '../rich-editor/emojis'
 import { EntryDetails } from './EntryDetails'
 import {
@@ -38,10 +39,19 @@ import { documentFromText, documentText } from '../rich-editor/document'
 
 export default function CloudEditor() {
   const { id } = useParams()
-  return <EntryForm key={id ?? 'new'} existingId={id} />
+  // Adopt the saved URL without replacing the live editor or upload dialog.
+  // A different existing entry still receives an independent component lifetime.
+  const [newId] = useState(() => crypto.randomUUID())
+  return <EntryForm key={id ?? newId} existingId={id} newId={newId} />
 }
-function EntryForm({ existingId }: { existingId?: string }) {
-  const state = useJournalEntry(existingId)
+function EntryForm({
+  existingId,
+  newId,
+}: {
+  existingId?: string
+  newId?: string
+}) {
+  const state = useJournalEntry(existingId, newId)
   const { draft, setDraft, ready, busy, error, dirty, row, published } = state
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
@@ -350,7 +360,15 @@ function EntryForm({ existingId }: { existingId?: string }) {
               )}
             </>
           )}
-          {!preview && <WritingMusic />}
+          {!preview && (
+            <WritingMusic
+              value={persistentMusicEnabled ? draft.music : undefined}
+              disabled={!ready}
+              onChange={
+                persistentMusicEnabled ? (music) => patch({ music }) : undefined
+              }
+            />
+          )}
           <div className="row spread paper-meta">
             <label>
               Entry date{' '}
@@ -715,6 +733,24 @@ function EntryForm({ existingId }: { existingId?: string }) {
                     ? `@${profile.username}`
                     : 'Anonymous writer'}
                 </dd>
+                {persistentMusicEnabled && (
+                  <>
+                    <dt>Public music</dt>
+                    <dd>
+                      {publicMusic(row?.music) ? (
+                        <a
+                          href={musicUrl(publicMusic(row?.music)!)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Approved Spotify {row?.music?.kind}
+                        </a>
+                      ) : (
+                        'None — your music stays private'
+                      )}
+                    </dd>
+                  </>
+                )}
               </dl>
 
               <h3>{row?.title}</h3>

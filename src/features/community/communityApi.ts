@@ -1,4 +1,5 @@
 import { publicStreaksEnabled } from './publicStreakConfig'
+import { musicFields } from '../music/music'
 import { appearanceEnabled } from '../appearance/appearance'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PublicStory } from '../journal/journalApi'
@@ -39,7 +40,8 @@ export const profileFields =
   (publicStreaksEnabled ? ',public_streak' : '')
 export const storyFields: string =
   'id,title,body,published_at,public_username,public_category,public_tags' +
-  richPublicFields
+  richPublicFields +
+  musicFields
 export function validUsername(value: string) {
   return (
     /^[a-z][a-z0-9_]{2,23}$/.test(value) &&

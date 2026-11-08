@@ -1,6 +1,8 @@
 import { entryIcon } from '../rich-editor/emojis'
 import { PublicAuthor } from '../community/PublicAuthor'
 import { PageCover } from '../rich-editor/PageCover'
+import { WritingMusic } from '../music/WritingMusic'
+import { persistentMusicEnabled } from '../music/music'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { LoadingState, PageHeading } from '../../components/Shared'
@@ -247,6 +249,13 @@ export function PublishedStory() {
             document={story.writing_document}
             preset={story.cover_preset}
           />
+          {persistentMusicEnabled && story.music && (
+            <WritingMusic
+              key={`${story.id}:${story.music.id}`}
+              value={story.music}
+              publicCopy
+            />
+          )}
           {entryIcon(story.writing_document, story.page_icon) && (
             <div className="writer-icon">
               {entryIcon(story.writing_document, story.page_icon)}

@@ -1,4 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import {
+  musicUrl,
+  validateMusic,
+  type PrivateMusic,
+  type StoryMusic,
+} from './music'
 
 export function spotifyEntity(value: string): string | null {
   try {
@@ -49,7 +55,23 @@ function loadSpotify() {
   return apiPromise
 }
 
-export function WritingMusic() {
+export function WritingMusic({
+  value: rawValue,
+  onChange,
+  publicCopy = false,
+  disabled = false,
+}: {
+  value?: PrivateMusic | StoryMusic | null
+  onChange?: (value: PrivateMusic | null) => void
+  publicCopy?: boolean
+  disabled?: boolean
+}) {
+  let value: PrivateMusic | StoryMusic | null = null
+  try {
+    if (rawValue) value = validateMusic(rawValue, !publicCopy)
+  } catch {
+    // Untrusted or future API formats must not crash the surrounding journal.
+  }
   const [open, setOpen] = useState(false)
   const [url, setUrl] = useState('')
   const [entity, setEntity] = useState<string | null>(null)
@@ -106,57 +128,114 @@ export function WritingMusic() {
         aria-expanded={open}
         onClick={() => setOpen(!open)}
       >
-        {entity ? '♫ Writing soundtrack' : '♫ Add writing music'}
+        {entity || value ? '♫ Soundtrack' : '♫ Add writing music'}
       </button>
       {open && (
         <div className="writing-music-options">
           <p>
-            Choose a track, album or playlist. Music is for this writing session
-            only; it is not saved or published.
+            {publicCopy
+              ? 'This story includes a Spotify selection approved by its author.'
+              : onChange
+                ? 'Choose a track, album or playlist. Saved privately with your entry; sharing is a separate choice.'
+                : 'Choose a track, album or playlist. Music is for this writing session only; it is not saved or published.'}
           </p>
-          <a
-            href="https://charts.spotify.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Browse Spotify charts ↗
-          </a>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault()
-              const next = spotifyEntity(url)
-              if (!next) {
-                setError('Paste a Spotify track, album or playlist link.')
-                return
-              }
-              setError('')
-              if (next !== entity) setLoaded(false)
-              setEntity(next)
-            }}
-          >
-            <label>
-              Spotify link
-              <input
-                type="url"
-                value={url}
-                onChange={(event) => setUrl(event.target.value)}
-                placeholder="https://open.spotify.com/track/…"
-                required
-              />
-            </label>
-            <small>
-              Loading connects to Spotify. Spotify controls playback, previews
-              and login requirements. Your journal text is never sent.
-            </small>
-            <button type="submit" className="button secondary">
-              Load Spotify player
-            </button>
-          </form>
+          {!publicCopy && (
+            <>
+              <a
+                href="https://charts.spotify.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Browse Spotify charts ↗
+              </a>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  const next = spotifyEntity(url)
+                  if (!next) {
+                    setError('Paste a Spotify track, album or playlist link.')
+                    return
+                  }
+                  setError('')
+                  if (next !== entity) setLoaded(false)
+                  setEntity(next)
+                  setOpen(false)
+                  const [, kind, id] = next.split(':')
+                  onChange?.({
+                    provider: 'spotify',
+                    kind: kind as StoryMusic['kind'],
+                    id,
+                    share: false,
+                  })
+                }}
+              >
+                <label>
+                  Spotify link
+                  <input
+                    type="url"
+                    value={url}
+                    onChange={(event) => setUrl(event.target.value)}
+                    placeholder="https://open.spotify.com/track/…"
+                    required
+                    disabled={disabled}
+                  />
+                </label>
+                <button
+                  type="submit"
+                  className="button secondary"
+                  disabled={disabled}
+                >
+                  Load Spotify player
+                </button>
+              </form>
+            </>
+          )}
+          {value && (
+            <>
+              <a
+                href={musicUrl(value)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open selected music in Spotify ↗
+              </a>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => {
+                  setError('')
+                  const next = `spotify:${value.kind}:${value.id}`
+                  if (next !== entity) setLoaded(false)
+                  setEntity(next)
+                  setOpen(false)
+                }}
+              >
+                Load selected music
+              </button>
+              {onChange && 'share' in value && (
+                <label className="row">
+                  <input
+                    type="checkbox"
+                    checked={value.share}
+                    disabled={disabled}
+                    onChange={(event) =>
+                      onChange({ ...value, share: event.target.checked })
+                    }
+                  />
+                  Include this Spotify selection in my next public snapshot
+                </label>
+              )}
+            </>
+          )}
+          <small>
+            Loading connects to Spotify, which controls previews, login and
+            playback availability. Your writing is never sent. No autoplay.
+          </small>
         </div>
       )}
       {error && <p role="alert">{error}</p>}
       <div ref={host} />
-      {entity && (
+      {(entity || (value && onChange)) && (
         <div className="row">
           <button
             type="button"
@@ -169,16 +248,19 @@ export function WritingMusic() {
           <small>
             Focus this button and press Space. Typing is never interrupted.
           </small>
-          <button
-            type="button"
-            className="text-button"
-            onClick={() => {
-              setEntity(null)
-              setLoaded(false)
-            }}
-          >
-            Remove music
-          </button>
+          {!publicCopy && (
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => {
+                setEntity(null)
+                setLoaded(false)
+                onChange?.(null)
+              }}
+            >
+              Remove music
+            </button>
+          )}
         </div>
       )}
     </section>
