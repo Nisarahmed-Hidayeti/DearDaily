@@ -2,13 +2,16 @@
 import { readFileSync } from 'node:fs'
 import { imageSize } from 'image-size'
 import { expect, it } from 'vitest'
-import { photographicCovers, profileCovers } from './covers'
+import { photographicCovers, profileCovers, coverThumbnail } from './covers'
 import { documentFromText, validateDocument } from './document'
 it('bundles licensed photographs and public-domain museum artwork, with validated document IDs and credits', () => {
   expect(photographicCovers).toHaveLength(15)
   for (const cover of photographicCovers) {
     const bytes = readFileSync('public' + cover.src)
     expect(imageSize(bytes).type).toBe('jpg')
+    expect(imageSize(readFileSync('public' + coverThumbnail(cover))).type).toBe(
+      'jpg',
+    )
     expect(cover.credit.length).toBeGreaterThan(2)
     expect(cover.source).toMatch(
       /^https:\/\/www\.(pexels\.com\/photo|metmuseum\.org\/art\/collection\/search)\//,

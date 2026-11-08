@@ -51,6 +51,8 @@ export async function hostedVoiceChecks(
         second.data.user?.id === bId &&
         aId !== bId,
     )
+    const ownerAccess = await a.rpc('my_owner_access')
+    check(!ownerAccess.error && ownerAccess.data?.owner === true)
     stage = 'private audio save and isolation'
     let row = await saveEntry(
       a,
@@ -79,6 +81,22 @@ export async function hostedVoiceChecks(
     const wav = encodeWav(new Float32Array(320000).fill(0.25)),
       id = await uploadVoice(a, row.id, wav)
     check(!!id)
+    const bDirect = await b.storage
+      .from('deardaily-voice-private')
+      .download(id + '.wav')
+    check(!!bDirect.error)
+    const aDirect = await a.storage
+      .from('deardaily-voice-private')
+      .download(id + '.wav')
+    check(!!aDirect.error)
+    const bSign = await b.storage
+      .from('deardaily-voice-private')
+      .createSignedUrl(id + '.wav', 60)
+    check(!!bSign.error)
+    const anonList = await anonymous.storage
+      .from('deardaily-voice-private')
+      .list()
+    check(!!anonList.error || anonList.data?.length === 0)
     let note: VoiceNote = {
       id,
       title: 'Approved synthetic excerpt',
@@ -94,6 +112,40 @@ export async function hostedVoiceChecks(
       row.version,
     )
     check(row.voice_notes?.[0].end === 19)
+    const bAudio = await uploadVoice(b, other.id, wav)
+    check(!!bAudio && bAudio !== id)
+    const bNote: VoiceNote = {
+      id: bAudio,
+      title: 'Private B recording',
+      start: 0,
+      end: 2,
+      share: false,
+    }
+    const bSaved = await saveEntry(
+      b,
+      bId,
+      other.id,
+      { ...draftOf(other), voice_notes: [bNote] },
+      other.version,
+    )
+    check(bSaved.voice_notes?.[0].id === bAudio)
+    let ownerBlocked = false
+    try {
+      await voiceUrl(a, bAudio)
+    } catch {
+      ownerBlocked = true
+    }
+    check(ownerBlocked)
+    const ownerPrivate = await a
+      .from('journal_entries')
+      .select('id,voice_notes')
+      .eq('id', other.id)
+    check(!ownerPrivate.error && ownerPrivate.data?.length === 0)
+    const ownerSpoof = await a
+      .from('journal_entries')
+      .update({ voice_notes: [bNote] })
+      .eq('id', row.id)
+    check(!!ownerSpoof.error)
     const hidden = await b
       .from('journal_entries')
       .select('id,voice_notes')
@@ -153,6 +205,10 @@ export async function hostedVoiceChecks(
       .select('user_id')
       .eq('id', row.id)
     check(!!leak.error)
+    const directPublic = await anonymous.storage
+      .from('deardaily-voice-public')
+      .download(copy!.id + '.wav')
+    check(!!directPublic.error)
     const getPublic = () =>
       fetch(
         `${authConfig!.url}/functions/v1/voice-gateway?public=${copy!.id}`,
@@ -209,11 +265,7 @@ export async function hostedVoiceChecks(
       [a, ids[0], aId],
       [b, ids[1], bId],
     ] as const) {
-      const pub = await client
-        .from('public_stories')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', who)
+      const pub = await client.from('public_stories').delete().eq('id', id)
       if (pub.error) cleanup = false
       const removed = await client
         .from('journal_entries')

@@ -31,10 +31,7 @@ export default function VoiceSecurityCheck() {
         user = identity.data.user
       const allowed =
         slot === 'A'
-          ? [
-              'nisarahmedhidayeti@gmail.com',
-              'nisarahmedhidayeti+deardaily-beta@gmail.com',
-            ]
+          ? ['nisarahmedhidayeti@gmail.com']
           : ['deardailywebsite@gmail.com', 'hidayetiahmed@gmail.com']
       if (
         identity.error ||

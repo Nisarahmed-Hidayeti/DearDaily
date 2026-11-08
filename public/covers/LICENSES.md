@@ -31,3 +31,7 @@ Retrieved November 8, 2026 from The Metropolitan Museum of Art Open Access API. 
 - `met-heart-andes.jpg` — Heart of the Andes, Frederic Edwin Church. [Museum record](https://www.metmuseum.org/art/collection/search/10481).
 - `met-lake-george-new-york.jpg` — Lake George, New York, John Frederick Kensett. [Museum record](https://www.metmuseum.org/art/collection/search/11315).
 - `met-beeches.jpg` — Study of Beeches, John Frederick Kensett. [Museum record](https://www.metmuseum.org/art/collection/search/11322).
+
+For the reading-studio release, the six Met originals were re-fetched from their verified museum API records and optimized locally to a maximum 1920px edge (JPEG quality 85) for sharper desktop covers without shipping full archival files. No attribution or public-domain status was changed.
+
+The picker uses separate locally bundled `-thumb.jpg` museum previews, so opening the gallery does not load every full-size artwork. Each thumbnail has the same museum source and license as its corresponding cover.

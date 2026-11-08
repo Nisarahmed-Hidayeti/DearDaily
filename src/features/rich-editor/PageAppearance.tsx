@@ -9,7 +9,7 @@ import {
   type WritingDocument,
   type CoverPreset,
 } from './document'
-import { photographicCovers, type PhotoCoverId } from './covers'
+import { photographicCovers, coverThumbnail, type PhotoCoverId } from './covers'
 import { PageCover } from './PageCover'
 export function PageAppearance({
   document,
@@ -182,7 +182,11 @@ export function PageAppearance({
                             aria-pressed={draft.page?.cover === c.id}
                             onClick={() => choosePhoto(c.id)}
                           >
-                            <img src={c.src} alt="" loading="lazy" />
+                            <img
+                              src={coverThumbnail(c)}
+                              alt=""
+                              loading="lazy"
+                            />
                             <span className="sr-only">{c.name}</span>
                           </button>
                         ))}

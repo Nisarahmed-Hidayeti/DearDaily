@@ -4,6 +4,7 @@ export const photographicCovers = [
     name: 'View from Mount Holyoke, Northampton, Massachusetts, after a Thunderstorm—The Oxbow',
     collection: 'The Met · Hudson River School',
     src: '/covers/met-oxbow.jpg',
+    thumbnail: '/covers/met-oxbow-thumb.jpg',
     credit: 'Thomas Cole',
     source: 'https://www.metmuseum.org/art/collection/search/10497',
   },
@@ -12,6 +13,7 @@ export const photographicCovers = [
     name: 'Lake George',
     collection: 'The Met · Hudson River School',
     src: '/covers/met-lake-george.jpg',
+    thumbnail: '/covers/met-lake-george-thumb.jpg',
     credit: 'John Frederick Kensett',
     source: 'https://www.metmuseum.org/art/collection/search/11311',
   },
@@ -20,6 +22,7 @@ export const photographicCovers = [
     name: "The Rocky Mountains, Lander's Peak",
     collection: 'The Met · Hudson River School',
     src: '/covers/met-landers-peak.jpg',
+    thumbnail: '/covers/met-landers-peak-thumb.jpg',
     credit: 'Albert Bierstadt',
     source: 'https://www.metmuseum.org/art/collection/search/10154',
   },
@@ -28,6 +31,7 @@ export const photographicCovers = [
     name: 'Heart of the Andes',
     collection: 'The Met · Hudson River School',
     src: '/covers/met-heart-andes.jpg',
+    thumbnail: '/covers/met-heart-andes-thumb.jpg',
     credit: 'Frederic Edwin Church',
     source: 'https://www.metmuseum.org/art/collection/search/10481',
   },
@@ -36,6 +40,7 @@ export const photographicCovers = [
     name: 'Lake George, New York',
     collection: 'The Met · Hudson River School',
     src: '/covers/met-lake-george-new-york.jpg',
+    thumbnail: '/covers/met-lake-george-new-york-thumb.jpg',
     credit: 'John Frederick Kensett',
     source: 'https://www.metmuseum.org/art/collection/search/11315',
   },
@@ -44,6 +49,7 @@ export const photographicCovers = [
     name: 'Study of Beeches',
     collection: 'The Met · Hudson River School',
     src: '/covers/met-beeches.jpg',
+    thumbnail: '/covers/met-beeches-thumb.jpg',
     credit: 'John Frederick Kensett',
     source: 'https://www.metmuseum.org/art/collection/search/11322',
   },
@@ -135,3 +141,7 @@ export function isPhotoCover(value: unknown): value is PhotoCoverId {
 export const profileCovers = photographicCovers.filter((c) =>
   ['forest-light', 'pacific-dusk', 'cafe-memory'].includes(c.id),
 )
+
+export function coverThumbnail(cover: (typeof photographicCovers)[number]) {
+  return 'thumbnail' in cover ? cover.thumbnail : cover.src
+}

@@ -1,9 +1,9 @@
-# Reading studio progress
+# Reading studio release status
 
-Branch: `feat/deardaily-reading-studio`. The development migrations/gateway and honest Spotify fallback were approved in chat. Hosted application and activation still require the documented preflight/security gates.
+Branch: `feat/deardaily-reading-studio`, PR #11.
 
-Completed locally: authenticated landing navigation; six Met public-domain covers and compact collection gallery; uniform private checkmark calendar; 16 moods and 12 categories behind the studio flag; voice recording/upload UI at the document end, visible excerpts and private/public audio pipeline behind its flag. Existing headings/checklists and optimistic autosave are retained.
+Implemented: authenticated landing navigation; 15 curated covers including six public-domain Met artworks; compact gallery with small thumbnails; wider document/overlapping icon; uniform private writing checkmarks; 16 moods and 12 private categories; voice recording/upload and visible excerpts at the document end; exact approved public audio copies; deliberate sharing and unpublishing. Existing rich editing, photos, themes, Focus Mode and autosave are preserved.
 
-Validation: 257 frontend tests at the previous full checkpoint; 386 database assertions after audio/quota/snapshot fixes; 25 real local A/B/anonymous API checks with exact fixture cleanup; TypeScript, ESLint and build passed. New hosted-check UI is development-only. Final head/CI and hosted results are recorded in READING_STUDIO_REVIEW.md as they finish.
+Approved development migrations and voice-gateway are applied once to deardaily-dev. **38 hosted A/B/owner/anonymous/direct-Storage checks passed**, plus 386 pgTAP assertions and 25 local real-API checks. The full frontend checkpoint was 257 tests; final CI and website deployment receipts are in READING_STUDIO_REVIEW.md.
 
-Still incomplete: automatic Spotify playlist extraction/exact Spotify song excerpts (the user approved the normal-player/owned-audio fallback), remaining Smithsonian/USDA artwork collections, and physical-device/microphone hardware checks. No claim of guaranteed Spotify playback or complete device compatibility.
+Agreed Spotify fallback: normal track/playlist player below the cover. Automatic Spotify account/playlist extraction and guaranteed Spotify song excerpts are unfinished and not advertised. Exact excerpts work for owned uploaded audio/recordings. Smithsonian/USDA artwork collections and physical-phone/microphone hardware QA remain future work. Current audio beta limits and operational gaps are explicit in the review.

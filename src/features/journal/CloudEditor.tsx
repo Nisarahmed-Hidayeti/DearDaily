@@ -806,14 +806,16 @@ function EntryForm({
               {richEditorEnabled && (
                 <>
                   <p>
-                    These page details will also be public:{' '}
-                    {entryIcon(row?.writing_document, row?.page_icon) ??
-                      'no icon'}{' '}
-                    ·{' '}
-                    {row?.writing_document?.page?.cover ??
-                      row?.cover_preset ??
-                      'no cover'}
-                    . No private mood, date or tags are copied.
+                    Page icon:{' '}
+                    {entryIcon(row?.writing_document, row?.page_icon) ?? 'None'}
+                    {' · '}
+                    {row?.writing_document?.page
+                      ? row.writing_document.page.cover === 'upload'
+                        ? 'Custom photo cover'
+                        : 'Gallery cover'
+                      : row?.cover_preset && row.cover_preset !== 'none'
+                        ? 'Color cover'
+                        : 'No cover'}
                   </p>
                   <p>
                     {row?.body.slice(0, 180)}

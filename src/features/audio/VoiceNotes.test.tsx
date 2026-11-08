@@ -44,6 +44,7 @@ it('does not retain a private signed player when switching accounts', async () =
   const { rerender } = render(<VoicePlayer note={note} />)
   await userEvent.click(screen.getByRole('button', { name: '▶ Listen' }))
   expect(document.querySelector('audio')).not.toBeNull()
+  expect(document.querySelector('audio')?.autoplay).toBe(true)
   auth.session.user.id = 'owner-b'
   rerender(<VoicePlayer note={note} />)
   expect(document.querySelector('audio')).toBeNull()

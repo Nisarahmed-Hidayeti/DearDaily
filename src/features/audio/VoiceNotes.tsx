@@ -62,6 +62,7 @@ export function VoicePlayer({
         <audio
           ref={audio}
           controls
+          autoPlay={!localSource}
           preload="metadata"
           src={localSource || url}
           aria-label={note.title || 'Voice note'}
