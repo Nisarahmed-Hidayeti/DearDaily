@@ -1,4 +1,6 @@
 import { uploadEntryPhoto } from './entryPhotoUpload'
+import { WritingMusic } from '../music/WritingMusic'
+import { persistentMusicEnabled, publicMusic, musicUrl } from '../music/music'
 import { entryIcon } from '../rich-editor/emojis'
 import { EntryDetails } from './EntryDetails'
 import {
@@ -20,7 +22,7 @@ import {
   myProfile,
 } from '../community/communityApi'
 import type { PublicProfile } from '../community/communityApi'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Eye, Feather, LockKeyhole, X } from 'lucide-react'
 import type { Mood } from '../../data/demo'
 import { Modal, PageHeading } from '../../components/Shared'
@@ -37,11 +39,41 @@ import { documentFromText, documentText } from '../rich-editor/document'
 
 export default function CloudEditor() {
   const { id } = useParams()
-  return <EntryForm key={id ?? 'new'} existingId={id} />
+  const location = useLocation()
+  // Adopt the saved URL without replacing the live editor or upload dialog.
+  // A different existing entry still receives an independent component lifetime.
+  const [{ newId, routeKey }, setNewPage] = useState(() => ({
+    newId: crypto.randomUUID(),
+    routeKey: location.key,
+  }))
+  if (!id && routeKey !== location.key)
+    setNewPage({ newId: crypto.randomUUID(), routeKey: location.key })
+  return <EntryForm key={id ?? newId} existingId={id} newId={newId} />
 }
-function EntryForm({ existingId }: { existingId?: string }) {
-  const state = useJournalEntry(existingId)
+function EntryForm({
+  existingId,
+  newId,
+}: {
+  existingId?: string
+  newId?: string
+}) {
+  const state = useJournalEntry(existingId, newId)
   const { draft, setDraft, ready, busy, error, dirty, row, published } = state
+  useEffect(() => {
+    const shortcut = (event: KeyboardEvent) => {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.altKey &&
+        event.key.toLowerCase() === 's'
+      ) {
+        event.preventDefault()
+        if (!event.repeat && !event.isComposing && ready && !busy && dirty)
+          void state.save(true)
+      }
+    }
+    window.addEventListener('keydown', shortcut)
+    return () => window.removeEventListener('keydown', shortcut)
+  }, [state, ready, busy, dirty])
   const [preview, setPreview] = useState(false)
   const { focus, setFocus } = useWritingFocus()
   const { appearance } = useAppearance()
@@ -333,6 +365,15 @@ function EntryForm({ existingId }: { existingId?: string }) {
                 />
               )}
             </>
+          )}
+          {!preview && (
+            <WritingMusic
+              value={persistentMusicEnabled ? draft.music : undefined}
+              disabled={!ready}
+              onChange={
+                persistentMusicEnabled ? (music) => patch({ music }) : undefined
+              }
+            />
           )}
           <div className="row spread paper-meta">
             <label>
@@ -698,6 +739,24 @@ function EntryForm({ existingId }: { existingId?: string }) {
                     ? `@${profile.username}`
                     : 'Anonymous writer'}
                 </dd>
+                {persistentMusicEnabled && (
+                  <>
+                    <dt>Public music</dt>
+                    <dd>
+                      {publicMusic(row?.music) ? (
+                        <a
+                          href={musicUrl(publicMusic(row?.music)!)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Approved Spotify {row?.music?.kind}
+                        </a>
+                      ) : (
+                        'None — your music stays private'
+                      )}
+                    </dd>
+                  </>
+                )}
               </dl>
 
               <h3>{row?.title}</h3>

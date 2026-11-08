@@ -20,9 +20,12 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - name: Isolate CI Supabase ports and project
+        id: ci_supabase
+        run: node scripts/configure-ci-supabase.mjs
       - name: Start isolated local Supabase (no hosted credentials)
         run: npx supabase start
       - run: npx supabase db reset
       - run: npx supabase test db
-      - if: always()
+      - if: always() && steps.ci_supabase.outcome == 'success'
         run: npx supabase stop --no-backup

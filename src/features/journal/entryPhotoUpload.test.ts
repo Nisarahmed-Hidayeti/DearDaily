@@ -55,3 +55,23 @@ it('reuses the existing private entry without creating another draft', async () 
     1,
   )
 })
+it('waits for the shared initial save before uploading while autosave is pending', async () => {
+  let confirm!: (row: JournalEntry) => void
+  const pending = new Promise<JournalEntry>((resolve) => {
+    confirm = resolve
+  })
+  const save = vi.fn(() => pending)
+  vi.mocked(uploadPhoto).mockResolvedValue('asset')
+  const upload = uploadEntryPhoto(client, file(), 0, null, save)
+  await Promise.resolve()
+  await Promise.resolve()
+  expect(uploadPhoto).not.toHaveBeenCalled()
+  confirm({ id: 'pending-draft' } as JournalEntry)
+  await expect(upload).resolves.toBe('asset')
+  expect(uploadPhoto).toHaveBeenCalledWith(
+    client,
+    'pending-draft',
+    expect.anything(),
+    0,
+  )
+})

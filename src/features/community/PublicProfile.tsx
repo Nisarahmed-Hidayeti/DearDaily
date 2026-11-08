@@ -1,3 +1,4 @@
+import { publicStreaksEnabled } from './publicStreakConfig'
 import { photographicCovers } from '../rich-editor/covers'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -95,6 +96,13 @@ export default function PublicProfile() {
               title={profile.display_name}
             />
             <p className="profile-bio">{profile.bio}</p>
+            {publicStreaksEnabled &&
+              typeof profile.public_streak === 'number' && (
+                <p className="muted">
+                  Shared writing streak: {profile.public_streak}{' '}
+                  {profile.public_streak === 1 ? 'day' : 'days'}
+                </p>
+              )}
             <p className="muted">
               {count} published {count === 1 ? 'story' : 'stories'}
               {profile.joined_month

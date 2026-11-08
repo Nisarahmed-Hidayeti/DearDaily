@@ -137,7 +137,7 @@ export default function Landing() {
           </Link>
           <p className="muted">
             {journalEnabled
-              ? 'Closed beta: sign in to save private entries and deliberately share stories.'
+              ? 'Sign in to save private entries and deliberately share stories.'
               : 'Explore the frontend preview. Drafts are temporary.'}
           </p>
         </section>

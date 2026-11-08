@@ -112,6 +112,7 @@ export function PageAppearance({
                 disabled={!onUpload || uploading}
                 onChange={async (e) => {
                   const f = e.target.files?.[0]
+                  e.currentTarget.value = ''
                   if (!f || !onUpload) return
                   setUploading(true)
                   setError('')
@@ -122,9 +123,12 @@ export function PageAppearance({
                       page: { cover: 'upload', assetId: id, position: 50 },
                     }))
                     setCover(null)
-                  } catch {
+                  } catch (failure) {
                     setError(
-                      'Cover upload failed. Your previous cover is unchanged.',
+                      (failure instanceof Error
+                        ? failure.message
+                        : 'Cover upload failed.') +
+                        ' Your previous cover is unchanged.',
                     )
                   } finally {
                     setUploading(false)

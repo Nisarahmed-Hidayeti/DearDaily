@@ -15,6 +15,9 @@ import { lazy, Suspense } from 'react'
 const EditorWorkshop = import.meta.env.DEV
   ? lazy(() => import('./features/rich-editor/EditorPreview'))
   : null
+const OwnerSecurityCheck = import.meta.env.DEV
+  ? lazy(() => import('./features/auth/OwnerSecurityCheck'))
+  : null
 const RegistrationSecurityCheck = import.meta.env.DEV
   ? lazy(() => import('./features/auth/RegistrationSecurityCheck'))
   : null
@@ -37,6 +40,7 @@ import {
   RequireAccount,
 } from './features/auth/AuthPages'
 import Account from './features/auth/Account'
+import OwnerAdmin from './features/admin/OwnerAdmin'
 import SecurityCheck from './features/auth/SecurityCheck'
 import JournalSecurityCheck from './features/auth/JournalSecurityCheck'
 import { ThemeProvider } from './features/theme/ThemeProvider'
@@ -72,6 +76,14 @@ function ThemedRoutes() {
           ))}
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route element={<Shell />}>
+            <Route
+              path="/account/owner"
+              element={
+                <RequireAccount>
+                  <OwnerAdmin />
+                </RequireAccount>
+              }
+            />
             {import.meta.env.DEV && EditorWorkshop && (
               <Route
                 path="/dev/editor-workshop"
@@ -88,6 +100,20 @@ function ThemedRoutes() {
             )}
             {import.meta.env.DEV && (
               <Route path="/dev/security-check" element={<SecurityCheck />} />
+            )}
+            {import.meta.env.DEV && OwnerSecurityCheck && (
+              <Route
+                path="/dev/owner-check"
+                element={
+                  <Suspense
+                    fallback={
+                      <LoadingState>Preparing owner verification…</LoadingState>
+                    }
+                  >
+                    <OwnerSecurityCheck />
+                  </Suspense>
+                }
+              />
             )}
             {import.meta.env.DEV && RegistrationSecurityCheck && (
               <Route

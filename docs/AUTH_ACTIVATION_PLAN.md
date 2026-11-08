@@ -1,6 +1,6 @@
 # Authentication activation plan — November 7
 
-Status: NOT ACTIVATED. No hosted CAPTCHA, signup, redirect, production environment or website deployment changes have been applied by the current work.
+Current status (November 8): protected public signup, Google login, CAPTCHA and custom SMTP are active from the previously approved beta rollout. Email confirmation remains required; anonymous Auth is off. Real verification/recovery and live login were confirmed. The plan below is historical; see REGISTRATION_LAUNCH_GATE.md for activation evidence. The new owner/streak/music interfaces remain production-disabled pending final release. The 53 hosted owner/MFA checks and 16 hosted music checks have now passed; see OWNER_AND_STREAK_REVIEW.md and WRITING_MUSIC_REVIEW.md.
 
 ## Prepared locally
 
@@ -103,3 +103,41 @@ Docker is currently stopped and noninteractive startup requires a system passwor
 ### Approved beta publication checkpoint — November 8
 
 Owner approved publishing the prepared privacy and beta-terms pages with deardailywebsite@gmail.com as contact, and started Docker. A fresh local pgTAP run passed all 264 checks across six files without resetting data or applying hosted migrations. Latest main was merged into the existing feature branch; the sole conflict was the evidence document's appended timeline, preserved in full. Source files were unchanged by the merge, so the 213-test/TypeScript/lint/build result applies to the resulting application code. Publishing these pages does not by itself enable signup or change the Google audience. Audio and optional public streaks are excluded and remain unfinished.
+
+### Reviewed update deployed; activation pending
+
+PR #9 merged after all GitHub checks passed as `a40937399b37854f84a31cc39d34c1050db4104b`. Netlify's dashboard verified this exact main commit published. Live `/privacy` and `/terms` render the owner-approved pages. No signup activation occurred: public settings still confirm disable_signup=true, email confirmation required, anonymous_users=false, and email/Google providers enabled.
+
+Netlify production flags were inspected individually: journals, community, rich editor and Renaissance data are true; signup is false. VITE_ENABLE_MEDIA is absent, so upload activation remains pending despite passing the 47 hosted media checks. Google's live homepage/privacy/terms URLs and `deardailyy.netlify.app` authorized domain are prepared but unsaved. The owner has been asked for one grouped protected-beta activation approval covering those Google settings/audience, hosted signup and the frontend signup/media flags, with no database or Storage-policy changes. Stop on Google verification requirements or failed live tests.
+
+### Approved activation attempt and fail-closed follow-up
+
+Owner explicitly approved protected beta activation. Google branding URLs and the exact live authorized domain were saved; Google Audience now confirms In production. No additional verification was requested for this basic-profile configuration. Netlify production-only signup/media values were set true (other contexts false), and deploy `6aefe6af819df08b1dec63b7` published the already reviewed `a409373` application code. Hosted signup was deliberately kept OFF until live checks.
+
+Live Google login with the approved DearDaily test identity returned to the confirmed account, and the real cloud editor displayed the enabled photo control. A synthetic PNG upload failed with `Photo upload not confirmed`, while all writing remained intact. The exact disposable entry `8f726bc1-a498-42d0-90cc-9f36dbd9d147` was deleted through its own confirmation and the app returned to /app. No real writing was used.
+
+A credential-free gateway POST probe confirmed localhost reaches authentication rejection (401 Sign in required), while the live origin is rejected before authentication (403 Origin unavailable). OPTIONS alone was insufficient evidence: unknown origins receive a wildcard preflight, but POST still enforces the explicit origin allowlist. The deployed gateway defaults to localhost-only unless MEDIA_ALLOWED_ORIGINS is configured. Owner approval was requested to retain localhost and add exactly https://deardailyy.netlify.app; no gateway/Storage/RLS changes were made.
+
+The in-app live Turnstile timed out, so a normal-browser existing-account login was requested rather than bypassing verification. Per the approved stop condition, hosted signup remained closed and both production frontend signup/media flags were returned false pending successful retests. Google login remains enabled. This is not a completed registration activation and must not be reported as open registration. Existing 213 frontend/264 pgTAP/54 journal/47 media results remain valid within their tested environments; the localhost media suite did not establish live-origin permission.
+
+### Protected beta registration opened — November 8
+
+Owner confirmed fresh live normal-browser password login and explicitly approved the exact live media origin. Saved MEDIA_ALLOWED_ORIGINS retains localhost and adds only https://deardailyy.netlify.app. POST probes now require authentication for both approved origins (401) and still reject an unapproved origin (403). No bucket/RLS/function-code change was made. Production-only signup/media flags were restored true and the reviewed main code redeployed.
+
+Live synthetic entry `81605a34-40db-4d7f-880e-c98435ca8bf8` passed photo upload with original text intact, save/reload with image loaded, explicit photo approval, anonymous-byline publication, public image rendering and unpublish. Anonymous API checks confirmed no public row after unpublish and no private entry access. The exact synthetic entry was deleted through its own confirmation; normal app returned to /app.
+
+Only Allow new users to sign up was then enabled and saved in deardaily-dev. Public settings verify signup open, email confirmation required, anonymous Auth OFF, and email/Google ON. A missing-CAPTCHA signup probe returned HTTP 400 with `error_code=captcha_failed`, with neither a user nor session created. Note the raw API uses error_code (its numeric code is HTTP status); the SDK normalizes the error. Google remains In production. Owner/admin and optional public-streak features are NOT included in this activation and remain off pending their separate reviewed migrations and MFA tests.
+
+### Approved owner/streak migration application
+
+The approved two migrations and permanent verified-owner assignment committed only to deardaily-dev after CI and clean hosted preflight. Postflight confirmed one owner matching the approved confirmed email (receipt cb18d80862df), four new forced-RLS tables, zero ordinary-client table grants, zero anonymous new-RPC execution grants, and zero shared streaks. Migration history was absent and left untouched. Exact query receipts and SQL hashes are in OWNER_AND_STREAK_REVIEW.md. No real journal row, existing owner policy, bucket setting or signup flag changed.
+
+Local owner/streak flags are true only in ignored .env.local; production flags remain off. The dev verification tab retained the approved distinct Google test-writer session in memory. Google requested identity verification during the owner's localhost login; owner handoff is pending before pre-MFA capture and TOTP setup. No TOTP enrollment has been performed by the assistant. New privileged actions still require actual owner AAL2 and have not passed hosted tests yet.
+
+The deployed profile client's writeback contract needs the reviewed compatibility correction 20261108000300. It restores the original own-profile RPC shape; new streak code reads its server-owned count separately. No rows or permissions change. Approval was requested before hosted application. Local validation after this correction and the DEV-only owner harness: 223 frontend tests, 332 pgTAP checks, TypeScript, ESLint and build passed. The owner test harness and session-capture strings were verified absent from the production bundle. PR #10 remains draft; owner/streak production activation awaits correction approval, real owner MFA, hosted isolation tests and exact fixture cleanup.
+
+### Profile compatibility restored and owner MFA handoff
+
+The separately approved third migration committed only to deardaily-dev. Its preflight source matched, and postflight confirmed the exact original writable profile RPC response, authenticated execution retained, anonymous execution denied and the single owner unchanged. SQL receipt: 260a1455-283c-4131-b406-231e9e79a6a1. No row, bucket, role or registration setting changed.
+
+The expired owner OAuth callback was restarted using the already verified Google identity. The confirmed owner and distinct test-writer sessions are now retained in the DEV-only verification tab, including the owner's pre-MFA session for negative tests. The owner authenticator page is open for manual QR/code handling; no enrollment credential is entered or read by the assistant. Keep PR #10 draft and production owner/streak flags OFF until real MFA, hosted security checks and exact fixture cleanup pass.

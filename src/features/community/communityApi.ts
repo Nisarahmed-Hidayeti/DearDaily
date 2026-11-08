@@ -1,3 +1,5 @@
+import { publicStreaksEnabled } from './publicStreakConfig'
+import { musicFields } from '../music/music'
 import { appearanceEnabled } from '../appearance/appearance'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PublicStory } from '../journal/journalApi'
@@ -17,6 +19,7 @@ export const avatars: Record<string, string> = {
   book: '▤',
 }
 export interface PublicProfile {
+  public_streak?: number | null
   cover_id?: string | null
   username: string
   display_name: string
@@ -33,10 +36,12 @@ export interface StoryMetadata {
 export type CommunityStory = PublicStory & Partial<StoryMetadata>
 export const profileFields =
   'username,display_name,bio,avatar,visible,joined_month' +
-  (appearanceEnabled ? ',cover_id' : '')
+  (appearanceEnabled ? ',cover_id' : '') +
+  (publicStreaksEnabled ? ',public_streak' : '')
 export const storyFields: string =
   'id,title,body,published_at,public_username,public_category,public_tags' +
-  richPublicFields
+  richPublicFields +
+  musicFields
 export function validUsername(value: string) {
   return (
     /^[a-z][a-z0-9_]{2,23}$/.test(value) &&
@@ -62,7 +67,15 @@ export async function myProfile(
 ): Promise<PublicProfile | null> {
   const { data, error } = await client.rpc('my_public_profile')
   if (error) throw new Error('Profile unavailable')
-  return data
+  if (!data || !publicStreaksEnabled) return data
+  // Keep the legacy RPC response writable for already-deployed clients.
+  const streak = await client
+    .from('public_profiles')
+    .select('public_streak')
+    .eq('username', data.username)
+    .single()
+  if (streak.error) throw new Error('Profile unavailable')
+  return { ...data, public_streak: streak.data.public_streak }
 }
 export async function saveProfile(
   client: SupabaseClient,
@@ -73,9 +86,11 @@ export async function saveProfile(
     throw new Error(
       'Choose 3–24 lowercase letters, numbers or underscores, starting with a letter. Reserved names are unavailable.',
     )
+  const { public_streak: readOnlyStreak, ...writable } = profile
+  void readOnlyStreak
   const query = previous
-    ? client.from('public_profiles').update(profile).eq('username', previous)
-    : client.from('public_profiles').insert(profile)
+    ? client.from('public_profiles').update(writable).eq('username', previous)
+    : client.from('public_profiles').insert(writable)
   // PostgREST representation responses need the hidden primary key. Keep the
   // write minimal, then verify only the approved fields through the own-row RPC.
   const { error } = await query
@@ -86,7 +101,7 @@ export async function saveProfile(
   const saved = await myProfile(client)
   if (
     !saved ||
-    !(Object.keys(profile) as (keyof PublicProfile)[]).every(
+    !(Object.keys(writable) as (keyof PublicProfile)[]).every(
       (key) => saved[key] === profile[key],
     )
   )

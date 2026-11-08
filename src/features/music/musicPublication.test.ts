@@ -1,0 +1,42 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { expect, it, vi } from 'vitest'
+import { publishStory, type JournalEntry } from '../journal/journalApi'
+vi.mock('./music', async (original) => ({
+  ...(await original<typeof import('./music')>()),
+  persistentMusicEnabled: true,
+  musicFields: ',music',
+}))
+it('publishes only approved canonical music through the actual API', async () => {
+  const insert = vi.fn()
+  const q = {
+    insert: (value: unknown) => {
+      insert(value)
+      return q
+    },
+    select: () => q,
+    returns: () => q,
+    single: async () => ({ data: { id: 'synthetic' }, error: null }),
+  }
+  const client = { from: () => q } as unknown as SupabaseClient
+  const entry = {
+    id: 'synthetic',
+    title: 'Public',
+    body: 'Approved writing',
+    music: {
+      provider: 'spotify',
+      kind: 'track',
+      id: '4uLU6hMCjMI75M1A2tKUQC',
+      share: false,
+    },
+  } as JournalEntry
+  await publishStory(client, 'A', entry, false)
+  expect(insert.mock.calls[0][0].music).toBeNull()
+  entry.music!.share = true
+  await publishStory(client, 'A', entry, false)
+  expect(insert.mock.calls[1][0].music).toEqual({
+    provider: 'spotify',
+    kind: 'track',
+    id: entry.music!.id,
+  })
+  expect(insert.mock.calls[1][0].music).not.toHaveProperty('share')
+})
