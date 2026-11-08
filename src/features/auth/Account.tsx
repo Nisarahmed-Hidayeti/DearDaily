@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
 import { PageHeading } from '../../components/Shared'
+import { OwnerControlsLink } from '../admin/OwnerAdmin'
+import ModerationNotices from '../admin/ModerationNotices'
 
 export default function Account() {
   const { client, session, signOut } = useAuth()
@@ -168,7 +170,9 @@ export default function Account() {
           </Link>
         </div>
       )}
+      <ModerationNotices />
       <div className="account-actions">
+        <OwnerControlsLink />
         <Link className="button secondary" to="/app/settings">
           Appearance settings
         </Link>

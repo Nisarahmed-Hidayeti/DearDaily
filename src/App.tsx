@@ -37,6 +37,7 @@ import {
   RequireAccount,
 } from './features/auth/AuthPages'
 import Account from './features/auth/Account'
+import OwnerAdmin from './features/admin/OwnerAdmin'
 import SecurityCheck from './features/auth/SecurityCheck'
 import JournalSecurityCheck from './features/auth/JournalSecurityCheck'
 import { ThemeProvider } from './features/theme/ThemeProvider'
@@ -72,6 +73,14 @@ function ThemedRoutes() {
           ))}
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route element={<Shell />}>
+            <Route
+              path="/account/owner"
+              element={
+                <RequireAccount>
+                  <OwnerAdmin />
+                </RequireAccount>
+              }
+            />
             {import.meta.env.DEV && EditorWorkshop && (
               <Route
                 path="/dev/editor-workshop"
