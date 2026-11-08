@@ -454,6 +454,10 @@ export async function hostedOwnerChecks(
           ).error
         )
           cleanup = false
+        if (createdProfile) {
+          const remainingProfile = await writer.rpc('my_public_profile')
+          if (remainingProfile.error || remainingProfile.data) cleanup = false
+        }
         const allNotices = await writer.rpc('my_moderation_notices')
         if (allNotices.error) cleanup = false
         else
