@@ -15,6 +15,9 @@ import { lazy, Suspense } from 'react'
 const EditorWorkshop = import.meta.env.DEV
   ? lazy(() => import('./features/rich-editor/EditorPreview'))
   : null
+const OwnerSecurityCheck = import.meta.env.DEV
+  ? lazy(() => import('./features/auth/OwnerSecurityCheck'))
+  : null
 const RegistrationSecurityCheck = import.meta.env.DEV
   ? lazy(() => import('./features/auth/RegistrationSecurityCheck'))
   : null
@@ -97,6 +100,20 @@ function ThemedRoutes() {
             )}
             {import.meta.env.DEV && (
               <Route path="/dev/security-check" element={<SecurityCheck />} />
+            )}
+            {import.meta.env.DEV && OwnerSecurityCheck && (
+              <Route
+                path="/dev/owner-check"
+                element={
+                  <Suspense
+                    fallback={
+                      <LoadingState>Preparing owner verification…</LoadingState>
+                    }
+                  >
+                    <OwnerSecurityCheck />
+                  </Suspense>
+                }
+              />
             )}
             {import.meta.env.DEV && RegistrationSecurityCheck && (
               <Route
