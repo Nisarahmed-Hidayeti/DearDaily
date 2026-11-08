@@ -28,5 +28,24 @@ Status: implemented and tested locally; NOT applied to hosted Supabase. Existing
 
 ## Reviewed local SQL receipts
 
-23631c013af65c5a71eb2d122af6463196cecb08426ed35105501ae18af8cb36  supabase/migrations/20261108000100_owner_controls.sql
-99bad1b6047730be613ab9f019a5e0d44fc82884de9be429b426918fba4e90bb  supabase/migrations/20261108000200_optional_public_streak.sql
+23631c013af65c5a71eb2d122af6463196cecb08426ed35105501ae18af8cb36 supabase/migrations/20261108000100_owner_controls.sql
+99bad1b6047730be613ab9f019a5e0d44fc82884de9be429b426918fba4e90bb supabase/migrations/20261108000200_optional_public_streak.sql
+
+## Hosted application and compatibility correction
+
+The approved preflight found no conflicts, five original tables with forced RLS, one confirmed owner identity (receipt ending cb18d80862df), and the original expected profile RPC. The existing migration-history table is absent; no history repair or new history table was performed.
+
+The two approved migration transactions and owner assignment committed. Reviewed SQL was copied back from the editor and compared exactly before execution. SQL editor receipts:
+
+- Owner migration: 9ce42d7e-cb5a-4590-a4d3-0268a1f206b8
+- Streak migration: bc93f31b-5888-4581-a0e1-d91fd2ded317
+- Confirmed owner assignment: eaa695fb-2e8b-46b3-aec4-41e2ef63f545
+
+Postflight: exactly one matching owner, four new forced-RLS tables, zero ordinary-client table privileges, zero anonymous function-execution grants, and zero shared streaks. Only localhost owner/streak flags were enabled. Production owner/streak flags remain off. Google requested an owner identity check during localhost login; user handoff is pending. No MFA secret or code is handled by the assistant.
+
+An older-client compatibility case was caught before feature deployment: the newly extended my_public_profile RPC includes read-only public_streak, while the deployed profile editor submits the returned object as its update payload. This can reject current profile saves. The correction `20261108000300_profile_response_compatibility.sql` restores the exact original writable RPC response and existing grants, with no row updates or privacy changes. New streak-enabled code reads the approved count separately through existing SELECT permissions; it never writes the server-owned field. The original two migration files and their receipts remain unchanged. This third hosted correction requires approval before application.
+
+Regression coverage checks that every legacy own-profile RPC field remains writable, and checks separate count reads when the new flag is enabled. Local database coverage now totals 332 checks. The dev-only owner harness additionally verifies actual low/raised-MFA sessions for the same immutable owner ID and a distinct confirmed approved writer. It refuses any nonempty writer account, creates only exact synthetic fixtures, tests public-photo revocation on a publishing ban, and retains cleanup receipts for protected synthetic audits/notices. It never serializes sessions, grants roles, changes MFA or uses real journals as fixtures.
+e1dbdd06ac0f18cc73fb33fb4914e88336079491625ca27999b48a9c856bebf8 supabase/migrations/20261108000300_profile_response_compatibility.sql
+
+Latest local verification: 223 frontend tests across 40 files, 332 pgTAP checks, TypeScript, ESLint and build passed. Owner verification code is DEV-only and excluded from the production bundle. Both optional production feature flags stay disabled. No claim of completed hosted owner-MFA verification is made.

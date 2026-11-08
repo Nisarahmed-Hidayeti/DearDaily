@@ -65,7 +65,15 @@ export async function myProfile(
 ): Promise<PublicProfile | null> {
   const { data, error } = await client.rpc('my_public_profile')
   if (error) throw new Error('Profile unavailable')
-  return data
+  if (!data || !publicStreaksEnabled) return data
+  // Keep the legacy RPC response writable for already-deployed clients.
+  const streak = await client
+    .from('public_profiles')
+    .select('public_streak')
+    .eq('username', data.username)
+    .single()
+  if (streak.error) throw new Error('Profile unavailable')
+  return { ...data, public_streak: streak.data.public_streak }
 }
 export async function saveProfile(
   client: SupabaseClient,

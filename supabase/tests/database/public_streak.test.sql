@@ -5,7 +5,8 @@ insert into auth.users(id) values('83000000-0000-4000-8000-000000000001'),('8300
 set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"83000000-0000-4000-8000-000000000001","role":"authenticated"}',true);
 insert into public.public_profiles(username,display_name,visible) values('streak_a','Synthetic A',true);
-select is(public.my_public_profile()->>'public_streak',null::text,'streak hidden by default');
+select is((select public_streak from public.public_profiles where username='streak_a'),null::integer,'streak hidden by default');
+select ok((select bool_and(has_column_privilege('authenticated','public.public_profiles',k,'UPDATE')) from jsonb_object_keys(public.my_public_profile()) k),'legacy RPC response contains only writable profile fields');
 insert into public.journal_entries(id,title,body,entry_date,status) values(gen_random_uuid(),'One','PRIVATE',current_date,'saved'),(gen_random_uuid(),'Duplicate date','PRIVATE',current_date,'saved'),(gen_random_uuid(),'Two','PRIVATE',current_date-1,'saved'),(gen_random_uuid(),'Older gap','PRIVATE',current_date-3,'saved'),(gen_random_uuid(),'Future','PRIVATE',current_date+1,'saved'),(gen_random_uuid(),'Draft','PRIVATE',current_date-2,'draft');
 select is(public.set_public_streak(true),2,'share snapshot counts distinct consecutive saved dates only');
 select throws_ok($$update public.public_profiles set public_streak=999$$,'42501',null,'cannot forge shared count directly');

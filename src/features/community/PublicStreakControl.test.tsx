@@ -62,9 +62,18 @@ it('does not write a backend-owned streak value during ordinary profile editing'
     public_streak: 4,
   }
   const insert = vi.fn().mockResolvedValue({ error: null })
-  const rpc = vi.fn().mockResolvedValue({ data: profile, error: null })
+  const { public_streak: sharedCount, ...legacyProfile } = profile
+  const rpc = vi.fn().mockResolvedValue({ data: legacyProfile, error: null })
+  const read = {
+    select: () => read,
+    eq: () => read,
+    single: async () => ({ data: { public_streak: sharedCount }, error: null }),
+  }
   await saveProfile(
-    { from: () => ({ insert }), rpc } as unknown as SupabaseClient,
+    {
+      from: () => ({ insert, select: read.select }),
+      rpc,
+    } as unknown as SupabaseClient,
     profile,
     null,
   )
