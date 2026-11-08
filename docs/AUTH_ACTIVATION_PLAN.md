@@ -35,3 +35,71 @@ No database migration, Storage policy change, payment, Google secret rotation or
 - `scripts/test-local-registration.mjs` accepts only CLI status JSON for `http://127.0.0.1:54321` and mail capture `http://127.0.0.1:54324`. Run it only with locally enabled signup and email confirmation; never supply hosted credentials. Keep the CLI-generated status file private and clear it after testing. Do not run a database reset for this test.
 
 Remaining acceptance: hosted CAPTCHA enforcement and missing/invalid-token denial, fresh external-email signup/confirmation, new Google-user signup, live redirects, and authenticated hosted isolation checks for those new accounts. These require the rollout approvals above; no general-public readiness claim is made.
+
+### Additional local abuse probe (not a passing release gate)
+
+A local-only probe rejected 35 invalid signup-verification hashes, but did not return HTTP 429. The Auth container has `GOTRUE_RATE_LIMIT_VERIFY=30`; that configured value does not prove enforcement through the tested local route. Hosted rate-limit enforcement remains unverified and must be tested in a controlled way before opening general registration. No limits were increased or disabled.
+
+## Hosted activation checkpoint — November 7
+
+Owner approved rollout; PR #8 was merged as `33d947a` and Netlify published that production commit. The public Turnstile Site Key and Google flag are configured on Netlify, with signup false across deploy contexts. Site URL is now `https://deardailyy.netlify.app`; the exact live callback/reset redirects were added while retaining localhost.
+
+Owner entered the Secret Key directly and reported saving. Read-only dashboard verification found CAPTCHA ON, provider Turnstile, and Save changes disabled (no pending edits). Two synthetic nonexistent-account password requests without a CAPTCHA token and with an invalid token each returned HTTP 400 / `captcha_failed`, with no session. Public settings still show signup disabled, email confirmation required, anonymous Auth disabled, and email/Google enabled.
+
+Positive post-activation email/password login remains pending owner confirmation. Earlier successful live login was before server CAPTCHA activation and must not be substituted for that check. Fresh hosted registrations and hosted rate-limit enforcement remain pending; do not enable signup or describe general registration as ready.
+
+### Post-activation sign-in failure diagnosis
+
+Owner's fresh login failed after CAPTCHA activation. A read-only unified Auth-log query categorized recent rejections as CAPTCHA failures and then confirmed the provider subtype `invalid-input-secret`. This establishes an invalid configured Turnstile secret, not rejection of the submitted password for those attempts. The agent did not read the secret or reset any password. Cloudflare Edit Widget and Supabase Attack Protection were reopened for the owner to copy the Secret Key directly (not the public Site Key), replace it, and save. Correction and a successful post-correction login remain pending.
+
+Local error UX now recognizes only allowlisted CAPTCHA/rate-limit error codes with fixed safe messages, rather than showing password guidance for every provider rejection. Arbitrary provider messages and account-existence details remain hidden. The focused auth suite passed 18 tests. This message improvement is local and not deployed; fixing the actual provider secret is the operational priority.
+
+### Secret corrected and positive login confirmed
+
+Owner reported correcting and saving the Turnstile Secret Key. Read-only UI confirmed CAPTCHA ON and no pending save. An additional invalid-token probe was denied. Owner then explicitly confirmed fresh sign-in works after activation/correction. This is owner-confirmed positive live-login evidence, not an agent-observed session in the separate normal browser. Hosted signup remains disabled; new-user email/Google tests and rate-limit enforcement are still pending.
+
+## Protected hosted signup test stage — owner approved
+
+Owner explicitly approved enabling new-user signup in deardaily-dev and localhost while keeping the public frontend closed, with the project API exposure explained. Targeted public-settings preflight confirmed email confirmation required and anonymous Auth off; the saved Turnstile switch was ON. Only Allow new users to sign up was enabled and saved. The API confirmed signup enabled with the other protections intact. `.env.local` signup was set true, without committing it or deploying anything. Live-site Create account and Google signup buttons were verified disabled with the closed notice.
+
+Approved identities: `nisarahmedhidayeti+deardaily-beta@gmail.com` for email registration, and `deardailywebsite@gmail.com` for Google registration. No passwords are entered by the agent. Hosted registration/isolation tests remain in progress; this is not general-public release approval. Global API registration is open behind CAPTCHA/email confirmation during this explicitly approved stage.
+
+### Fresh email account evidence
+
+The approved email-alias account was created through the normal signup form (no administrator confirmation). Dashboard status changed from unconfirmed to confirmed after the owner opened the delivered verification email. Owner then signed in with the saved password; the development harness independently verified the SDK session and `getUser()` identity, required email confirmation and the exact approved email, and retained an isolated client only in memory. Authenticated ID receipt ends `f592a8e27b82`.
+
+A preflight search found no existing `deardailywebsite@gmail.com` user before starting its Google registration. Local Google signup now explicitly requests account selection with only `openid email profile` scopes, avoiding accidental reuse of the owner's existing Google account. Google credential entry/consent is a user handoff; creation, second distinct session and hosted isolation checks remain pending. The first session remains in the open development verification tab.
+
+The new development-only registration verification route is lazy-imported behind `import.meta.env.DEV`; it has no password fields, allows only the two approved confirmed identities, verifies both isolated sessions and rejects duplicate authenticated IDs before reusing the existing synthetic hosted privacy suite. Session snapshots are never serialized or printed and can be released through Clear test sessions. Unit regressions cover unconfirmed identity rejection, duplicate identity rejection and passing only verified sessions to the privacy suite.
+
+### New Google registration and first hosted privacy run — November 8
+
+The initial Google callback expired while the owner completed sign-in. The agent restarted OAuth, selected the now-authenticated approved DearDaily Google identity, and observed DearDaily's confirmed account page for `deardailywebsite@gmail.com`. The verification harness independently checked its confirmed email, Google identity and authenticated user ID. Email ID ends `f592a8e27b82`; new Google ID ends `87704d9a3745`. The identities are genuinely distinct.
+
+The first hosted privacy run passed 31 checks, including private CRUD and cross-owner denial, then failed its old four-column public projection assertion. The application now deliberately returns additional approved rich-writing/public metadata fields. Exact synthetic fixture cleanup passed. Per the owner's failure boundary, hosted signup was switched OFF and verified closed; localhost's signup flag was also restored false. Existing confirmed test accounts remain intact.
+
+The assertion was replaced with an independent fixed allowlist for the enabled interfaces, rather than deriving expected fields from production SELECT constants. Regression tests reject extra owner IDs, mood, private tags/date, joins, emails and version fields, and reject missing required fields. The corrected hosted rerun remains pending a refreshed email test session; the Google session is retained in development memory. The dev harness now preserves its memory-only captures across HMR updates (never serializes them).
+
+### Corrected fresh-account gate — November 8
+
+Both approved confirmed identities were recaptured and independently verified by Supabase. The corrected suite passed **54 hosted journal checks**, including distinct IDs, cross-owner denial, anonymous access boundaries, independent public snapshots and unpublishing. **47 hosted media checks** then passed with these same new accounts, including private asset isolation, approved public copies and revocation after unpublishing. Both suites reported exact synthetic fixture cleanup PASS. No hosted schema, Storage policy or authentication settings changed during the reruns.
+
+The Google account also completed an actual local cloud-editor acceptance flow: create a disposable entry, backend-confirmed save, reload with title/body preserved, explicit anonymous publication confirmation, discovery in Explore, unpublish and delete the exact synthetic entry `8069a082-4fc7-4aa2-b789-ccfc000b6acd`. No real writing was used. Public signup remains closed on the hosted project, localhost and public frontend after the earlier failure rollback; passing reruns do not authorize reopening it.
+
+Current checks: 211 frontend tests across 36 files passed; TypeScript, ESLint and production build passed. After adding the dev-only media-run control, TypeScript and the 12 focused harness/projection tests passed again. Existing 264 pgTAP and 35 local Auth integration checks remain valid; no database migration changed.
+
+Remaining launch work: controlled hosted rate-limit enforcement evidence, Google general-audience readiness, remaining release/policy/operational review, and explicit approval for signup activation and any further deployment. The email account's external verification/login and Google's distinct new-account authentication are verified; no claim of completed public release is made. Test sessions are held only in the development tab's memory, never exported. Local code changes have not been pushed or deployed.
+
+### November 8 release follow-up
+
+Owner authorized pushing and deployment once requested work and checks are complete, with registration as first priority. A controlled hosted `/verify` probe used only random nonexistent signup hashes: 32 HTTP 403 responses followed by HTTP 429 on request 33, no sessions. No real OTP, email message, account or authentication setting changed. Verification rate limiting is now observed; do not generalize this to untested endpoint quotas.
+
+Google Audience currently shows External / Testing, with Publish app disabled pending branding. Homepage/privacy/terms fields are empty. Public privacy and beta-terms routes were prepared locally, linked from the homepage and signup, and submitted to the owner for review before publishing. No Google audience/configuration changes were saved.
+
+Account recovery instructions no longer claim delivery remains untested. Account sign-out now navigates home only on confirmed success, with two regression tests. Existing motion is shorter and card movement quieter; reduced-motion rules remain in place. All 213 frontend tests passed; TypeScript/lint/build passed. Loaded-theme browser checks verified 96 route/viewport combinations across all four themes with no horizontal overflow; original Midnight preference restored on the approved Google test account. Initial loading/fallback measurements were discarded from theme evidence. No claim of physical keyboard testing.
+
+Docker is currently stopped and noninteractive startup requires a system password. Owner was asked to start it; previous pgTAP results are historical, not a fresh run. Signup stays closed pending the release steps in REGISTRATION_LAUNCH_GATE.md. No hosted schema/Storage changes, merge, push or deployment occurred in this follow-up.
+
+### Approved beta publication checkpoint — November 8
+
+Owner approved publishing the prepared privacy and beta-terms pages with deardailywebsite@gmail.com as contact, and started Docker. A fresh local pgTAP run passed all 264 checks across six files without resetting data or applying hosted migrations. Latest main was merged into the existing feature branch; the sole conflict was the evidence document's appended timeline, preserved in full. Source files were unchanged by the merge, so the 213-test/TypeScript/lint/build result applies to the resulting application code. Publishing these pages does not by itself enable signup or change the Google audience. Audio and optional public streaks are excluded and remain unfinished.

@@ -98,3 +98,24 @@ it('waits for cover upload confirmation before applying a new private image', as
     }),
   )
 })
+
+it('opens cover options from the chosen cover and retains the original writing', async () => {
+  const document = documentFromText('Keep every word')
+  const onApply = vi.fn()
+  render(
+    <PageAppearance
+      showCover
+      document={document}
+      preset="dawn"
+      onApply={onApply}
+    />,
+  )
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Change or remove cover' }),
+  )
+  expect(screen.getByRole('dialog')).toBeVisible()
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Apply page style' }),
+  )
+  expect(onApply.mock.calls[0][0].document.content).toEqual(document.content)
+})

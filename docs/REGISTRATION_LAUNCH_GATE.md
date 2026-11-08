@@ -1,4 +1,24 @@
-# Registration launch checklist — 2026-10-30
+# Registration launch checkpoint — November 8, 2026
+
+## Verified
+
+- Real new email confirmation, password login, recovery and new-password login; distinct new Google account authentication.
+- 54 hosted journal/privacy checks and 47 hosted media checks passed with the two fresh accounts; exact synthetic cleanup passed.
+- Hosted verification rate limiting observed: 32 invalid nonexistent verification hashes returned 403, then HTTP 429; no session created and no real code/email used. This proves the verification endpoint limit, not every endpoint's independent quota.
+- Hosted CAPTCHA rejects missing/invalid tokens; owner confirmed successful live password login after correcting the secret. Email confirmation stays ON; anonymous Auth OFF.
+- 213 frontend tests, TypeScript, ESLint and production build passed. 96 loaded-theme layout checks covered eight main routes, all four themes, and 360/768/1440px with no horizontal overflow. These geometry checks do not prove a physical mobile keyboard test.
+- Signup remains OFF in hosted/local/public configuration. Existing login remains available.
+
+## Exact remaining release work
+
+1. Owner review of the prepared `/privacy` and `/terms` pages. The text documents infrastructure access, processors, public snapshots, manual deletion, and unverified backup retention; it does not claim legal compliance. Age/consent and deletion/retention operations still need owner review for the intended audience.
+2. Google dashboard currently shows External / Testing and disables Publish app because branding configuration is incomplete. Homepage, privacy and terms URLs are empty. Review approved policy pages, publish their URLs, complete branding, and obtain action-time approval before expanding the Google audience. Never advertise generally available Google signup from the tester success alone.
+3. Docker must be started by the owner to rerun pgTAP. Last unchanged-schema result: 264 passing checks. No hosted migration is needed for the current auth/UI patch.
+4. Review CI and actual Netlify flags. Deploy only the reviewed release, verify both live auth providers, then activate hosted/frontend signup with explicit action-time approval. Keep confirmation, CAPTCHA and RLS intact. No audio/streak migration is included.
+
+Audio/MP3/recording uploads and optional public streaks remain unfinished. They require their own additive security design and hosted approval; image validation must not be weakened. This release must not be represented as completing those features.
+
+## Historical evidence (superseded where noted above)
 
 ## Current evidence
 
@@ -35,6 +55,7 @@ For two distinct fresh accounts, verify register → email received → verify �
 Only after evidence is recorded: request approval for hosted signup plus VITE_ALLOW_SIGNUP=true. Anonymous Auth remains disabled; email confirmation remains enabled. Merge and deployment require separate approval. Cosmetics, avatar uploads and admin expansion are deferred.
 
 References:
+
 - https://help.brevo.com/hc/en-us/articles/7924908994450-Send-transactional-emails-using-Brevo-SMTP
 - https://help.brevo.com/hc/en-us/articles/16045394674066-Troubleshooting-Domain-authentication
 - https://help.brevo.com/hc/en-us/articles/208589409-About-Brevo-s-pricing-plans

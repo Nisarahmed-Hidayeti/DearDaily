@@ -109,12 +109,21 @@ export function AuthPage({ mode }: { mode: Mode }) {
         finishRecovery()
         setMessage('Your password was updated. You can return to your account.')
       }
-    } catch {
+    } catch (failure) {
       // Do not render provider messages, email existence, tokens, or raw errors.
+      const code =
+        failure && typeof failure === 'object' && 'code' in failure
+          ? failure.code
+          : null
       setError(
-        mode === 'sign-in'
-          ? 'Unable to sign in. Check your details and email confirmation, or try your original sign-in provider.'
-          : 'We could not complete this request. Check your connection and try again later.',
+        code === 'captcha_failed'
+          ? 'Security verification was rejected. Complete a fresh verification and try again. This does not mean your password is wrong.'
+          : code === 'over_request_rate_limit' ||
+              code === 'over_email_send_rate_limit'
+            ? 'Too many attempts. Please wait a few minutes before trying again.'
+            : mode === 'sign-in'
+              ? 'Unable to sign in. Check your details and email confirmation, or try your original sign-in provider.'
+              : 'We could not complete this request. Check your connection and try again later.',
       )
     } finally {
       setCaptchaToken('')
@@ -164,6 +173,9 @@ export function AuthPage({ mode }: { mode: Mode }) {
         options: {
           redirectTo: authRedirect('/auth/callback'),
           scopes: 'openid email profile',
+          ...(mode === 'sign-up'
+            ? { queryParams: { prompt: 'select_account' } }
+            : {}),
         },
       })
       if (error) throw error
@@ -191,6 +203,12 @@ export function AuthPage({ mode }: { mode: Mode }) {
         <p className="muted">
           Your account is personal. Your story stays yours.
         </p>
+        {mode === 'sign-up' && (
+          <p className="tiny muted">
+            Read our <Link to="/privacy">privacy notice</Link> and{' '}
+            <Link to="/terms">beta terms</Link> before creating an account.
+          </p>
+        )}
         {!client && (
           <p role="status" className="auth-notice">
             Account services are not configured yet. You can still explore the

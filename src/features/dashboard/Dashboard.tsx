@@ -38,7 +38,7 @@ function DemoDashboard({
         </Link>
       </PageHeading>
       <p className="page-subtitle">
-        Welcome, Jamie. What would you like to remember?
+        What would you like to remember?
       </p>
       {!library && (
         <>

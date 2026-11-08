@@ -177,6 +177,29 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
       screen.queryByText(/secret-provider-message/),
     ).not.toBeInTheDocument()
   })
+  it('distinguishes rejected security verification without exposing provider details', async () => {
+    const mock = mockClient()
+    mock.auth.signInWithPassword.mockResolvedValue({
+      error: { code: 'captcha_failed', message: 'private provider details' },
+    })
+    form('sign-in', mock)
+    await waitFor(() =>
+      expect(screen.getByLabelText('Email address')).toBeEnabled(),
+    )
+    await userEvent.type(
+      screen.getByLabelText('Email address'),
+      'test@example.test',
+    )
+    await userEvent.type(screen.getByLabelText('Password'), 'example-password')
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Security verification was rejected',
+    )
+    expect(screen.getByRole('alert')).not.toHaveTextContent(
+      'private provider details',
+    )
+    expect(screen.queryByText(/Unable to sign in/)).not.toBeInTheDocument()
+  })
   it('keeps an unconfigured Google provider disabled without blocking password login', async () => {
     const mock = form('sign-in')
     await waitFor(() =>
@@ -284,6 +307,34 @@ describe('auth foundation with mocked Supabase SDK (not live integration)', () =
       screen.getByRole('button', { name: 'Update password' }),
     ).toBeDisabled()
     expect(mock.auth.updateUser).not.toHaveBeenCalled()
+  })
+  it('opens an account chooser for Google registration without adding broader scopes', async () => {
+    flags.allowSignup = true
+    flags.googleEnabled = true
+    flags.captchaSiteKey = 'synthetic-site-key'
+    try {
+      const mock = form('sign-up')
+      await waitFor(() =>
+        expect(
+          screen.getByRole('button', { name: 'Continue with Google' }),
+        ).toBeEnabled(),
+      )
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Continue with Google' }),
+      )
+      expect(mock.auth.signInWithOAuth).toHaveBeenCalledWith({
+        provider: 'google',
+        options: {
+          redirectTo: 'http://localhost:5173/auth/callback',
+          scopes: 'openid email profile',
+          queryParams: { prompt: 'select_account' },
+        },
+      })
+    } finally {
+      flags.allowSignup = false
+      flags.googleEnabled = false
+      flags.captchaSiteKey = null
+    }
   })
   it('uses neutral signup confirmation even for obfuscated duplicate accounts', async () => {
     flags.allowSignup = true

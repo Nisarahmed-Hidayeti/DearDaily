@@ -290,13 +290,16 @@ function EntryForm({ existingId }: { existingId?: string }) {
         <section className="writing-paper">
           {richEditorEnabled && (
             <>
-              <PageCover
-                privateMedia
-                document={draft.writing_document}
-                preset={draft.cover_preset}
-              />
+              {preview && (
+                <PageCover
+                  privateMedia
+                  document={draft.writing_document}
+                  preset={draft.cover_preset}
+                />
+              )}
               {!preview && (
                 <PageAppearance
+                  showCover
                   onUpload={
                     mediaEnabled && client
                       ? (file) =>
@@ -310,22 +313,24 @@ function EntryForm({ existingId }: { existingId?: string }) {
                       : undefined
                   }
                   disabled={!ready}
-                  document={draft.writing_document}
+                  document={
+                    draft.writing_document ?? documentFromText(draft.body)
+                  }
                   preset={draft.cover_preset}
                   icon={entryIcon(draft.writing_document, draft.page_icon)}
                   onApply={(style) =>
                     patch({
-                      writing_document: style.document,
+                      writing_document: {
+                        ...style.document,
+                        content: (
+                          draft.writing_document ?? documentFromText(draft.body)
+                        ).content,
+                      },
                       cover_preset: style.preset,
                       page_icon: style.icon,
                     })
                   }
                 />
-              )}
-              {entryIcon(draft.writing_document, draft.page_icon) && (
-                <div className="writer-icon">
-                  {entryIcon(draft.writing_document, draft.page_icon)}
-                </div>
               )}
             </>
           )}

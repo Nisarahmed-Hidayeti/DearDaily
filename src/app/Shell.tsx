@@ -211,7 +211,7 @@ export default function Shell() {
         >
           <summary aria-label="Open account menu" data-tooltip="Your account">
             <span className="avatar" aria-hidden="true">
-              JD
+              <UserRound size={17} />
             </span>
             <span className="account-caption">
               {session ? 'Your space' : 'DearDaily'}

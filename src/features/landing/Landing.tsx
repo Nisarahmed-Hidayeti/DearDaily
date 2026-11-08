@@ -151,6 +151,8 @@ export default function Landing() {
         <Link to="/app/settings">
           Appearance <ArrowRight size={14} />
         </Link>
+        <Link to="/privacy">Privacy</Link>
+        <Link to="/terms">Beta terms</Link>
         <span>© 2026 DearDaily</span>
       </footer>
     </div>
