@@ -1198,3 +1198,30 @@
 .editor-cover-action > .writer-cover {
   margin-bottom: 0;
 }
+
+/* Quiet, collection-led artwork gallery; titles remain accessible without clutter. */
+.cover-collection h4 {
+  margin: 18px 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.cover-collection .cover-gallery {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.cover-collection .cover-gallery button {
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 5px;
+}
+.cover-collection .cover-gallery button[aria-pressed='true'] {
+  border-color: var(--accent);
+}
+.cover-collection .cover-gallery img {
+  height: 68px;
+}
+@media (max-width: 480px) {
+  .cover-collection .cover-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -115,7 +115,11 @@ it('opens cover options from the chosen cover and retains the original writing',
   )
   expect(screen.getByRole('dialog')).toBeVisible()
   await userEvent.click(
+    screen.getByRole('button', { name: "The Rocky Mountains, Lander's Peak" }),
+  )
+  await userEvent.click(
     screen.getByRole('button', { name: 'Apply page style' }),
   )
   expect(onApply.mock.calls[0][0].document.content).toEqual(document.content)
+  expect(onApply.mock.calls[0][0].document.page.cover).toBe('met-landers-peak')
 })
