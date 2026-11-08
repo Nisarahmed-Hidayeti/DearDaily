@@ -11,6 +11,7 @@ const state = vi.hoisted(() => ({
   },
   clients: [] as unknown[],
   run: vi.fn(),
+  musicRun: vi.fn(),
 }))
 vi.mock('../../lib/supabase/client', () => ({
   authConfig: { url: 'https://synthetic.invalid', key: 'synthetic-public-key' },
@@ -36,6 +37,7 @@ vi.mock('@supabase/supabase-js', () => ({
   },
 }))
 vi.mock('./hostedOwnerChecks', () => ({ hostedOwnerChecks: state.run }))
+vi.mock('./hostedMusicChecks', () => ({ hostedMusicChecks: state.musicRun }))
 vi.mock('./AuthProvider', () => ({ useAuth: () => ({ client: source }) }))
 const source = {
   auth: {
@@ -64,6 +66,7 @@ const source = {
 beforeEach(() => {
   state.clients.length = 0
   state.run.mockReset()
+  state.musicRun.mockReset()
   state.current = {
     id: 'owner-a',
     email: 'nisarahmedhidayeti@gmail.com',
@@ -148,4 +151,55 @@ it('passes only three independently verified isolated sessions with the required
     ),
   )
   expect(await screen.findByText(/PASS: 1 hosted owner/)).toBeInTheDocument()
+})
+it('runs music checks with two verified distinct sessions while retaining the separate owner-MFA gate', async () => {
+  state.musicRun.mockResolvedValue({
+    passed: true,
+    checks: 18,
+    cleanup: true,
+    stage: 'complete',
+    distinctIdentities: true,
+    fixtureEntryIds: [],
+    marker: 'synthetic',
+  })
+  await mount()
+  expect(
+    screen.getByRole('button', { name: 'Run synthetic music tests' }),
+  ).toBeDisabled()
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Capture owner before MFA' }),
+  )
+  await screen.findByText(
+    'Verified owner before MFA session captured only in memory.',
+  )
+  state.current = {
+    id: 'writer-b',
+    email: 'deardailywebsite@gmail.com',
+    owner: false,
+    mfa: false,
+  }
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Capture test writer' }),
+  )
+  await screen.findByText(
+    'Verified test writer session captured only in memory.',
+  )
+  expect(
+    screen.getByRole('button', { name: 'Run synthetic owner tests' }),
+  ).toBeDisabled()
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Run synthetic music tests' }),
+  )
+  await waitFor(() =>
+    expect(state.musicRun).toHaveBeenCalledWith(
+      state.clients[0],
+      state.clients[1],
+      'owner-a',
+      'writer-b',
+    ),
+  )
+  expect(
+    await screen.findByText(/PASS: 18 hosted music checks/),
+  ).toBeInTheDocument()
+  expect(state.run).not.toHaveBeenCalled()
 })
