@@ -1,3 +1,4 @@
+import PublicStreakControl from './PublicStreakControl'
 import { appearanceEnabled } from '../appearance/appearance'
 import { profileCovers } from '../rich-editor/covers'
 import { useEffect, useState } from 'react'
@@ -206,6 +207,11 @@ export default function ProfileSettings() {
         </fieldset>
       </form>
       <p role="status">{message}</p>
+      <PublicStreakControl
+        key={`${previous ?? 'unsaved'}:${savedProfile.public_streak ?? 'hidden'}`}
+        saved={!!previous}
+        initial={savedProfile.public_streak}
+      />
       <section className="panel profile-masthead">
         <p className="eyebrow">
           Preview · {form.visible ? 'Public after saving' : 'Hidden'}
