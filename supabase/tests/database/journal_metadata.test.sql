@@ -1,0 +1,11 @@
+begin;set local search_path=public,extensions;select no_plan();
+insert into auth.users(id)values('13000000-0000-0000-0000-000000000001');
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"13000000-0000-0000-0000-000000000001","role":"authenticated"}',true);
+select lives_ok($$insert into public.journal_entries(id,title,body,mood,category)values('23000000-0000-0000-0000-000000000001','Synthetic mood','Test','Grateful','Creativity')$$,'expanded metadata saves');
+select throws_ok($$update public.journal_entries set mood='Anything'$$,'23514',null,'unknown mood rejected');
+select throws_ok($$update public.journal_entries set category='Anything'$$,'23514',null,'unknown category rejected');
+select lives_ok($$update public.journal_entries set mood='Calm',category='Personal'$$,'legacy values remain valid');
+set local role anon;
+select throws_ok($$select mood,category from public.journal_entries$$,'42501',null,'private metadata stays private');
+select * from finish();rollback;

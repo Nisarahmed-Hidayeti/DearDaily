@@ -1,3 +1,4 @@
+import { voiceNotesEnabled } from '../audio/audio'
 import { publicStreaksEnabled } from './publicStreakConfig'
 import { musicFields } from '../music/music'
 import { appearanceEnabled } from '../appearance/appearance'
@@ -41,7 +42,8 @@ export const profileFields =
 export const storyFields: string =
   'id,title,body,published_at,public_username,public_category,public_tags' +
   richPublicFields +
-  musicFields
+  musicFields +
+  (voiceNotesEnabled ? ',voice_notes' : '')
 export function validUsername(value: string) {
   return (
     /^[a-z][a-z0-9_]{2,23}$/.test(value) &&

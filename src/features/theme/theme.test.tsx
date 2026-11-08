@@ -59,7 +59,8 @@ describe('theme preferences', () => {
       'data-theme',
       'paper-white',
     )
-    await userEvent.click(screen.getByRole('link', { name: 'Start writing' }))
+    await userEvent.click(screen.getByRole('link', { name: /Try the demo/ }))
+    await userEvent.click(screen.getByRole('link', { name: 'Write' }))
     expect(document.documentElement).toHaveAttribute(
       'data-theme',
       'paper-white',

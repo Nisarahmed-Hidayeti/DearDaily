@@ -1,3 +1,4 @@
+import { availableMoods } from '../journal/entryMetadata'
 import { entryIcon } from '../rich-editor/emojis'
 import { PageCover } from '../rich-editor/PageCover'
 import { useEffect, useState } from 'react'
@@ -107,7 +108,6 @@ export default function CloudDashboard({
                 {[
                   [rows.length, 'Total entries'],
                   [stats.words, 'Words written'],
-                  [stats.streak, 'Day writing streak'],
                 ].map(([value, label]) => (
                   <article className="panel stat" key={label}>
                     <BookOpen />
@@ -155,7 +155,7 @@ export default function CloudDashboard({
               <label>
                 Mood
                 <select value={mood} onChange={(e) => setMood(e.target.value)}>
-                  {['All moods', 'Calm', 'Happy', 'Reflective', 'Low'].map(
+                  {['All moods', ...availableMoods.map((mood) => mood[0])].map(
                     (m) => (
                       <option key={m}>{m}</option>
                     ),
@@ -227,8 +227,7 @@ export default function CloudDashboard({
             </div>
           </section>
           <p className="tiny muted">
-            Streaks count distinct saved entry dates, through today or
-            yesterday, using the dates you choose. Drafts do not count.
+            Each checkmark is a day you wrote. Drafts do not count.
           </p>
         </>
       )}

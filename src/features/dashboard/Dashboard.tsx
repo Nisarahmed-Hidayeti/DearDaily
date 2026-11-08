@@ -37,9 +37,7 @@ function DemoDashboard({
           New Entry
         </Link>
       </PageHeading>
-      <p className="page-subtitle">
-        What would you like to remember?
-      </p>
+      <p className="page-subtitle">What would you like to remember?</p>
       {!library && (
         <>
           <div className="dashboard-banner">
@@ -57,19 +55,21 @@ function DemoDashboard({
             </div>
           </div>
           <div className="stats">
-            {dashboardStats.map(({ kind, value, label, note }) => {
-              const Icon = statIcons[kind]
-              return (
-                <article className="panel stat" key={label}>
-                  <Icon size={21} />
-                  <div>
-                    <strong>{value}</strong>
-                    <span>{label}</span>
-                  </div>
-                  <small>{note}</small>
-                </article>
-              )
-            })}
+            {dashboardStats
+              .filter((stat) => stat.kind !== 'streak')
+              .map(({ kind, value, label, note }) => {
+                const Icon = statIcons[kind]
+                return (
+                  <article className="panel stat" key={label}>
+                    <Icon size={21} />
+                    <div>
+                      <strong>{value}</strong>
+                      <span>{label}</span>
+                    </div>
+                    <small>{note}</small>
+                  </article>
+                )
+              })}
           </div>
           <ActivityHeatmap />
         </>

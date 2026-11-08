@@ -28,7 +28,8 @@ describe('DearDaily prototype', () => {
     expect(
       screen.getByRole('heading', { name: /Every day has a story/ }),
     ).toBeInTheDocument()
-    await userEvent.click(screen.getByRole('link', { name: 'Start writing' }))
+    await userEvent.click(screen.getByRole('link', { name: /Try the demo/ }))
+    await userEvent.click(screen.getByRole('link', { name: 'Write' }))
     expect(screen.getByLabelText('Entry title')).toBeInTheDocument()
   })
   it('renders fictional dashboard data and working navigation', async () => {

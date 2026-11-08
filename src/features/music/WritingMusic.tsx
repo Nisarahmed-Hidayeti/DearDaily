@@ -133,6 +133,9 @@ export function WritingMusic({
                   Load Spotify player
                 </button>
               </form>
+              {value && value.kind !== 'track' && (
+                <small>To keep one song, paste its Spotify track link.</small>
+              )}
               {!onChange && (
                 <small>Session only · not saved or published.</small>
               )}
@@ -194,6 +197,11 @@ export function WritingMusic({
           )}
         </div>
       )}
+      {entity && (
+        <small className="music-playback-note">
+          Spotify controls preview length. Open Spotify for full playback.
+        </small>
+      )}
       {error && <p role="alert">{error}</p>}
       {entity && !loaded && !error && (
         <small role="status">Loading music…</small>
@@ -206,7 +214,7 @@ export function WritingMusic({
           title="Spotify music player"
           src={`https://open.spotify.com/embed/${entity.split(':')[1]}/${entity.split(':')[2]}`}
           width="100%"
-          height="152"
+          height={!entity.startsWith('spotify:track:') ? 352 : 152}
           referrerPolicy="no-referrer"
           sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
           allow="encrypted-media"

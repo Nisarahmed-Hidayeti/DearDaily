@@ -9,7 +9,7 @@ import {
   type WritingDocument,
   type CoverPreset,
 } from './document'
-import { photographicCovers, type PhotoCoverId } from './covers'
+import { photographicCovers, coverThumbnail, type PhotoCoverId } from './covers'
 import { PageCover } from './PageCover'
 export function PageAppearance({
   document,
@@ -38,7 +38,7 @@ export function PageAppearance({
     ),
     [cover, setCover] = useState<CoverPreset | null>(preset ?? null),
     [emoji, setEmoji] = useState(entryIcon(document, icon) ?? ''),
-    [collection, setCollection] = useState(''),
+    [collection, setCollection] = useState('The Met · Hudson River School'),
     [uploading, setUploading] = useState(false),
     [error, setError] = useState('')
   let unsupported = false
@@ -160,27 +160,43 @@ export function PageAppearance({
                   ))}
                 </select>
               </label>
-              <div className="cover-gallery">
-                {photographicCovers
-                  .filter((c) => !collection || c.collection === collection)
-                  .map((c) => (
-                    <button
-                      type="button"
-                      key={c.id}
-                      disabled={uploading}
-                      aria-pressed={draft.page?.cover === c.id}
-                      onClick={() => choosePhoto(c.id)}
-                    >
-                      <img src={c.src} alt="" loading="lazy" />
-                      <span>{c.name}</span>
-                      <small>{c.collection}</small>
-                    </button>
-                  ))}
-              </div>
+              {[...new Set(photographicCovers.map((c) => c.collection))]
+                .filter((group) => !collection || group === collection)
+                .map((group) => (
+                  <section
+                    className="cover-collection"
+                    key={group}
+                    aria-label={group}
+                  >
+                    <h4>{group}</h4>
+                    <div className="cover-gallery">
+                      {photographicCovers
+                        .filter((c) => c.collection === group)
+                        .map((c) => (
+                          <button
+                            type="button"
+                            key={c.id}
+                            disabled={uploading}
+                            title={`${c.name} · ${c.credit}`}
+                            aria-label={c.name}
+                            aria-pressed={draft.page?.cover === c.id}
+                            onClick={() => choosePhoto(c.id)}
+                          >
+                            <img
+                              src={coverThumbnail(c)}
+                              alt=""
+                              loading="lazy"
+                            />
+                            <span className="sr-only">{c.name}</span>
+                          </button>
+                        ))}
+                    </div>
+                  </section>
+                ))}
               <details className="photo-credit">
-                <summary>Photograph credits &amp; license</summary>
+                <summary>Artwork &amp; photograph credits</summary>
                 <p>
-                  Photos by{' '}
+                  Images by{' '}
                   {photographicCovers.map((c, i) => (
                     <span key={c.id}>
                       {i ? ', ' : ''}
@@ -200,6 +216,14 @@ export function PageAppearance({
                     rel="noopener noreferrer"
                   >
                     Pexels License
+                  </a>
+                  {' · '}
+                  <a
+                    href="https://www.metmuseum.org/hubs/open-access"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    The Met · Public domain / CC0
                   </a>
                 </p>
               </details>

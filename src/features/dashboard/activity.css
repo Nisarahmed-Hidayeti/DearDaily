@@ -72,3 +72,18 @@
   height: 8px;
   border-radius: 2px;
 }
+
+.activity {
+  --cell-size: 18px;
+}
+.activity .activity-cell {
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  color: var(--on-accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+.dashboard .stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}

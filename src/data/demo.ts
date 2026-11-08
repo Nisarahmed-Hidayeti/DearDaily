@@ -1,5 +1,6 @@
 export type Visibility = 'Private' | 'Public'
-export type Mood = 'Calm' | 'Happy' | 'Reflective' | 'Low'
+import type { Mood } from '../features/journal/entryMetadata'
+export type { Mood } from '../features/journal/entryMetadata'
 export interface Tag {
   name: string
 }

@@ -10,9 +10,6 @@ export default function ActivityHeatmap({
   activity?: ActivityDay[]
   real?: boolean
 }) {
-  // Scale the visible calendar to this writer's own busiest day. A single
-  // saved entry is the brightest shade when that is their current maximum.
-  const peak = Math.max(0, ...activity.map((day) => day.minutes))
   if (!activity.length)
     return (
       <section className="panel activity">
@@ -40,7 +37,7 @@ export default function ActivityHeatmap({
       <div className="row spread">
         <div>
           <h2 id="activity-title">Your writing rhythm</h2>
-          <p className="muted">A little consistency goes a long way.</p>
+          <p className="muted">One checkmark for showing up.</p>
         </div>
         <span className="badge">
           {real ? 'Saved entries · 12 weeks' : 'Sample activity · 12 weeks'}
@@ -99,11 +96,7 @@ export default function ActivityHeatmap({
                   </span>
                   <div className="heatmap">
                     {days.map((day) => {
-                      const level = real
-                        ? day.minutes > 0 && peak > 0
-                          ? Math.ceil((day.minutes / peak) * 4)
-                          : 0
-                        : day.level
+                      const level = day.minutes > 0 ? 4 : 0
                       const description = `${dayFormatter.format(parseLocalDate(day.date))}: ${day.minutes === 0 ? 'no writing' : `${day.minutes} ${real ? (day.minutes === 1 ? 'saved entry' : 'saved entries') : 'minutes written'}`}${real ? '' : ' (sample)'}`
                       return (
                         <span
@@ -114,8 +107,14 @@ export default function ActivityHeatmap({
                           role="img"
                           aria-label={description}
                           title={description}
-                          style={{ background: `var(--heat-${level})` }}
-                        />
+                          style={{
+                            background: level
+                              ? 'var(--accent)'
+                              : 'var(--elevated)',
+                          }}
+                        >
+                          {level ? <span aria-hidden="true">✓</span> : null}
+                        </span>
                       )
                     })}
                   </div>
@@ -127,25 +126,7 @@ export default function ActivityHeatmap({
       </div>
       <div className="activity-footer">
         <span>{rangeFormatter.formatRange(start, end)}</span>
-        <span
-          className="activity-legend"
-          aria-label={
-            real
-              ? `Color intensity is relative to your busiest day in these 12 weeks: ${peak} saved ${peak === 1 ? 'entry' : 'entries'}`
-              : 'Color intensity increases from no writing to 40 minutes written'
-          }
-        >
-          Less{' '}
-          {[0, 1, 2, 3, 4].map((level) => (
-            <i
-              className="heat-key"
-              key={level}
-              aria-hidden="true"
-              style={{ background: `var(--heat-${level})` }}
-            />
-          ))}{' '}
-          More
-        </span>
+        <span className="activity-legend">✓ A day you wrote</span>
       </div>
     </section>
   )

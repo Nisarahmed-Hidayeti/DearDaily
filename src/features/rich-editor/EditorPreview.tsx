@@ -1,6 +1,10 @@
+import { type PrivateMusic } from '../music/music'
+import { VoiceNotes } from '../audio/VoiceNotes'
+import { type VoiceNote } from '../audio/audio'
+import { WritingMusic } from '../music/WritingMusic'
 import { PageAppearance } from './PageAppearance'
 import { useWritingFocus } from './useWritingFocus'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { themes } from '../theme/themes'
 import type { ThemeId } from '../theme/themes'
@@ -12,6 +16,14 @@ export default function EditorPreview() {
     documentFromText(
       'A little space for today.\nWhat would you like to remember?',
     ),
+  )
+  const [music, setMusic] = useState<PrivateMusic | null>(null)
+  const [notes, setNotes] = useState<VoiceNote[]>([])
+  const [sources, setSources] = useState<Record<string, string>>({})
+  const objectUrls = useRef<string[]>([])
+  useEffect(
+    () => () => objectUrls.current.forEach((url) => URL.revokeObjectURL(url)),
+    [],
   )
   const [title, setTitle] = useState('The art of noticing')
   const [icon, setIcon] = useState('🌿')
@@ -100,6 +112,7 @@ export default function EditorPreview() {
             setIcon(style.icon ?? '')
           }}
         />
+        <WritingMusic value={music} onChange={setMusic} />
         <div className="writer-sheet">
           <label className="sr-only" htmlFor="workshop-title">
             Entry title
@@ -112,6 +125,18 @@ export default function EditorPreview() {
             onChange={(e) => setTitle(e.target.value)}
           />
           <RichWriter value={document} onChange={setDocument} />
+          <VoiceNotes
+            notes={notes}
+            onChange={setNotes}
+            localSources={sources}
+            onUpload={async (blob) => {
+              const id = crypto.randomUUID(),
+                url = URL.createObjectURL(blob)
+              objectUrls.current.push(url)
+              setSources((s) => ({ ...s, [id]: url }))
+              return id
+            }}
+          />
         </div>
       </section>
     </div>

@@ -1,3 +1,5 @@
+import { VoiceNotes } from '../audio/VoiceNotes'
+import { voiceNotesEnabled } from '../audio/audio'
 import { entryIcon } from '../rich-editor/emojis'
 import { PublicAuthor } from '../community/PublicAuthor'
 import { PageCover } from '../rich-editor/PageCover'
@@ -264,6 +266,9 @@ export function PublishedStory() {
           <article>
             <RichRead document={story.writing_document} fallback={story.body} />
           </article>
+          {voiceNotesEnabled && (
+            <VoiceNotes notes={story.voice_notes ?? []} publicCopy />
+          )}
           <div className="tag-list">
             {story.public_tags?.map((t) => (
               <span className="tag" key={t}>

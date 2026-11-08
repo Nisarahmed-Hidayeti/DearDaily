@@ -1,4 +1,10 @@
 import {
+  voiceNotesEnabled,
+  validateVoiceNotes,
+  type VoiceNote,
+} from '../audio/audio'
+import { preparePublicVoice, cleanVoice } from '../audio/audioApi'
+import {
   documentAssetIds,
   preparePublicPhotos,
   cleanQueuedPhotos,
@@ -24,6 +30,7 @@ import { richEditorEnabled, richPublicFields } from '../rich-editor/config'
 
 export const journalEnabled = import.meta.env.VITE_ENABLE_JOURNALS === 'true'
 export interface Draft {
+  voice_notes?: VoiceNote[]
   music?: PrivateMusic | null
   writing_document?: WritingDocument | null
   page_icon?: string | null
@@ -44,6 +51,7 @@ export interface JournalEntry extends Draft {
   updated_at: string
 }
 export interface PublicStory {
+  voice_notes?: VoiceNote[]
   music?: StoryMusic | null
   writing_document?: WritingDocument | null
   page_icon?: string | null
@@ -54,13 +62,17 @@ export interface PublicStory {
   published_at: string
 }
 export const publicFields: string =
-  'id,title,body,published_at' + richPublicFields + musicFields
+  'id,title,body,published_at' +
+  richPublicFields +
+  musicFields +
+  (voiceNotesEnabled ? ',voice_notes' : '')
 const readableFields: string = communityEnabled ? storyFields : publicFields
 export function localDay(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 export function newDraft(): Draft {
   return {
+    ...(voiceNotesEnabled ? { voice_notes: [] } : {}),
     ...(persistentMusicEnabled ? { music: null } : {}),
     ...(richEditorEnabled
       ? { writing_document: null, page_icon: null, cover_preset: null }
@@ -76,6 +88,7 @@ export function newDraft(): Draft {
 }
 export function draftOf(row: Draft): Draft {
   return {
+    ...(voiceNotesEnabled ? { voice_notes: row.voice_notes ?? [] } : {}),
     ...(persistentMusicEnabled ? { music: row.music ?? null } : {}),
     ...(richEditorEnabled
       ? {
@@ -114,6 +127,7 @@ export async function saveEntry(
   draft: Draft,
   version: number | null,
 ) {
+  if (draft.voice_notes) validateVoiceNotes(draft.voice_notes)
   if (draft.music) validateMusic(draft.music, true)
   const query =
     version === null
@@ -147,6 +161,7 @@ export async function removeEntry(
     .single()
   if (error || data?.id !== id) throw new Error('Delete not confirmed')
   // Deleting the entry queues exact private/public objects; never prune unrelated drafts.
+  if (voiceNotesEnabled) void cleanVoice(client).catch(() => {})
   await cleanQueuedPhotos(client).catch(() => {})
 }
 export async function listEntries(client: SupabaseClient, userId: string) {
@@ -192,6 +207,15 @@ export async function publishStory(
       )
     : entry.writing_document
   const fields = {
+    ...(voiceNotesEnabled
+      ? {
+          voice_notes: await preparePublicVoice(
+            client,
+            entry.id,
+            entry.version,
+          ),
+        }
+      : {}),
     ...(persistentMusicEnabled ? { music: publicMusic(entry.music) } : {}),
     title: entry.title,
     body: entry.body,
@@ -217,6 +241,7 @@ export async function publishStory(
     .single()
   if (error || data?.id !== entry.id)
     throw new Error('Publication not confirmed')
+  if (voiceNotesEnabled) void cleanVoice(client).catch(() => {})
   void cleanQueuedPhotos(client).catch(() => {})
   return data as PublicStory
 }
@@ -228,6 +253,7 @@ export async function unpublishStory(client: SupabaseClient, id: string) {
     .select('id')
     .single()
   if (error || data?.id !== id) throw new Error('Unpublish not confirmed')
+  if (voiceNotesEnabled) void cleanVoice(client).catch(() => {})
   void cleanQueuedPhotos(client).catch(() => {})
 }
 export function exportMarkdown(draft: Draft, publicOnly = false) {
