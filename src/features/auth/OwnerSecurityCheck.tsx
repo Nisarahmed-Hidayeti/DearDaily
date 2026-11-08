@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { authConfig } from '../../lib/supabase/client'
 import { useAuth } from './AuthProvider'
 import { hostedOwnerChecks } from './hostedOwnerChecks'
+import { hostedMusicChecks } from './hostedMusicChecks'
 type Slot = 'low' | 'owner' | 'writer'
 type Capture = { client: SupabaseClient; id: string }
 const captures: Map<Slot, Capture> =
@@ -23,6 +24,9 @@ export default function OwnerSecurityCheck() {
   )
   const [busy, setBusy] = useState(false)
   const [revision, setRevision] = useState(0)
+  const [musicReceipt, setMusicReceipt] = useState<Awaited<
+    ReturnType<typeof hostedMusicChecks>
+  > | null>(null)
   const [receipt, setReceipt] = useState<Awaited<
     ReturnType<typeof hostedOwnerChecks>
   > | null>(null)
@@ -157,6 +161,43 @@ export default function OwnerSecurityCheck() {
       ))}
       <div className="account-actions">
         <button
+          className="button secondary"
+          disabled={
+            busy ||
+            !(captures.has('low') || captures.has('owner')) ||
+            !captures.has('writer')
+          }
+          onClick={async () => {
+            const a = captures.get('low') ?? captures.get('owner'),
+              b = captures.get('writer')
+            if (!a || !b || a.id === b.id) return
+            setBusy(true)
+            setMessage(
+              'Testing exact synthetic music fixtures with two authenticated identities and anonymous access…',
+            )
+            try {
+              const result = await hostedMusicChecks(
+                a.client,
+                b.client,
+                a.id,
+                b.id,
+              )
+              setMusicReceipt(result)
+              setMessage(
+                `${result.passed ? 'PASS' : 'FAIL'}: ${result.checks} hosted music checks. Distinct authenticated IDs: ${result.distinctIdentities ? 'PASS' : 'FAIL'}. Exact cleanup: ${result.cleanup ? 'PASS' : 'FAIL'}. Stage: ${result.stage}.`,
+              )
+            } catch {
+              setMessage(
+                'FAIL: music verification interrupted. Inspect exact fixture cleanup.',
+              )
+            } finally {
+              setBusy(false)
+            }
+          }}
+        >
+          Run synthetic music tests
+        </button>
+        <button
           className="button"
           disabled={busy || captures.size !== 3}
           onClick={() => void run()}
@@ -177,6 +218,11 @@ export default function OwnerSecurityCheck() {
           Clear owner test sessions
         </button>
       </div>
+      {musicReceipt && (
+        <pre aria-label="Synthetic music cleanup receipt">
+          {JSON.stringify(musicReceipt, null, 2)}
+        </pre>
+      )}
       {receipt && (
         <pre aria-label="Synthetic cleanup receipt">
           {JSON.stringify(
