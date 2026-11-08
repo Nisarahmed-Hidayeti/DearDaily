@@ -1,6 +1,6 @@
 # Owner controls and optional public streak — review
 
-Status: implemented and tested locally; NOT applied to hosted Supabase. Existing permanent moderator access remains unchanged. Public beta registration is now open under the separately approved activation.
+Status: all three reviewed migrations are applied once to deardaily-dev, and the confirmed owner has the permanent protected backend role. Only localhost owner/streak UI is enabled. Real owner MFA and hosted security tests remain pending; production owner/streak flags remain OFF. Existing moderator access and open protected registration are unchanged.
 
 ## Proposed changes for deardaily-dev only
 
@@ -43,9 +43,15 @@ The two approved migration transactions and owner assignment committed. Reviewed
 
 Postflight: exactly one matching owner, four new forced-RLS tables, zero ordinary-client table privileges, zero anonymous function-execution grants, and zero shared streaks. Only localhost owner/streak flags were enabled. Production owner/streak flags remain off. Google requested an owner identity check during localhost login; user handoff is pending. No MFA secret or code is handled by the assistant.
 
-An older-client compatibility case was caught before feature deployment: the newly extended my_public_profile RPC includes read-only public_streak, while the deployed profile editor submits the returned object as its update payload. This can reject current profile saves. The correction `20261108000300_profile_response_compatibility.sql` restores the exact original writable RPC response and existing grants, with no row updates or privacy changes. New streak-enabled code reads the approved count separately through existing SELECT permissions; it never writes the server-owned field. The original two migration files and their receipts remain unchanged. This third hosted correction requires approval before application.
+An older-client compatibility case was caught before feature deployment: the newly extended my_public_profile RPC includes read-only public_streak, while the deployed profile editor submits the returned object as its update payload. This can reject current profile saves. The correction `20261108000300_profile_response_compatibility.sql` restores the exact original writable RPC response and existing grants, with no row updates or privacy changes. New streak-enabled code reads the approved count separately through existing SELECT permissions; it never writes the server-owned field. The original two migration files and their receipts remain unchanged. This third hosted correction was separately approved and applied; its verification receipt is recorded below.
 
 Regression coverage checks that every legacy own-profile RPC field remains writable, and checks separate count reads when the new flag is enabled. Local database coverage now totals 332 checks. The dev-only owner harness additionally verifies actual low/raised-MFA sessions for the same immutable owner ID and a distinct confirmed approved writer. It refuses any nonempty writer account, creates only exact synthetic fixtures, tests public-photo revocation on a publishing ban, and retains cleanup receipts for protected synthetic audits/notices. It never serializes sessions, grants roles, changes MFA or uses real journals as fixtures.
 e1dbdd06ac0f18cc73fb33fb4914e88336079491625ca27999b48a9c856bebf8 supabase/migrations/20261108000300_profile_response_compatibility.sql
 
 Latest local verification: 223 frontend tests across 40 files, 332 pgTAP checks, TypeScript, ESLint and build passed. Owner verification code is DEV-only and excluded from the production bundle. Both optional production feature flags stay disabled. No claim of completed hosted owner-MFA verification is made.
+
+## Profile compatibility correction applied
+
+Owner separately approved 20261108000300. CI passed; the hosted preflight matched the expected new RPC source and found the single expected owner. Editor copy-back matched the reviewed transaction exactly. The transaction committed under SQL receipt 260a1455-283c-4131-b406-231e9e79a6a1. Postflight verified original_response_restored=true, authenticated_allowed=true, anonymous_allowed=false, owner_count=1. No rows or other permissions changed. Do not reapply this migration.
+
+The expired owner OAuth callback was restarted using the newly verified Google identity without requesting another password. The localhost owner account is confirmed, and its real pre-MFA session and the distinct approved writer session are retained only in the verification tab's memory. The owner setup page is open; TOTP enrollment/verification is a user-only handoff. Never inspect or capture the QR or code. Actual AAL2 capture, hosted tests and exact protected-audit cleanup remain pending.
