@@ -1,6 +1,6 @@
 # Authentication activation plan — November 7
 
-Status: NOT ACTIVATED. No hosted CAPTCHA, signup, redirect, production environment or website deployment changes have been applied by the current work.
+Current status (November 8): protected public signup, Google login, CAPTCHA and custom SMTP are active from the previously approved beta rollout. Email confirmation remains required; anonymous Auth is off. Real verification/recovery and live login were confirmed. The plan below is historical; see REGISTRATION_LAUNCH_GATE.md for activation evidence. The new owner/streak/music interfaces remain production-disabled pending final release. The 53 hosted owner/MFA checks and 16 hosted music checks have now passed; see OWNER_AND_STREAK_REVIEW.md and WRITING_MUSIC_REVIEW.md.
 
 ## Prepared locally
 

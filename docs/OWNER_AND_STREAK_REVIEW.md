@@ -1,6 +1,6 @@
 # Owner controls and optional public streak — review
 
-Status: all three reviewed migrations are applied once to deardaily-dev, and the confirmed owner has the permanent protected backend role. Only localhost owner/streak UI is enabled. Real owner MFA and hosted security tests remain pending; production owner/streak flags remain OFF. Existing moderator access and open protected registration are unchanged.
+Status: all three reviewed migrations are applied once to deardaily-dev, and the confirmed owner has the permanent protected backend role. Only localhost owner/streak UI is enabled. The real owner-MFA gate has now passed 53 hosted checks with the same verified owner at AAL1/AAL2, a different approved writer, and anonymous access. Exact protected fixture cleanup is complete; production owner/streak flags remain OFF pending final release. Existing moderator access and open protected registration are unchanged.
 
 ## Proposed changes for deardaily-dev only
 
@@ -55,3 +55,14 @@ Latest local verification: 223 frontend tests across 40 files, 332 pgTAP checks,
 Owner separately approved 20261108000300. CI passed; the hosted preflight matched the expected new RPC source and found the single expected owner. Editor copy-back matched the reviewed transaction exactly. The transaction committed under SQL receipt 260a1455-283c-4131-b406-231e9e79a6a1. Postflight verified original_response_restored=true, authenticated_allowed=true, anonymous_allowed=false, owner_count=1. No rows or other permissions changed. Do not reapply this migration.
 
 The expired owner OAuth callback was restarted using the newly verified Google identity without requesting another password. The localhost owner account is confirmed, and its real pre-MFA session and the distinct approved writer session are retained only in the verification tab's memory. The owner setup page is open; TOTP enrollment/verification is a user-only handoff. Never inspect or capture the QR or code. Actual AAL2 capture, hosted tests and exact protected-audit cleanup remain pending.
+
+
+## Final hosted security gate — November 8
+
+53 checks passed using the same confirmed owner before/after real user-performed MFA (ID ending cb18d80862df), a distinct confirmed writer (ending 87704d9a3745), and an anonymous SDK client. Verified owner MFA enforcement; non-owner/anonymous denial; public-only moderation including anonymous stories; private journal/photo isolation from the owner; publishing ban with public-photo revocation; continued private CRUD while banned; private reason notices; restoration without automatic republishing; and explicit count-only streak sharing/hiding. No real journal or profile was used as a fixture.
+
+The development account-switch helper now opens a separate Google flow without signing out either captured session. An earlier music identity check stopped before writes because sign-out revoked the first session. The corrected session flow passed 16 hosted music checks and the full owner gate. Captured test sessions were released from memory afterward; normal owner MFA login remains available.
+
+Fixture marker: `Synthetic owner gate 07cd9d3f-1db8-47b0-a528-7c0c0941eca0`. Source IDs: `dd7e2670-5e1e-4270-a93e-8850bb67f6be`, `bd354c63-23e0-4e76-9843-c94b11b54ca9`, `359bde7e-b864-473c-9359-85e8d8603110`. Source rows, synthetic media, profile and publishing restriction were cleaned by the harness. Tombstones already cascaded with source deletion. Exact protected cleanup verified actor/recipient/reasons before deleting three notice IDs and three audit IDs only. The first cleanup transaction rolled back on an incorrect tombstone-count assertion; after verifying automatic cascades, only the six identified audit/notice rows were deleted. No owner, authentication or real-content rows were changed.
+
+Cleanup receipt: `3c84af9d-6e19-4b0b-831c-ce1c9297776b`. Postflight: synthetic notices 0, audits 0, entries 0, bans 0; permanent expected owner preserved = 1. Evidence: `/tmp/deardaily-owner-security-gate-pass.jpg` and `/tmp/deardaily-owner-cleanup-pass.jpg`. Earlier pending checkpoints above are historical. Backup/restore operational gaps and MP3 uploads remain incomplete; no claim of complete security or disaster recovery.

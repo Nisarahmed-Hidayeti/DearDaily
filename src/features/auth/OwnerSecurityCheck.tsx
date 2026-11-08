@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { authConfig } from '../../lib/supabase/client'
+import { authRedirect } from '../../lib/supabase/config'
 import { useAuth } from './AuthProvider'
 import { hostedOwnerChecks } from './hostedOwnerChecks'
 import { hostedMusicChecks } from './hostedMusicChecks'
@@ -24,6 +25,7 @@ export default function OwnerSecurityCheck() {
   )
   const [busy, setBusy] = useState(false)
   const [revision, setRevision] = useState(0)
+  const [switchUrl, setSwitchUrl] = useState('')
   const [musicReceipt, setMusicReceipt] = useState<Awaited<
     ReturnType<typeof hostedMusicChecks>
   > | null>(null)
@@ -142,6 +144,47 @@ export default function OwnerSecurityCheck() {
         public profile as fixtures.
       </p>
       <p role="status">{message}</p>
+      <button
+        className="button secondary"
+        disabled={busy}
+        onClick={async () => {
+          if (!client || !authConfig) return
+          setBusy(true)
+          try {
+            const response = await client.auth.signInWithOAuth({
+              provider: 'google',
+              options: {
+                redirectTo: authRedirect('/auth/callback'),
+                skipBrowserRedirect: true,
+                queryParams: { prompt: 'select_account' },
+                scopes: 'openid email profile',
+              },
+            })
+            if (
+              response.error ||
+              !response.data.url ||
+              new URL(response.data.url).origin !==
+                new URL(authConfig.url).origin
+            )
+              throw Error()
+            setSwitchUrl(response.data.url)
+            setMessage(
+              'Open Google account selection in a separate tab. Do not sign out: signing out revokes captured sessions.',
+            )
+          } catch {
+            setMessage('Google account switching could not be prepared.')
+          } finally {
+            setBusy(false)
+          }
+        }}
+      >
+        Prepare Google account switch
+      </button>
+      {switchUrl && (
+        <a href={switchUrl} target="_blank" rel="noopener noreferrer">
+          Open Google account selection
+        </a>
+      )}
       {(['low', 'owner', 'writer'] as const).map((slot) => (
         <section key={slot}>
           <h2>{labels[slot]}</h2>

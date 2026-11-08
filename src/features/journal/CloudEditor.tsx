@@ -22,7 +22,7 @@ import {
   myProfile,
 } from '../community/communityApi'
 import type { PublicProfile } from '../community/communityApi'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Eye, Feather, LockKeyhole, X } from 'lucide-react'
 import type { Mood } from '../../data/demo'
 import { Modal, PageHeading } from '../../components/Shared'
@@ -39,9 +39,15 @@ import { documentFromText, documentText } from '../rich-editor/document'
 
 export default function CloudEditor() {
   const { id } = useParams()
+  const location = useLocation()
   // Adopt the saved URL without replacing the live editor or upload dialog.
   // A different existing entry still receives an independent component lifetime.
-  const [newId] = useState(() => crypto.randomUUID())
+  const [{ newId, routeKey }, setNewPage] = useState(() => ({
+    newId: crypto.randomUUID(),
+    routeKey: location.key,
+  }))
+  if (!id && routeKey !== location.key)
+    setNewPage({ newId: crypto.randomUUID(), routeKey: location.key })
   return <EntryForm key={id ?? newId} existingId={id} newId={newId} />
 }
 function EntryForm({

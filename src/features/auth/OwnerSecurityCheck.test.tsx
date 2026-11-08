@@ -16,6 +16,9 @@ const state = vi.hoisted(() => ({
 vi.mock('../../lib/supabase/client', () => ({
   authConfig: { url: 'https://synthetic.invalid', key: 'synthetic-public-key' },
 }))
+vi.mock('../../lib/supabase/config', () => ({
+  authRedirect: () => 'http://localhost:5173/auth/callback',
+}))
 vi.mock('@supabase/supabase-js', () => ({
   createClient: () => {
     const snapshot = { ...state.current }
@@ -41,6 +44,12 @@ vi.mock('./hostedMusicChecks', () => ({ hostedMusicChecks: state.musicRun }))
 vi.mock('./AuthProvider', () => ({ useAuth: () => ({ client: source }) }))
 const source = {
   auth: {
+    signInWithOAuth: vi.fn().mockResolvedValue({
+      data: {
+        url: 'https://synthetic.invalid/auth/v1/authorize?provider=google',
+      },
+      error: null,
+    }),
     getSession: async () => ({
       data: {
         session: {
@@ -73,6 +82,27 @@ beforeEach(() => {
     owner: true,
     mfa: false,
   }
+})
+it('prepares a separate-tab Google switch without signing out captured sessions', async () => {
+  await mount()
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Prepare Google account switch' }),
+  )
+  const link = await screen.findByRole('link', {
+    name: 'Open Google account selection',
+  })
+  expect(link).toHaveAttribute('target', '_blank')
+  expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  expect(source.auth.signInWithOAuth).toHaveBeenCalledWith(
+    expect.objectContaining({
+      provider: 'google',
+      options: expect.objectContaining({
+        skipBrowserRedirect: true,
+        queryParams: { prompt: 'select_account' },
+        scopes: 'openid email profile',
+      }),
+    }),
+  )
 })
 async function mount() {
   render(<OwnerSecurityCheck />)

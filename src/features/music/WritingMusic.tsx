@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import {
   musicUrl,
   validateMusic,
@@ -26,35 +26,6 @@ export function spotifyEntity(value: string): string | null {
   }
 }
 
-type Controller = { togglePlay(): void; destroy(): void }
-type SpotifyApi = {
-  createController(
-    element: HTMLElement,
-    options: { uri: string; width: string; height: number },
-    callback: (controller: Controller) => void,
-  ): void
-}
-let apiPromise: Promise<SpotifyApi> | undefined
-function loadSpotify() {
-  if (!apiPromise)
-    apiPromise = new Promise<SpotifyApi>((resolve, reject) => {
-      const target = window as Window & {
-        onSpotifyIframeApiReady?: (api: SpotifyApi) => void
-      }
-      target.onSpotifyIframeApiReady = resolve
-      const script = document.createElement('script')
-      script.src = 'https://open.spotify.com/embed/iframe-api/v1'
-      script.referrerPolicy = 'no-referrer'
-      script.onerror = () => {
-        apiPromise = undefined
-        script.remove()
-        reject(new Error('Spotify unavailable'))
-      }
-      document.head.append(script)
-    })
-  return apiPromise
-}
-
 export function WritingMusic({
   value: rawValue,
   onChange,
@@ -77,68 +48,41 @@ export function WritingMusic({
   const [entity, setEntity] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loaded, setLoaded] = useState(false)
-  const host = useRef<HTMLDivElement>(null)
-  const controller = useRef<Controller | null>(null)
+  const [playerVisible, setPlayerVisible] = useState(true)
+  const playerId = useId()
   useEffect(() => {
-    if (!entity || !host.current) return
-    let active = true
-    let instance: Controller | undefined
-    const timeout = window.setTimeout(() => {
-      if (active && !instance)
-        setError(
-          'Spotify is taking too long. Check your connection or open your music in Spotify.',
-        )
-    }, 15000)
-    void loadSpotify()
-      .then((api) => {
-        if (!active || !host.current) return
-        const mount = document.createElement('div')
-        host.current.replaceChildren(mount)
-        api.createController(
-          mount,
-          { uri: entity, width: '100%', height: 152 },
-          (value) => {
-            instance = value
-            if (!active) {
-              value.destroy()
-              return
-            }
-            controller.current = value
-            window.clearTimeout(timeout)
-            setError('')
-            setLoaded(true)
-          },
-        )
-      })
-      .catch(() => {
-        if (active) setError('Spotify could not load. Try again later.')
-      })
-    return () => {
-      active = false
-      window.clearTimeout(timeout)
-      controller.current = null
-      instance?.destroy()
-    }
-  }, [entity])
+    if (!entity || loaded) return
+    const timer = window.setTimeout(
+      () => setError('Music could not load. Open your selection in Spotify.'),
+      15000,
+    )
+    return () => window.clearTimeout(timer)
+  }, [entity, loaded])
   return (
     <section className="writing-music" aria-label="Writing music">
-      <button
-        type="button"
-        className="text-button"
-        aria-expanded={open}
-        onClick={() => setOpen(!open)}
-      >
-        {entity || value ? '♫ Soundtrack' : '♫ Add writing music'}
-      </button>
+      <div className="row spread">
+        <button
+          type="button"
+          className="text-button"
+          aria-expanded={open}
+          onClick={() => setOpen(!open)}
+        >
+          ♫ Music
+        </button>
+        {entity && (
+          <button
+            type="button"
+            className="text-button"
+            aria-controls={playerId}
+            aria-expanded={playerVisible}
+            onClick={() => setPlayerVisible(!playerVisible)}
+          >
+            {playerVisible ? 'Hide player' : 'Show player'}
+          </button>
+        )}
+      </div>
       {open && (
         <div className="writing-music-options">
-          <p>
-            {publicCopy
-              ? 'This story includes a Spotify selection approved by its author.'
-              : onChange
-                ? 'Choose a track, album or playlist. Saved privately with your entry; sharing is a separate choice.'
-                : 'Choose a track, album or playlist. Music is for this writing session only; it is not saved or published.'}
-          </p>
           {!publicCopy && (
             <>
               <a
@@ -159,6 +103,7 @@ export function WritingMusic({
                   setError('')
                   if (next !== entity) setLoaded(false)
                   setEntity(next)
+                  setPlayerVisible(true)
                   setOpen(false)
                   const [, kind, id] = next.split(':')
                   onChange?.({
@@ -188,6 +133,9 @@ export function WritingMusic({
                   Load Spotify player
                 </button>
               </form>
+              {!onChange && (
+                <small>Session only · not saved or published.</small>
+              )}
             </>
           )}
           {value && (
@@ -199,19 +147,21 @@ export function WritingMusic({
               >
                 Open selected music in Spotify ↗
               </a>
-              <button
-                type="button"
-                className="button secondary"
-                onClick={() => {
-                  setError('')
-                  const next = `spotify:${value.kind}:${value.id}`
-                  if (next !== entity) setLoaded(false)
-                  setEntity(next)
-                  setOpen(false)
-                }}
-              >
-                Load selected music
-              </button>
+              {!entity && (
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={() => {
+                    setError('')
+                    setLoaded(false)
+                    setEntity(`spotify:${value.kind}:${value.id}`)
+                    setPlayerVisible(true)
+                    setOpen(false)
+                  }}
+                >
+                  Load selected music
+                </button>
+              )}
               {onChange && 'share' in value && (
                 <label className="row">
                   <input
@@ -222,36 +172,17 @@ export function WritingMusic({
                       onChange({ ...value, share: event.target.checked })
                     }
                   />
-                  Include this Spotify selection in my next public snapshot
+                  Include music when publishing
                 </label>
               )}
             </>
           )}
-          <small>
-            Loading connects to Spotify, which controls previews, login and
-            playback availability. Your writing is never sent. No autoplay.
-          </small>
-        </div>
-      )}
-      {error && <p role="alert">{error}</p>}
-      <div ref={host} />
-      {(entity || (value && onChange)) && (
-        <div className="row">
-          <button
-            type="button"
-            className="button secondary"
-            disabled={!loaded}
-            onClick={() => controller.current?.togglePlay()}
-          >
-            Play / pause
-          </button>
-          <small>
-            Focus this button and press Space. Typing is never interrupted.
-          </small>
-          {!publicCopy && (
+          <small>Loads Spotify. Your writing stays private.</small>
+          {!publicCopy && (entity || (value && onChange)) && (
             <button
               type="button"
               className="text-button"
+              disabled={disabled}
               onClick={() => {
                 setEntity(null)
                 setLoaded(false)
@@ -262,6 +193,31 @@ export function WritingMusic({
             </button>
           )}
         </div>
+      )}
+      {error && <p role="alert">{error}</p>}
+      {entity && !loaded && !error && (
+        <small role="status">Loading music…</small>
+      )}
+      {entity && (
+        <iframe
+          id={playerId}
+          hidden={!playerVisible}
+          key={entity}
+          title="Spotify music player"
+          src={`https://open.spotify.com/embed/${entity.split(':')[1]}/${entity.split(':')[2]}`}
+          width="100%"
+          height="152"
+          referrerPolicy="no-referrer"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          allow="encrypted-media"
+          onLoad={() => {
+            setLoaded(true)
+            setError('')
+          }}
+          onError={() =>
+            setError('Music could not load. Open your selection in Spotify.')
+          }
+        />
       )}
     </section>
   )

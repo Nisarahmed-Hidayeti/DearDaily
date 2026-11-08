@@ -21,9 +21,7 @@ it('accepts canonical Spotify entities and rejects arbitrary embeds and credenti
 it('does not contact Spotify before consent and explains the session-only boundary', async () => {
   render(<WritingMusic />)
   expect(document.querySelector('script[src*="spotify"]')).toBeNull()
-  await userEvent.click(
-    screen.getByRole('button', { name: /Add writing music/ }),
-  )
+  await userEvent.click(screen.getByRole('button', { name: '♫ Music' }))
   expect(screen.getByText(/not saved or published/)).toBeVisible()
   expect(
     screen.getByRole('link', { name: /Browse Spotify charts/ }),
@@ -42,7 +40,7 @@ it('does not auto-load saved public music or expose private sharing controls', a
       }}
     />,
   )
-  await userEvent.click(screen.getByRole('button', { name: '♫ Soundtrack' }))
+  await userEvent.click(screen.getByRole('button', { name: '♫ Music' }))
   expect(
     screen.getByRole('link', { name: /Open selected music/ }),
   ).toHaveAttribute(
@@ -61,8 +59,46 @@ it('rejects malicious API music without crashing the journal', async () => {
       value={{ provider: 'spotify', kind: 'track', id: 'javascript:alert(1)' }}
     />,
   )
-  await userEvent.click(
-    screen.getByRole('button', { name: /Add writing music/ }),
-  )
+  await userEvent.click(screen.getByRole('button', { name: '♫ Music' }))
   expect(screen.queryByRole('link', { name: /Open selected music/ })).toBeNull()
+})
+it('keeps the player compact and has no custom Space or playback controls', async () => {
+  render(
+    <WritingMusic
+      value={{
+        provider: 'spotify',
+        kind: 'track',
+        id: '4uLU6hMCjMI75M1A2tKUQC',
+        share: false,
+      }}
+      onChange={() => {}}
+    />,
+  )
+  await userEvent.click(screen.getByRole('button', { name: '♫ Music' }))
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Load selected music' }),
+  )
+  expect(screen.getByRole('button', { name: '♫ Music' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  )
+  expect(screen.queryByRole('button', { name: 'Play / pause' })).toBeNull()
+  expect(screen.queryByText(/press Space/)).toBeNull()
+  expect(screen.queryByLabelText('Spotify link')).toBeNull()
+  const frame = screen.getByTitle('Spotify music player')
+  await userEvent.click(screen.getByRole('button', { name: 'Hide player' }))
+  expect(frame).not.toBeVisible()
+  await userEvent.click(screen.getByRole('button', { name: 'Show player' }))
+  expect(screen.getByTitle('Spotify music player')).toBe(frame)
+  expect(frame).toBeVisible()
+  expect(frame).toHaveAttribute(
+    'src',
+    'https://open.spotify.com/embed/track/4uLU6hMCjMI75M1A2tKUQC',
+  )
+  expect(frame).toHaveAttribute('referrerpolicy', 'no-referrer')
+  expect(frame).toHaveAttribute(
+    'sandbox',
+    'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox',
+  )
+  expect(document.querySelector('script[src*="spotify"]')).toBeNull()
 })
