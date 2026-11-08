@@ -566,3 +566,34 @@
   background: var(--surface-hover);
   color: var(--accent);
 }
+
+/* Quiet, opt-in soundtrack below the cover; no fixed player over writing. */
+.writing-music {
+  margin: 0.5rem 0 1.25rem;
+  font-size: 0.85rem;
+}
+.writing-music-options {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem 0;
+  max-width: 42rem;
+}
+.writing-music-options form,
+.writing-music-options label {
+  display: grid;
+  gap: 0.6rem;
+}
+.writing-music-options input {
+  width: 100%;
+  min-width: 0;
+}
+.writing-music > .row {
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+.writing-music iframe {
+  max-width: 100%;
+  border: 0;
+  border-radius: 12px;
+}

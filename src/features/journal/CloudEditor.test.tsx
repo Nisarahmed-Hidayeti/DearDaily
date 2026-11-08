@@ -42,6 +42,21 @@ function editor() {
   )
 }
 describe('real editor presentation', () => {
+  it('Ctrl+S saves the latest draft without opening browser Save Page', async () => {
+    editor()
+    await userEvent.type(screen.getByLabelText('Entry title'), 'Shortcut page')
+    await userEvent.type(screen.getByLabelText('Journal body'), 'Latest words')
+    await userEvent.keyboard('{Control>}s{/Control}')
+    await waitFor(() =>
+      expect(saveEntry).toHaveBeenCalledWith(
+        {},
+        'writer-a',
+        expect.any(String),
+        expect.objectContaining({ body: 'Latest words', status: 'saved' }),
+        null,
+      ),
+    )
+  })
   it('saves privately and requires confirmation for publishing and unpublishing', async () => {
     editor()
     expect(screen.getByRole('button', { name: 'Publish story' })).toBeDisabled()

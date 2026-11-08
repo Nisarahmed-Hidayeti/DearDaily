@@ -1,4 +1,5 @@
 import { uploadEntryPhoto } from './entryPhotoUpload'
+import { WritingMusic } from '../music/WritingMusic'
 import { entryIcon } from '../rich-editor/emojis'
 import { EntryDetails } from './EntryDetails'
 import {
@@ -42,6 +43,21 @@ export default function CloudEditor() {
 function EntryForm({ existingId }: { existingId?: string }) {
   const state = useJournalEntry(existingId)
   const { draft, setDraft, ready, busy, error, dirty, row, published } = state
+  useEffect(() => {
+    const shortcut = (event: KeyboardEvent) => {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        !event.altKey &&
+        event.key.toLowerCase() === 's'
+      ) {
+        event.preventDefault()
+        if (!event.repeat && !event.isComposing && ready && !busy && dirty)
+          void state.save(true)
+      }
+    }
+    window.addEventListener('keydown', shortcut)
+    return () => window.removeEventListener('keydown', shortcut)
+  }, [state, ready, busy, dirty])
   const [preview, setPreview] = useState(false)
   const { focus, setFocus } = useWritingFocus()
   const { appearance } = useAppearance()
@@ -334,6 +350,7 @@ function EntryForm({ existingId }: { existingId?: string }) {
               )}
             </>
           )}
+          {!preview && <WritingMusic />}
           <div className="row spread paper-meta">
             <label>
               Entry date{' '}
