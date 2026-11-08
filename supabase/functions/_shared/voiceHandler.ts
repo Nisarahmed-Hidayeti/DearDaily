@@ -209,7 +209,10 @@ export function createVoiceHandler(
             cleaned++
           }
         }
-        return json({ cleaned })
+        return json({
+          cleaned,
+          pending: (await record('jobs', { user_id: who })).length,
+        })
       }
       return json({ error: 'Unsupported recording request' }, 400)
     } catch {

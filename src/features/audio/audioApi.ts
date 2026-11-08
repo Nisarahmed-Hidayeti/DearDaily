@@ -45,9 +45,11 @@ export async function preparePublicVoice(
   return validateVoiceNotes(data?.notes, false)
 }
 export async function cleanVoice(client: SupabaseClient) {
-  await client.functions.invoke('voice-gateway', {
+  const { data, error } = await client.functions.invoke('voice-gateway', {
     body: { action: 'cleanup' },
   })
+  if (error || data?.pending !== 0)
+    throw Error('Audio cleanup remains queued for retry')
 }
 export function approvedVoice(notes?: VoiceNote[]) {
   return (notes ?? []).filter((n) => n.share)

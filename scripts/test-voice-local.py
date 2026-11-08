@@ -64,6 +64,6 @@ try:
 finally:
  for i,eid in enumerate(entries):
   if i<len(tokens):
-   call('/rest/v1/public_stories?id=eq.'+eid,'DELETE',token=tokens[i]);call('/rest/v1/journal_entries?id=eq.'+eid,'DELETE',token=tokens[i]);call('/functions/v1/voice-gateway','POST',{'action':'cleanup'},tokens[i])
+   call('/rest/v1/public_stories?id=eq.'+eid,'DELETE',token=tokens[i]);call('/rest/v1/journal_entries?id=eq.'+eid,'DELETE',token=tokens[i]);status,receipt,_=call('/functions/v1/voice-gateway','POST',{'action':'cleanup'},tokens[i]);assert status==200 and receipt.get('pending')==0,'Exact fixture object cleanup'
  for uid in users:call('/auth/v1/admin/users/'+uid,'DELETE',token=service)
  print('Exact local synthetic fixtures cleaned; checks:',checks,flush=True)
