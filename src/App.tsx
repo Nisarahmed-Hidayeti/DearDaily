@@ -12,6 +12,9 @@ import Moderation from './features/community/Moderation'
 import AccountPrivacy from './features/community/AccountPrivacy'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
+const VoiceSecurityCheck = import.meta.env.DEV
+  ? lazy(() => import('./features/auth/VoiceSecurityCheck'))
+  : null
 const EditorWorkshop = import.meta.env.DEV
   ? lazy(() => import('./features/rich-editor/EditorPreview'))
   : null
@@ -84,6 +87,20 @@ function ThemedRoutes() {
                 </RequireAccount>
               }
             />
+            {import.meta.env.DEV && VoiceSecurityCheck && (
+              <Route
+                path="/dev/voice-check"
+                element={
+                  <Suspense
+                    fallback={
+                      <LoadingState>Preparing audio checks…</LoadingState>
+                    }
+                  >
+                    <VoiceSecurityCheck />
+                  </Suspense>
+                }
+              />
+            )}
             {import.meta.env.DEV && EditorWorkshop && (
               <Route
                 path="/dev/editor-workshop"

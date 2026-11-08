@@ -1,3 +1,8 @@
+import { VoiceNotes } from '../audio/VoiceNotes'
+import { voiceNotesEnabled } from '../audio/audio'
+import { uploadVoice, approvedVoice } from '../audio/audioApi'
+import { MoodPicker } from './MoodPicker'
+import { journalCategories } from './entryMetadata'
 import { uploadEntryPhoto } from './entryPhotoUpload'
 import { WritingMusic } from '../music/WritingMusic'
 import { persistentMusicEnabled, publicMusic, musicUrl } from '../music/music'
@@ -24,7 +29,6 @@ import {
 import type { PublicProfile } from '../community/communityApi'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Eye, Feather, LockKeyhole, X } from 'lucide-react'
-import type { Mood } from '../../data/demo'
 import { Modal, PageHeading } from '../../components/Shared'
 import { exportMarkdown } from './journalApi'
 import { useJournalEntry } from './useJournalEntry'
@@ -459,6 +463,27 @@ function EntryForm({
               )}
             </>
           )}
+          {voiceNotesEnabled && (
+            <VoiceNotes
+              notes={draft.voice_notes ?? []}
+              disabled={!ready}
+              onChange={
+                preview ? undefined : (voice_notes) => patch({ voice_notes })
+              }
+              onUpload={
+                !preview && client
+                  ? async (blob) => {
+                      const confirmed = row ?? (await state.save())
+                      if (!confirmed)
+                        throw Error(
+                          'Save your private page before uploading audio',
+                        )
+                      return uploadVoice(client, confirmed.id, blob)
+                    }
+                  : undefined
+              }
+            />
+          )}
           <div className="paper-footer">
             <span>Your words stay private until you choose to publish.</span>
             <output aria-live="polite">
@@ -502,24 +527,12 @@ function EntryForm({
               )}{' '}
               Private source entry
             </p>
-            <fieldset disabled={!ready}>
-              <legend>How are you feeling?</legend>
-              <div className="moods">
-                {(['Calm', 'Happy', 'Reflective', 'Low'] as Mood[]).map(
-                  (m, i) => (
-                    <button
-                      key={m}
-                      className={draft.mood === m ? 'selected' : ''}
-                      aria-pressed={draft.mood === m}
-                      onClick={() => patch({ mood: m })}
-                    >
-                      <span>{['☁', '☀', '☾', '☂'][i]}</span>
-                      {m}
-                    </button>
-                  ),
-                )}
-              </div>
-            </fieldset>
+            <MoodPicker
+              value={draft.mood}
+              onChange={(mood) => patch({ mood })}
+              disabled={!ready}
+            />
+
             <label htmlFor="tags">Tags</label>
             <form
               className="tag-form"
@@ -569,7 +582,7 @@ function EntryForm({
               value={draft.category}
               onChange={(e) => patch({ category: e.target.value })}
             >
-              {['Personal', 'Gratitude', 'Growth', 'Travel'].map((c) => (
+              {journalCategories.map((c) => (
                 <option key={c}>{c}</option>
               ))}
             </select>
@@ -729,6 +742,19 @@ function EntryForm({
           {confirmation === 'publish' && (
             <article className="entry-preview">
               <dl className="publication-receipt">
+                {voiceNotesEnabled && (
+                  <>
+                    <dt>Public voice notes</dt>
+                    <dd>
+                      {approvedVoice(row?.voice_notes)
+                        .map(
+                          (n) =>
+                            `${n.title} (${n.start.toFixed(1)}–${n.end.toFixed(1)}s)`,
+                        )
+                        .join(', ') || 'None — recordings stay private'}
+                    </dd>
+                  </>
+                )}
                 <dt>Public category</dt>
                 <dd>{publicCategory}</dd>
                 <dt>Public tags</dt>

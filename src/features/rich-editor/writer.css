@@ -1225,3 +1225,134 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Document-end audio, visually quiet and independent of the typing surface. */
+.voice-notes {
+  width: min(100%, var(--writing-width));
+  margin: 32px auto 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.voice-notes h3 {
+  font: inherit;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
+.voice-note {
+  margin-top: 14px;
+}
+.voice-player {
+  padding: 10px 0;
+}
+.voice-player > .row {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.voice-player small,
+.voice-compose > small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.voice-notes audio {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 40px;
+}
+.voice-note-options,
+.voice-compose {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+.voice-trim {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.voice-trim input {
+  width: 100%;
+}
+.voice-compose > .row,
+.voice-note-options > .row {
+  flex-wrap: wrap;
+}
+.music-track-choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+}
+.music-playback-note {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.voice-notes .button {
+  min-height: 40px;
+}
+@media (max-width: 600px) {
+  .voice-compose .button {
+    flex: 1;
+    text-align: center;
+  }
+  .music-track-choice {
+    align-items: start;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .voice-compose,
+  .voice-note-options {
+    animation: voice-reveal 180ms ease-out;
+  }
+  @keyframes voice-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Wide artwork, calm reading measure. The editor stays mounted through every layout change. */
+.studio-shell .notion-editor {
+  max-width: 1440px;
+  padding-inline: clamp(16px, 3vw, 44px);
+}
+.studio-shell .notion-editor .writing-paper {
+  max-width: 1280px;
+}
+.notion-editor .writer-cover {
+  height: clamp(180px, 26vw, 320px);
+}
+.notion-editor .writer-topbar,
+.notion-editor > .details-summary {
+  width: 100%;
+}
+.notion-editor .title-input {
+  letter-spacing: -0.035em;
+  line-height: 1.14;
+}
+@media (min-width: 1101px) {
+  .editor-lab {
+    --writing-width: 780px;
+  }
+}
+@media (max-width: 600px) {
+  .studio-shell .notion-editor {
+    padding-inline: 16px;
+  }
+  .notion-editor .writer-cover {
+    height: 180px;
+    border-radius: 8px;
+  }
+  .voice-compose .row {
+    gap: 10px;
+  }
+}

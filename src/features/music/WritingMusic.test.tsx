@@ -102,3 +102,28 @@ it('keeps the player compact and has no custom Space or playback controls', asyn
   )
   expect(document.querySelector('script[src*="spotify"]')).toBeNull()
 })
+
+it('gives playlists enough space without adding provider scripts to the journal', async () => {
+  render(
+    <WritingMusic
+      value={{
+        provider: 'spotify',
+        kind: 'playlist',
+        id: '4uLU6hMCjMI75M1A2tKUQC',
+        share: false,
+      }}
+      onChange={() => {}}
+    />,
+  )
+  await userEvent.click(screen.getByRole('button', { name: '♫ Music' }))
+  expect(screen.getByText(/paste its Spotify track link/)).toBeVisible()
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Load selected music' }),
+  )
+  expect(screen.getByTitle('Spotify music player')).toHaveAttribute(
+    'height',
+    '352',
+  )
+  expect(document.querySelector('script[src*="spotify"]')).toBeNull()
+  expect(screen.getByText(/Spotify controls preview length/)).toBeVisible()
+})

@@ -423,3 +423,8 @@ enabled = true
 enabled = true
 verify_jwt = false
 import_map = "./functions/media-gateway/deno.json"
+
+[functions.voice-gateway]
+enabled = true
+verify_jwt = false
+import_map = "./functions/voice-gateway/deno.json"
