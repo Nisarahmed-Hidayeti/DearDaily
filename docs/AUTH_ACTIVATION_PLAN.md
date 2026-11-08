@@ -103,3 +103,9 @@ Docker is currently stopped and noninteractive startup requires a system passwor
 ### Approved beta publication checkpoint — November 8
 
 Owner approved publishing the prepared privacy and beta-terms pages with deardailywebsite@gmail.com as contact, and started Docker. A fresh local pgTAP run passed all 264 checks across six files without resetting data or applying hosted migrations. Latest main was merged into the existing feature branch; the sole conflict was the evidence document's appended timeline, preserved in full. Source files were unchanged by the merge, so the 213-test/TypeScript/lint/build result applies to the resulting application code. Publishing these pages does not by itself enable signup or change the Google audience. Audio and optional public streaks are excluded and remain unfinished.
+
+### Reviewed update deployed; activation pending
+
+PR #9 merged after all GitHub checks passed as `a40937399b37854f84a31cc39d34c1050db4104b`. Netlify's dashboard verified this exact main commit published. Live `/privacy` and `/terms` render the owner-approved pages. No signup activation occurred: public settings still confirm disable_signup=true, email confirmation required, anonymous_users=false, and email/Google providers enabled.
+
+Netlify production flags were inspected individually: journals, community, rich editor and Renaissance data are true; signup is false. VITE_ENABLE_MEDIA is absent, so upload activation remains pending despite passing the 47 hosted media checks. Google's live homepage/privacy/terms URLs and `deardailyy.netlify.app` authorized domain are prepared but unsaved. The owner has been asked for one grouped protected-beta activation approval covering those Google settings/audience, hosted signup and the frontend signup/media flags, with no database or Storage-policy changes. Stop on Google verification requirements or failed live tests.
