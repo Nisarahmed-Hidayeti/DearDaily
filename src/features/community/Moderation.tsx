@@ -61,7 +61,7 @@ export default function Moderation() {
   }
   return (
     <div className="page">
-      <PageHeading eyebrow="Closed beta / Restricted" title="Community care." />
+      <PageHeading eyebrow="Community / Restricted" title="Community care." />
       <p role="status">{message}</p>
       {items.map((r) => (
         <section className="panel" key={r.id}>

@@ -1,3 +1,11 @@
+# Current activation — November 8, 2026
+
+Protected beta registration is OPEN after explicit owner approval. Email verification and Google signup are enabled; email confirmation, CAPTCHA and RLS remain enforced; anonymous Auth stays OFF. Live password login was owner-confirmed and live Google login observed. Missing CAPTCHA is rejected without a user/session. The live image origin was separately approved and the full synthetic photo publish/unpublish flow passed. See the latest AUTH_ACTIVATION_PLAN.md checkpoint for exact evidence.
+
+Audio, optional public streaks and expanded owner controls remain unfinished/disabled on the hosted site. Those are separate from registration activation. Operational retention/restore, wider legal/age review and free-tier email quotas remain limitations, not guarantees.
+
+## Earlier checkpoints (historical; superseded above)
+
 # Registration launch checkpoint — November 8, 2026
 
 ## Verified
