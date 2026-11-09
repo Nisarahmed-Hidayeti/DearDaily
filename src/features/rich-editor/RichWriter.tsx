@@ -328,7 +328,11 @@ function ValidatedRichWriter({
     <div
       className="rich-writer"
       onMouseDown={(event) => {
-        if ((event.target as Element).closest('button')) event.preventDefault()
+        if (
+          (event.target as Element).closest('button') &&
+          !(event.target as Element).closest('[draggable="true"]')
+        )
+          event.preventDefault()
       }}
     >
       <BubbleMenu editor={editor}>
@@ -354,21 +358,6 @@ function ValidatedRichWriter({
       />
       {uploading && (
         <LoadingState>Preparing and uploading your private photo…</LoadingState>
-      )}
-      {onUpload && (
-        <button
-          type="button"
-          className="mobile-photo-insert quiet"
-          aria-label="Insert photo"
-          title="Insert photo"
-          disabled={disabled || uploading}
-          onClick={() => {
-            pendingPhoto.current = null
-            fileInput.current?.click()
-          }}
-        >
-          <ImagePlus size={20} />
-        </button>
       )}
       <BlockControls
         editor={editor}
@@ -450,6 +439,21 @@ function ValidatedRichWriter({
         </form>
       )}
       <EditorContent editor={editor} />
+      {onUpload && (
+        <button
+          type="button"
+          className="mobile-photo-insert quiet"
+          aria-label="Insert photo"
+          title="Insert photo"
+          disabled={disabled || uploading}
+          onClick={() => {
+            pendingPhoto.current = null
+            fileInput.current?.click()
+          }}
+        >
+          <ImagePlus size={20} />
+        </button>
+      )}
       {error && (
         <p role="alert">
           {error} The last valid document is retained. Undo or remove the

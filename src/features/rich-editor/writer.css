@@ -1559,3 +1559,32 @@
     left: -24px;
   }
 }
+
+.block-handle {
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.block-handle:active {
+  cursor: grabbing;
+}
+.block-drop-indicator {
+  position: fixed;
+  height: 3px;
+  background: var(--accent);
+  z-index: 90;
+  pointer-events: none;
+  border-radius: 2px;
+}
+
+.writer-focus .block-gutter {
+  display: grid;
+}
+@media (max-width: 600px) {
+  .block-gutter {
+    left: -14px;
+  }
+  .rich-writer .tiptap {
+    padding-left: 14px;
+  }
+}

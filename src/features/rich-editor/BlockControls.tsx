@@ -1,5 +1,5 @@
-import { NodeSelection } from '@tiptap/pm/state'
-import { useEffect, useState } from 'react'
+import { startBlockDrag, type DropIndicator } from './blockDrag'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Editor } from '@tiptap/core'
 import { GripVertical, Plus } from 'lucide-react'
@@ -21,6 +21,11 @@ export function BlockControls({
   onPhoto?: () => void
 }) {
   const [open, setOpen] = useState(false)
+  const [indicator, setIndicator] = useState<DropIndicator | null>(null)
+  const [announcement, setAnnouncement] = useState('')
+  const dragCleanup = useRef<(() => void) | null>(null)
+  const suppressClick = useRef(false)
+  useEffect(() => () => dragCleanup.current?.(), [])
   const [top, setTop] = useState(0)
   const [position, setPosition] = useState({ left: 12, top: 12, width: 280 })
   useEffect(() => {
@@ -66,25 +71,54 @@ export function BlockControls({
   const block = currentBlock(editor)
   return (
     <>
+      <span className="sr-only" role="status">
+        {announcement}
+      </span>
+      {indicator &&
+        createPortal(
+          <div
+            className="block-drop-indicator"
+            style={indicator}
+            aria-hidden="true"
+          />,
+          document.body,
+        )}
       <div className="block-gutter" style={{ top }}>
         <button
           className="block-handle"
-          draggable
           title="Drag to move · click for block actions"
-          onDragStart={(event) => {
-            beginBlockDrag(editor)
-            event.dataTransfer.effectAllowed = 'move'
-            // Non-sensitive marker: the actual slice stays inside this editor.
-            event.dataTransfer.setData('text/plain', 'DearDaily block')
-            setOpen(false)
-          }}
-          onDragEnd={() => {
-            endBlockDrag(editor)
+          onPointerDown={(event) => {
+            if (event.button !== 0) return
+            event.preventDefault()
+            dragCleanup.current?.()
+            dragCleanup.current = startBlockDrag(
+              editor,
+              event.currentTarget,
+              {
+                x: event.clientX,
+                y: event.clientY,
+                pointerId: event.pointerId,
+              },
+              currentBlock(editor).index,
+              setIndicator,
+              (moved, attempted) => {
+                suppressClick.current = attempted
+                if (attempted)
+                  setAnnouncement(
+                    moved
+                      ? 'Block moved.'
+                      : 'Block unchanged. Use Move up or Move down in Block actions.',
+                  )
+              },
+            )
           }}
           aria-label="Block actions"
           aria-expanded={open}
-          onMouseDown={(e) => e.preventDefault()}
           onClick={(e) => {
+            if (suppressClick.current) {
+              suppressClick.current = false
+              return
+            }
             setPosition(menuPosition(e.currentTarget.getBoundingClientRect()))
             setOpen(!open)
           }}
@@ -182,15 +216,4 @@ export function BlockControls({
         )}
     </>
   )
-}
-
-/** ProseMirror owns this imperative drag state, outside React render state. */
-function beginBlockDrag(editor: Editor) {
-  const current = currentBlock(editor)
-  const selection = NodeSelection.create(editor.state.doc, current.from)
-  editor.view.dispatch(editor.state.tr.setSelection(selection))
-  editor.view.dragging = { slice: selection.content(), move: true }
-}
-function endBlockDrag(editor: Editor) {
-  editor.view.dragging = null
 }

@@ -1,3 +1,4 @@
+import { moveBlockTo } from './blockDrag'
 import { Editor } from '@tiptap/core'
 import { it, expect } from 'vitest'
 import { writingExtensions } from './extensions'
@@ -174,4 +175,26 @@ it('keeps constrained private and public image blocks through validation and rel
       },
     }),
   ).toThrow()
+})
+
+it('moves a block to either document boundary without losing formatting and undoes the move', () => {
+  const e = new Editor({
+    extensions: writingExtensions(),
+    content: documentFromText('One\nTwo\nThree').content,
+  })
+  try {
+    e.commands.setTextSelection({ from: 1, to: 4 })
+    e.commands.setBold()
+    expect(moveBlockTo(e, 0, 3)).toBe(true)
+    expect(e.getText()).toBe('Two\n\nThree\n\nOne')
+    expect(e.state.doc.lastChild?.firstChild?.marks[0]?.type.name).toBe('bold')
+    e.commands.undo()
+    expect(e.getText()).toBe('One\n\nTwo\n\nThree')
+    expect(moveBlockTo(e, 2, 0)).toBe(true)
+    expect(e.getText()).toBe('Three\n\nOne\n\nTwo')
+    expect(moveBlockTo(e, 0, 1)).toBe(false)
+    expect(moveBlockTo(e, 10, 0)).toBe(false)
+  } finally {
+    e.destroy()
+  }
 })
