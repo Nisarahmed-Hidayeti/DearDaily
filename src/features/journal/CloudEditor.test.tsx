@@ -70,7 +70,7 @@ describe('real editor presentation', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Publish story' }))
     expect(publishStory).not.toHaveBeenCalled()
     expect(screen.getByRole('dialog')).toHaveTextContent(
-      'This public snapshot contains only',
+      'Publish this snapshot with only',
     )
     await userEvent.click(screen.getByRole('button', { name: 'Publish now' }))
     await screen.findByRole('button', { name: 'Unpublish story' })
@@ -109,7 +109,9 @@ describe('real editor presentation', () => {
       '<script>bad()</script>',
     )
     await userEvent.click(screen.getByRole('button', { name: 'Preview' }))
-    expect(screen.getByText('<script>bad()</script>')).toBeVisible()
+    expect(document.querySelector('.entry-preview')).toHaveTextContent(
+      '<script>bad()</script>',
+    )
     expect(document.querySelector('.entry-preview script')).toBeNull()
   })
 })

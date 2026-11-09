@@ -4,7 +4,13 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { avatars, validUsername } from './communityApi'
 type Author = { username: string; display_name: string; avatar: string }
-export function PublicAuthor({ username }: { username?: string | null }) {
+export function PublicAuthor({
+  username,
+  compact = false,
+}: {
+  username?: string | null
+  compact?: boolean
+}) {
   const photos = usePublicImages(username)
   const { client } = useAuth()
   const [author, setAuthor] = useState<Author | null>(null)
@@ -24,9 +30,10 @@ export function PublicAuthor({ username }: { username?: string | null }) {
       active = false
     }
   }, [client, username])
-  if (!username) return <span className="muted">Anonymous writer</span>
+  if (!username)
+    return compact ? null : <span className="muted">Anonymous writer</span>
   if (!author || author.username !== username)
-    return <span className="muted">@{username}</span>
+    return compact ? null : <span className="muted">@{username}</span>
   return (
     <Link className="public-author" to={`/u/${author.username}`}>
       <span className="author-symbol" aria-hidden="true">

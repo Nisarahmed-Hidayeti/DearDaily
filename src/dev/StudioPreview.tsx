@@ -65,9 +65,9 @@ const entries: Row[] = [
 }))
 const tables: Record<string, Row[]> = {
   journal_entries: entries,
-  public_stories: entries.slice(0, 2).map((e) => ({
+  public_stories: entries.slice(0, 2).map((e, index) => ({
     ...e,
-    public_username: 'studio_writer',
+    public_username: index === 0 ? 'studio_writer' : null,
     public_category: 'Personal',
     public_tags: ['ordinary-days'],
     published_at: stamp,

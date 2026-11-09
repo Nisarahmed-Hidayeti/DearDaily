@@ -6,6 +6,7 @@ import {
 } from '../rich-editor/document'
 import {
   defaultPublicationPlan,
+  proposedPublicationPlan,
   publicationTags,
   validatePublicationPlan,
 } from './publicationPlan'
@@ -36,4 +37,22 @@ it('rejects injected preferences and never stores arbitrary ownership or style f
     { ...defaultPublicationPlan, tags: 'a'.repeat(155) },
   ])
     expect(() => validatePublicationPlan(value)).toThrow()
+})
+
+it('proposes bounded shared metadata without changing the private values or opting into identity', () => {
+  const draft = {
+    category: 'Study',
+    tags: Array.from({ length: 10 }, (_, i) => 'tag' + i),
+  }
+  const proposal = proposedPublicationPlan(draft)
+  expect(proposal).toEqual({
+    category: 'Study',
+    tags: 'tag0,tag1,tag2,tag3,tag4',
+    byline: false,
+  })
+  expect(draft.tags).toHaveLength(10)
+  expect(validatePublicationPlan(proposal)).toEqual(proposal)
+  expect(
+    proposedPublicationPlan({ category: '<script>', tags: [] }).category,
+  ).toBe('Uncategorized')
 })

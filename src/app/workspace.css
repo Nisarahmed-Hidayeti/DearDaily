@@ -4,7 +4,7 @@
   background: var(--bg);
   color: var(--text);
 }
-.studio-shell[data-collapsed='true'] {
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus)) {
   --nav-width: 60px;
 }
 .studio-sidebar {
@@ -163,32 +163,42 @@
   min-height: 38px;
   font-size: 12px;
 }
-.studio-shell[data-collapsed='true'] .studio-brand {
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus)) .studio-brand {
   flex-direction: column;
   gap: 0;
   margin-bottom: 12px;
 }
-.studio-shell[data-collapsed='true'] .studio-brand .logo > span,
-.studio-shell[data-collapsed='true'] .nav-label,
-.studio-shell[data-collapsed='true'] .account-caption,
-.studio-shell[data-collapsed='true'] .account-chevron {
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus))
+  .studio-brand
+  .logo
+  > span,
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus)) .nav-label,
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus)) .account-caption,
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus))
+  .account-chevron {
   display: none;
 }
-.studio-shell[data-collapsed='true'] .studio-brand .sidebar-toggle {
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus))
+  .studio-brand
+  .sidebar-toggle {
   top: auto;
   right: auto;
   bottom: 0;
   left: 5px;
   margin: 0;
 }
-.studio-shell[data-collapsed='true'] .studio-sidebar > nav a {
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus))
+  .studio-sidebar
+  > nav
+  a {
   justify-content: center;
   padding-inline: 0;
 }
-.studio-shell[data-collapsed='true'] [data-tooltip] {
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus)) [data-tooltip] {
   position: relative;
 }
-.studio-shell[data-collapsed='true'] [data-tooltip]::after {
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus))
+  [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   left: calc(100% + 12px);
@@ -204,8 +214,10 @@
   pointer-events: none;
   opacity: 0;
 }
-.studio-shell[data-collapsed='true'] [data-tooltip]:hover::after,
-.studio-shell[data-collapsed='true'] [data-tooltip]:focus-visible::after {
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus))
+  [data-tooltip]:hover::after,
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus))
+  [data-tooltip]:focus-visible::after {
   opacity: 1;
 }
 .studio-mobile-header {
@@ -220,13 +232,40 @@
   margin-top: 16px;
   padding-top: 12px;
 }
-.studio-shell:has(.writer-focus) .studio-sidebar,
-.studio-shell:has(.writer-focus) .studio-mobile-header,
+/* Focus keeps a quiet, accessible desktop navigation rail. */
+.studio-shell:has(.writer-focus) {
+  --nav-width: 60px;
+}
 .studio-shell:has(.writer-focus) .demo-notice {
   display: none;
 }
-.studio-shell:has(.writer-focus) .studio-main {
-  margin-left: 0;
+.studio-shell:has(.writer-focus) .studio-brand {
+  flex-direction: column;
+  align-items: center;
+}
+.studio-shell:has(.writer-focus) .studio-brand .logo > span,
+.studio-shell:has(.writer-focus) .nav-label,
+.studio-shell:has(.writer-focus) .account-caption,
+.studio-shell:has(.writer-focus) .account-chevron,
+.studio-shell:has(.writer-focus) .studio-brand .sidebar-toggle {
+  display: none;
+}
+.studio-shell:has(.writer-focus) .studio-sidebar > nav a {
+  justify-content: center;
+  padding-inline: 0;
+}
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus)) .studio-brand {
+  align-items: center;
+}
+.studio-shell:is([data-collapsed='true'], :has(.writer-focus))
+  .studio-brand
+  .logo,
+.studio-shell:has(.writer-focus) .studio-brand .logo {
+  width: 40px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  margin-inline: auto;
 }
 @media (prefers-reduced-motion: no-preference) {
   .studio-sidebar {
