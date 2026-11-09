@@ -1533,3 +1533,8 @@
 .page-style-dialog .cover-position {
   gap: 8px;
 }
+
+.writer-focus .details-summary,
+.writer-focus .paper-meta {
+  display: none;
+}

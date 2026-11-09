@@ -36,6 +36,9 @@ export async function hostedStudioChecks(
     if (!ok) throw Error('Studio: ' + label)
     checks++
   }
+  let result:
+    { checks: number; skipped: boolean; profileTested: boolean } | undefined
+  let failure: unknown
   try {
     check(aId !== bId, 'different users')
     const prior = await myProfile(b)
@@ -214,8 +217,11 @@ export async function hostedStudioChecks(
         .eq('username', username)
       check(!!ownerId.error, 'hidden profile ownership remains inaccessible')
     }
-    return { checks, skipped: false, profileTested: madeProfile }
-  } finally {
+    result = { checks, skipped: false, profileTested: madeProfile }
+  } catch (error) {
+    failure = error
+  }
+  try {
     const pub = await a.from('public_stories').delete().eq('id', id)
     const entry = await a
       .from('journal_entries')
@@ -232,5 +238,14 @@ export async function hostedStudioChecks(
     const remains = await a.from('journal_entries').select('id').eq('id', id)
     if (remains.error || remains.data.length)
       throw Error('Synthetic studio entry remains')
+  } catch (cleanupFailure) {
+    throw new AggregateError(
+      failure ? [failure, cleanupFailure] : [cleanupFailure],
+      'Synthetic studio cleanup not confirmed',
+      { cause: cleanupFailure },
+    )
   }
+  if (failure) throw failure
+  if (!result) throw Error('Studio checks did not complete')
+  return result
 }

@@ -62,7 +62,8 @@ export function PageAppearance({
     setDraft(next)
     setCover(id)
   }
-  const openAppearance = () => {
+  const openAppearance = (part: 'cover' | 'icon' = 'cover') => {
+    setSection(part)
     setDraft(document ?? documentFromText(''))
     setCover(preset ?? null)
     setEmoji(entryIcon(document, icon) ?? '')
@@ -77,7 +78,7 @@ export function PageAppearance({
           aria-label="Change or remove cover"
           title="Change, remove or reposition cover"
           disabled={disabled || unsupported}
-          onClick={openAppearance}
+          onClick={() => openAppearance('cover')}
         >
           <PageCover privateMedia document={document} preset={preset} />
         </button>
@@ -89,7 +90,9 @@ export function PageAppearance({
           title="Cover & page icon"
           aria-label={`${entryIcon(document, icon) || '＋'} Cover & page icon`}
           disabled={disabled || unsupported}
-          onClick={openAppearance}
+          onClick={() =>
+            openAppearance(entryIcon(document, icon) ? 'icon' : 'cover')
+          }
         >
           <span>
             {entryIcon(document, icon) || (hasAppearance ? '✧' : '＋')}

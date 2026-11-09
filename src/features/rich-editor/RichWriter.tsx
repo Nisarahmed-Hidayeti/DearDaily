@@ -112,6 +112,11 @@ function ValidatedRichWriter({
         if (!photo) return false
         if (onUpload) {
           event.preventDefault()
+          const point = _view.posAtCoords({
+            left: event.clientX,
+            top: event.clientY,
+          })
+          if (point) pendingPhoto.current = { from: point.pos, to: point.pos }
           void addPhoto(photo)
           return true
         }
@@ -349,7 +354,11 @@ function ValidatedRichWriter({
       {uploading && (
         <LoadingState>Preparing and uploading your private photo…</LoadingState>
       )}
-      <BlockControls editor={editor} disabled={disabled} />
+      <BlockControls
+        editor={editor}
+        disabled={disabled}
+        onPhoto={onUpload ? () => choose(editor, 'image') : undefined}
+      />
       {slash && (
         <SlashMenu
           state={slash}

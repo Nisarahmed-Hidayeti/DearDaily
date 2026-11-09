@@ -177,6 +177,15 @@ function EntryForm({
             Journal <span>/</span> <span>Private page</span>
           </Link>
           <div className="row">
+            {focus && (
+              <button
+                className="quiet"
+                disabled={!ready || busy}
+                onClick={() => void state.save(true)}
+              >
+                {busy ? 'Saving…' : 'Save now'}
+              </button>
+            )}
             <button
               className="quiet"
               aria-pressed={focus}
@@ -241,7 +250,7 @@ function EntryForm({
                     ? 'Saved to your private account'
                     : 'A new private page · start writing'}
       </p>
-      {richEditorEnabled && (
+      {richEditorEnabled && !focus && (
         <div className="details-summary" aria-label="Entry details summary">
           <button
             className="quiet"

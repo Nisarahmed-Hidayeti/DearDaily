@@ -14,9 +14,11 @@ import {
 export function BlockControls({
   editor,
   disabled,
+  onPhoto,
 }: {
   editor: Editor
   disabled: boolean
+  onPhoto?: () => void
 }) {
   const [open, setOpen] = useState(false)
   const [top, setTop] = useState(0)
@@ -90,9 +92,16 @@ export function BlockControls({
           <GripVertical size={17} />
         </button>
         <button
-          aria-label="Add a paragraph after this block"
+          aria-label="Add a block"
+          aria-expanded={open}
           onMouseDown={(e) => e.preventDefault()}
-          onClick={() => editBlock(editor, 'add')}
+          onClick={(event) => {
+            editBlock(editor, 'add')
+            setPosition(
+              menuPosition(event.currentTarget.getBoundingClientRect()),
+            )
+            setOpen(true)
+          }}
         >
           <Plus size={15} />
         </button>
@@ -106,13 +115,25 @@ export function BlockControls({
             style={position}
           >
             <p className="eyebrow">This block</p>
+            {onPhoto && (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false)
+                  onPhoto()
+                }}
+              >
+                Insert photo…
+              </button>
+            )}
             <label>
               Convert to
               <select
                 aria-label="Convert this block"
                 defaultValue=""
                 onChange={(e) => {
-                  applyBlock(editor, e.target.value as BlockCommand)
+                  if (e.target.value === 'image') onPhoto?.()
+                  else applyBlock(editor, e.target.value as BlockCommand)
                   setOpen(false)
                 }}
               >
