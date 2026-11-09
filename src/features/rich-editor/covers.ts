@@ -1,3 +1,4 @@
+import { additionalCovers } from './additionalCovers'
 export const photographicCovers = [
   {
     id: 'met-oxbow',
@@ -58,6 +59,7 @@ export const photographicCovers = [
     name: 'Light through the trees',
     collection: 'Quiet nature',
     src: '/covers/forest-light.jpg',
+    thumbnail: '/covers/forest-light-thumb.jpg',
     credit: 'ClickerHappy',
     source: 'https://www.pexels.com/photo/forest-240040/',
   },
@@ -66,6 +68,7 @@ export const photographicCovers = [
     name: 'Pacific, after the rain',
     collection: 'Quiet nature',
     src: '/covers/pacific-dusk.jpg',
+    thumbnail: '/covers/pacific-dusk-thumb.jpg',
     credit: 'Julian Bracero',
     source: 'https://www.pexels.com/photo/photo-of-ocean-waves-12491774/',
   },
@@ -74,6 +77,7 @@ export const photographicCovers = [
     name: 'A window seat',
     collection: 'Everyday memories',
     src: '/covers/cafe-memory.jpg',
+    thumbnail: '/covers/cafe-memory-thumb.jpg',
     credit: 'Esra Afşar',
     source:
       'https://www.pexels.com/photo/cozy-cafe-window-with-books-and-coffee-33800703/',
@@ -83,6 +87,7 @@ export const photographicCovers = [
     name: 'Still water, open sky',
     collection: 'Quiet nature',
     src: '/covers/quiet-lake.jpg',
+    thumbnail: '/covers/quiet-lake-thumb.jpg',
     credit: 'Quentin Martinez',
     source:
       'https://www.pexels.com/photo/scenic-reflection-of-mountains-on-a-calm-lake-30127830/',
@@ -92,6 +97,7 @@ export const photographicCovers = [
     name: 'Fields of gold',
     collection: 'Seasons',
     src: '/covers/golden-hour.jpg',
+    thumbnail: '/covers/golden-hour-thumb.jpg',
     credit: 'Meriç Tuna',
     source:
       'https://www.pexels.com/photo/golden-wheat-field-at-sunset-30556704/',
@@ -101,6 +107,7 @@ export const photographicCovers = [
     name: 'A softer spring',
     collection: 'Seasons',
     src: '/covers/soft-blossoms.jpg',
+    thumbnail: '/covers/soft-blossoms-thumb.jpg',
     credit: 'Elina Volkova',
     source:
       'https://www.pexels.com/photo/close-up-of-a-cherry-tree-blossom-12056606/',
@@ -110,6 +117,7 @@ export const photographicCovers = [
     name: 'When the city quiets',
     collection: 'After dark',
     src: '/covers/city-after-dark.jpg',
+    thumbnail: '/covers/city-after-dark-thumb.jpg',
     credit: 'Simon Robben',
     source: 'https://www.pexels.com/photo/street-night-204366/',
   },
@@ -118,6 +126,7 @@ export const photographicCovers = [
     name: 'A road full of stars',
     collection: 'After dark',
     src: '/covers/star-road.jpg',
+    thumbnail: '/covers/star-road-thumb.jpg',
     credit: 'Simon Steiner',
     source:
       'https://www.pexels.com/photo/starry-milky-way-over-desert-road-nightscape-28737270/',
@@ -127,10 +136,12 @@ export const photographicCovers = [
     name: 'Between mist and water',
     collection: 'Quiet nature',
     src: '/covers/misty-reflection.jpg',
+    thumbnail: '/covers/misty-reflection-thumb.jpg',
     credit: 'Ray Bilcliff',
     source:
       'https://www.pexels.com/photo/mountains-reflection-in-lake-5748392/',
   },
+  ...additionalCovers,
 ] as const
 export type PhotoCoverId = (typeof photographicCovers)[number]['id']
 export function isPhotoCover(value: unknown): value is PhotoCoverId {
@@ -143,5 +154,5 @@ export const profileCovers = photographicCovers.filter((c) =>
 )
 
 export function coverThumbnail(cover: (typeof photographicCovers)[number]) {
-  return 'thumbnail' in cover ? cover.thumbnail : cover.src
+  return cover.thumbnail
 }
