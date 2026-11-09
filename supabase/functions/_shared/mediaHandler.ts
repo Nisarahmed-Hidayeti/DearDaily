@@ -1,3 +1,4 @@
+import { profileMediaRequest, profilePublicImage } from './profileImages.ts'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { readBounded, sanitizePhoto } from './image.ts'
 const uuid = (v: unknown): v is string =>
@@ -65,7 +66,7 @@ export function createMediaHandler(
       'Access-Control-Allow-Origin':
         origin && origins.includes(origin) ? origin : '*',
       'Access-Control-Allow-Headers':
-        'authorization,apikey,content-type,x-client-info,x-entry-id,x-action',
+        'authorization,apikey,content-type,x-client-info,x-entry-id,x-action,x-profile-kind',
       'Cache-Control': 'no-store',
       'Referrer-Policy': 'no-referrer',
     }
@@ -82,6 +83,18 @@ export function createMediaHandler(
     if (request.method === 'OPTIONS')
       return new Response(null, { headers: cors })
     try {
+      if (request.method === 'GET' && url.searchParams.has('profile')) {
+        const signed = await profilePublicImage(
+          admin,
+          url.searchParams.get('profile') ?? '',
+        )
+        return signed
+          ? new Response(null, {
+              status: 302,
+              headers: { ...cors, Location: externalUrl(signed) },
+            })
+          : json({ error: 'Unavailable' }, 404)
+      }
       if (request.method === 'GET' && uuid(publicId)) {
         const { data: m } = await admin
           .from('story_media')
@@ -117,6 +130,8 @@ export function createMediaHandler(
       if (identity.error || !identity.data.user)
         return json({ error: 'Sign in required' }, 401)
       const who = identity.data.user.id
+      if (request.headers.get('x-action') === 'profile-upload')
+        return json(await profileMediaRequest(request, admin, client, who))
       if (request.headers.get('x-action') === 'upload') {
         const entry = request.headers.get('x-entry-id')
         if (!uuid(entry)) return json({ error: 'Entry unavailable' }, 400)
@@ -176,6 +191,18 @@ export function createMediaHandler(
         entry?: string
         version?: number
         prune?: boolean
+      }
+      if (body.action?.startsWith('profile-')) {
+        const result = await profileMediaRequest(
+          request,
+          admin,
+          client,
+          who,
+          body as Record<string, unknown>,
+        )
+        if ('url' in result && typeof result.url === 'string')
+          result.url = externalUrl(result.url)
+        return json(result)
       }
       if (body.action === 'read' && uuid(body.id)) {
         const { data: m } = await admin

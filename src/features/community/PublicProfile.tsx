@@ -1,3 +1,4 @@
+import { ProfileImage, usePublicImages } from '../profile-images/ProfileImage'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { validateProfilePanel } from './profilePanel'
 import { publicStreaksEnabled } from './publicStreakConfig'
@@ -17,6 +18,7 @@ import type { PublicProfile as Profile, CommunityStory } from './communityApi'
 import { StoryCard } from './StoryCard'
 export default function PublicProfile() {
   const { username = '' } = useParams()
+  const photos = usePublicImages(username)
   const { client } = useAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [stories, setStories] = useState<CommunityStory[]>([])
@@ -78,20 +80,36 @@ export default function PublicProfile() {
         <p role="alert">Profile unavailable. Reload to retry.</p>
       ) : profile ? (
         <>
-          {photographicCovers.some((c) => c.id === profile.cover_id) && (
+          {photos?.banner ? (
             <div className="public-profile-banner">
-              <img
-                src={
-                  photographicCovers.find((c) => c.id === profile.cover_id)!.src
-                }
+              <ProfileImage
+                publicId={photos.banner}
+                position={photos.banner_position}
+                fallback={null}
                 alt="Author-selected public banner"
-                loading="lazy"
               />
             </div>
+          ) : (
+            photographicCovers.some((c) => c.id === profile.cover_id) && (
+              <div className="public-profile-banner">
+                <img
+                  src={
+                    photographicCovers.find((c) => c.id === profile.cover_id)!
+                      .src
+                  }
+                  alt="Author-selected public banner"
+                  loading="lazy"
+                />
+              </div>
+            )
           )}
           <section className="profile-masthead panel">
             <span className="profile-avatar" aria-hidden="true">
-              {avatars[profile.avatar]}
+              <ProfileImage
+                publicId={photos?.avatar}
+                fallback={avatars[profile.avatar]}
+                alt=""
+              />
             </span>
             <PageHeading
               eyebrow={`@${profile.username}`}

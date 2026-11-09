@@ -1,3 +1,5 @@
+import { OwnProfileAvatar } from '../profile-images/ProfileImage'
+import { ProfilePhotos } from '../profile-images/ProfilePhotos'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { emptyProfilePanel } from './profilePanel'
 import PublicStreakControl from './PublicStreakControl'
@@ -24,7 +26,7 @@ const empty: PublicProfile = {
   joined_month: null,
 }
 export default function ProfileSettings() {
-  const { client } = useAuth()
+  const { client, session } = useAuth()
   const [form, setForm] = useState(empty)
   const [savedProfile, setSavedProfile] = useState(empty)
   const [previous, setPrevious] = useState<string | null>(null)
@@ -100,6 +102,12 @@ export default function ProfileSettings() {
         This profile is hidden until you explicitly opt in. No email or account
         ID is shown.
       </p>
+      <ProfilePhotos
+        key={session?.user.id}
+        fallback={avatars[form.avatar]}
+        preset={profileCovers.find((c) => c.id === form.cover_id)?.src}
+        publicVisible={savedProfile.visible}
+      />
       <form
         className="panel account-form"
         onSubmit={(e) => {
@@ -141,7 +149,7 @@ export default function ProfileSettings() {
             />
           </label>
           <label>
-            Avatar
+            Default avatar icon
             <select
               value={form.avatar}
               onChange={(e) => patch({ avatar: e.target.value })}
@@ -273,7 +281,9 @@ export default function ProfileSettings() {
         <p className="eyebrow">
           Preview · {form.visible ? 'Public after saving' : 'Hidden'}
         </p>
-        <span className="profile-avatar">{avatars[form.avatar]}</span>
+        <span className="profile-avatar">
+          <OwnProfileAvatar fallback={avatars[form.avatar]} />
+        </span>
         <h2>{form.display_name || 'Your public name'}</h2>
         <p>@{form.username || 'your_username'}</p>
         <p className="profile-bio">{form.bio}</p>
