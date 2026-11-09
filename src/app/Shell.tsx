@@ -238,13 +238,9 @@ export default function Shell() {
         </header>
         {!writing &&
           !pathname.startsWith('/dev/') &&
-          (publicPage ? null : session ? (
-            <div className="demo-notice">
-              Your private journal · Share only what you choose
-            </div>
-          ) : !loading ? (
-            <DemoNotice />
-          ) : null)}
+          !publicPage &&
+          !session &&
+          !loading && <DemoNotice />}
         <main id="main" tabIndex={-1}>
           <Outlet
             context={import.meta.env.DEV ? { setPreviewTheme } : undefined}

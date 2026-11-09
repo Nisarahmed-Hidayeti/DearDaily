@@ -37,10 +37,8 @@ export function PageAppearance({
     ),
     [cover, setCover] = useState<CoverPreset | null>(preset ?? null),
     [emoji, setEmoji] = useState(entryIcon(document, icon) ?? ''),
-    [collection, setCollection] = useState('The Met · Hudson River School'),
     [uploading, setUploading] = useState(false),
-    [error, setError] = useState(''),
-    [section, setSection] = useState<'cover' | 'icon'>('cover')
+    [error, setError] = useState('')
   let unsupported = false
   try {
     if (document) validateDocument(document)
@@ -62,8 +60,7 @@ export function PageAppearance({
     setDraft(next)
     setCover(id)
   }
-  const openAppearance = (part: 'cover' | 'icon' = 'cover') => {
-    setSection(part)
+  const openAppearance = () => {
     setDraft(document ?? documentFromText(''))
     setCover(preset ?? null)
     setEmoji(entryIcon(document, icon) ?? '')
@@ -78,7 +75,7 @@ export function PageAppearance({
           aria-label="Change or remove cover"
           title="Change, remove or reposition cover"
           disabled={disabled || unsupported}
-          onClick={() => openAppearance('cover')}
+          onClick={openAppearance}
         >
           <PageCover privateMedia document={document} preset={preset} />
         </button>
@@ -90,9 +87,7 @@ export function PageAppearance({
           title="Cover & page icon"
           aria-label={`${entryIcon(document, icon) || '＋'} Cover & page icon`}
           disabled={disabled || unsupported}
-          onClick={() =>
-            openAppearance(entryIcon(document, icon) ? 'icon' : 'cover')
-          }
+          onClick={openAppearance}
         >
           <span>
             {entryIcon(document, icon) || (hasAppearance ? '✧' : '＋')}
@@ -108,30 +103,12 @@ export function PageAppearance({
             className="page-style-dialog"
             onClose={() => setOpen(false)}
           >
-            <div
-              className="page-style-tabs"
-              role="group"
-              aria-label="Page appearance section"
-            >
-              <button
-                type="button"
-                aria-pressed={section === 'cover'}
-                onClick={() => setSection('cover')}
-              >
-                Cover
-              </button>
-              <button
-                type="button"
-                aria-pressed={section === 'icon'}
-                onClick={() => setSection('icon')}
-              >
-                Page icon
-              </button>
-            </div>
-            <div hidden={section !== 'cover'}>
-              <div className="appearance-cover-preview">
-                <PageCover privateMedia document={draft} preset={cover} />
-              </div>
+            <div className="appearance-cover-tools">
+              {(draft.page || (cover && cover !== 'none')) && (
+                <div className="appearance-cover-preview">
+                  <PageCover privateMedia document={draft} preset={cover} />
+                </div>
+              )}
               <label className="cover-upload">
                 Upload cover from computer
                 <input
@@ -166,56 +143,8 @@ export function PageAppearance({
               </label>
               {uploading && <p role="status">Preparing private cover…</p>}
               {error && <p role="alert">{error}</p>}
-              <fieldset>
-                <legend className="sr-only">Cover gallery</legend>
-                <label>
-                  <span className="sr-only">Cover collection</span>
-                  <select
-                    value={collection}
-                    onChange={(e) => setCollection(e.target.value)}
-                  >
-                    <option value="">All collections</option>
-                    {[
-                      ...new Set(photographicCovers.map((c) => c.collection)),
-                    ].map((c) => (
-                      <option key={c}>{c}</option>
-                    ))}
-                  </select>
-                </label>
-                {[...new Set(photographicCovers.map((c) => c.collection))]
-                  .filter((group) => !collection || group === collection)
-                  .map((group) => (
-                    <section
-                      className="cover-collection"
-                      key={group}
-                      aria-label={group}
-                    >
-                      <h4>{group}</h4>
-                      <div className="cover-gallery">
-                        {photographicCovers
-                          .filter((c) => c.collection === group)
-                          .map((c) => (
-                            <button
-                              type="button"
-                              key={c.id}
-                              disabled={uploading}
-                              title={`${c.name} · ${c.credit}`}
-                              aria-label={c.name}
-                              aria-pressed={draft.page?.cover === c.id}
-                              onClick={() => choosePhoto(c.id)}
-                            >
-                              <img
-                                src={coverThumbnail(c)}
-                                alt=""
-                                loading="lazy"
-                              />
-                              <span className="sr-only">{c.name}</span>
-                            </button>
-                          ))}
-                      </div>
-                    </section>
-                  ))}
-              </fieldset>
+            </div>
+            <div className="appearance-cover-adjustments">
               <button
                 type="button"
                 className="text-button"
@@ -251,9 +180,56 @@ export function PageAppearance({
                 </label>
               )}
             </div>
-            <div hidden={section !== 'icon'}>
+            <section
+              className="page-icon-picker"
+              aria-label="Page icon selection"
+            >
+              <h3>Page icon</h3>
               <EmojiPicker value={emoji} onChange={setEmoji} />
-            </div>
+            </section>
+            <fieldset className="cover-browser">
+              <legend className="sr-only">Cover gallery</legend>
+              <div
+                className="cover-collections"
+                role="region"
+                aria-label="Cover collections"
+                tabIndex={0}
+              >
+                {[...new Set(photographicCovers.map((c) => c.collection))].map(
+                  (group) => (
+                    <section
+                      className="cover-collection"
+                      key={group}
+                      aria-label={group}
+                    >
+                      <h4>{group}</h4>
+                      <div className="cover-gallery">
+                        {photographicCovers
+                          .filter((c) => c.collection === group)
+                          .map((c) => (
+                            <button
+                              type="button"
+                              key={c.id}
+                              disabled={uploading}
+                              title={`${c.name} · ${c.credit}`}
+                              aria-label={c.name}
+                              aria-pressed={draft.page?.cover === c.id}
+                              onClick={() => choosePhoto(c.id)}
+                            >
+                              <img
+                                src={coverThumbnail(c)}
+                                alt=""
+                                loading="lazy"
+                              />
+                              <span className="sr-only">{c.name}</span>
+                            </button>
+                          ))}
+                      </div>
+                    </section>
+                  ),
+                )}
+              </div>
+            </fieldset>
             <div className="appearance-actions">
               <button
                 className="button"
