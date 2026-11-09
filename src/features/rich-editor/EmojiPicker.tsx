@@ -63,7 +63,7 @@ export function EmojiPicker({
   }
   return (
     <fieldset>
-      <legend>Page icon · {emojiCatalog.length} choices</legend>
+      <legend className="sr-only">Page icon</legend>
       <input
         type="search"
         aria-label="Search page icons"

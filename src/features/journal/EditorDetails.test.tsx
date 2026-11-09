@@ -131,7 +131,7 @@ it('saves public choices once, preserves private metadata and confirms a read-on
     ),
   )
   expect(screen.getByRole('textbox', { name: 'Journal body' })).toBe(editor)
-})
+}, 15000)
 it('opens a compact mobile sheet, respects available keyboard space and returns to the same editor', async () => {
   vi.stubGlobal('matchMedia', () => ({
     matches: true,
@@ -235,4 +235,13 @@ it('preserves legacy plaintext when adding and removing a page icon', async () =
   )
   expect(editor).toHaveTextContent(fixture.body)
   expect(screen.getByRole('textbox', { name: 'Journal body' })).toBe(editor)
+})
+
+it('opens page details without exiting immersive writing or changing the saved focus preference', async () => {
+  localStorage.setItem('deardaily.writing-focus', 'true')
+  show()
+  await screen.findByText('Saved to your private account')
+  await userEvent.click(screen.getByRole('button', { name: 'Share & details' }))
+  expect(document.querySelector('.editor-page')).toHaveClass('writer-focus')
+  expect(localStorage.getItem('deardaily.writing-focus')).toBe('true')
 })

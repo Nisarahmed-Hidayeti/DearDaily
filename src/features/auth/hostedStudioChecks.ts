@@ -1,3 +1,9 @@
+import {
+  uploadPhoto,
+  privatePhotoUrl,
+  cleanQueuedPhotos,
+} from '../media/mediaApi'
+import { documentFromText } from '../rich-editor/document'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { authConfig } from '../../lib/supabase/client'
 import {
@@ -78,6 +84,58 @@ export async function hostedStudioChecks(
       !!anon.error || anon.data?.length === 0,
       'anonymous private access blocked',
     )
+    const fixturePhoto = await fetch('/covers/met-oxbow-thumb.jpg')
+    if (!fixturePhoto.ok) throw Error('Synthetic fixture image unavailable')
+    const photo = await uploadPhoto(
+      a,
+      id,
+      new File([await fixturePhoto.blob()], 'synthetic-cover.jpg', {
+        type: 'image/jpeg',
+      }),
+      0,
+    )
+    check(
+      (await privatePhotoUrl(a, photo)).startsWith('https://'),
+      'owner reads private photo',
+    )
+    let otherPhotoBlocked = false,
+      anonymousPhotoBlocked = false
+    try {
+      await privatePhotoUrl(b, photo)
+    } catch {
+      otherPhotoBlocked = true
+    }
+    try {
+      await privatePhotoUrl(anonymous, photo)
+    } catch {
+      anonymousPhotoBlocked = true
+    }
+    check(otherPhotoBlocked, 'cross-user private image access blocked')
+    check(anonymousPhotoBlocked, 'anonymous private image access blocked')
+    const document = documentFromText(row.body)
+    document.page = { cover: 'upload', assetId: photo, position: 35 }
+    document.icon = '🌙'
+    document.content.content!.push({
+      type: 'journalImage',
+      attrs: {
+        assetId: photo,
+        publicId: null,
+        alt: 'Synthetic public-domain photo',
+        width: 'wide',
+        align: 'center',
+      },
+    })
+    row = await saveEntry(
+      a,
+      aId,
+      id,
+      { ...draftOf(row), writing_document: document },
+      row.version,
+    )
+    check(
+      row.writing_document?.page?.assetId === photo,
+      'private cover and inline image persist',
+    )
     const noConsent = await a.from('public_stories').insert({
       id,
       user_id: aId,
@@ -105,7 +163,7 @@ export async function hostedStudioChecks(
     })
     const pub = await anonymous
       .from('public_stories')
-      .select('id,music,public_category,public_username')
+      .select('id,music,public_category,public_username,writing_document')
       .eq('id', id)
       .single()
     check(
@@ -119,6 +177,18 @@ export async function hostedStudioChecks(
       pub.data?.public_category === 'Study' &&
         pub.data?.public_username === null,
       'explicit public category and anonymity',
+    )
+    const publicPhoto = pub.data?.writing_document?.page?.publicId
+    check(
+      typeof publicPhoto === 'string' &&
+        publicPhoto !== photo &&
+        !JSON.stringify(pub.data?.writing_document).includes(photo),
+      'public snapshot excludes private photo identifiers',
+    )
+    const publicPhotoUrl = `${authConfig!.url}/functions/v1/media-gateway?public=${publicPhoto}`
+    check(
+      (await fetch(publicPhotoUrl, { cache: 'no-store' })).ok,
+      'anonymous can read deliberately published photo',
     )
     const spoof = await a
       .from('public_stories')
@@ -159,6 +229,14 @@ export async function hostedStudioChecks(
     check(
       !removed.error && removed.data.length === 0,
       'unpublish revokes public snapshot',
+    )
+    check(
+      !(await fetch(publicPhotoUrl, { cache: 'no-store' })).ok,
+      'unpublishing revokes public photo gateway access',
+    )
+    check(
+      (await privatePhotoUrl(a, photo)).startsWith('https://'),
+      'unpublishing preserves owner private photo',
     )
     if (!prior) {
       const panel = {
@@ -207,8 +285,10 @@ export async function hostedStudioChecks(
         .update({ public_panel: {} })
         .eq('username', username)
         .select('username')
+      const intact = await myProfile(b)
       check(
-        !attack.error && attack.data.length === 0,
+        (!!attack.error || attack.data?.length === 0) &&
+          intact?.public_panel?.show_count === true,
         'owner role cannot edit another profile',
       )
       const ownerId = await anonymous
@@ -233,6 +313,7 @@ export async function hostedStudioChecks(
       if (current?.username === username) await removePublicProfile(b, username)
       else if (current) throw Error('Synthetic profile cleanup requires review')
     }
+    await cleanQueuedPhotos(a)
     if (pub.error || entry.error)
       throw Error('Synthetic studio cleanup not confirmed')
     const remains = await a.from('journal_entries').select('id').eq('id', id)

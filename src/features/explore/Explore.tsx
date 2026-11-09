@@ -250,17 +250,17 @@ export function PublishedStory() {
             document={story.writing_document}
             preset={story.cover_preset}
           />
+          {entryIcon(story.writing_document, story.page_icon) && (
+            <div className="writer-icon">
+              {entryIcon(story.writing_document, story.page_icon)}
+            </div>
+          )}
           {persistentMusicEnabled && story.music && (
             <WritingMusic
               key={`${story.id}:${story.music.id}`}
               value={story.music}
               publicCopy
             />
-          )}
-          {entryIcon(story.writing_document, story.page_icon) && (
-            <div className="writer-icon">
-              {entryIcon(story.writing_document, story.page_icon)}
-            </div>
           )}
           <h1>{story.title}</h1>
           <article>

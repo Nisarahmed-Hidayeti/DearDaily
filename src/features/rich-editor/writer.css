@@ -1434,7 +1434,7 @@
 }
 .editor-lab[data-font='humanist'] .tiptap,
 [data-writing-font='humanist'] .rich-read .tiptap {
-  font-family: Optima, Candara, 'Trebuchet MS', sans-serif;
+  font-family: Optima, Candara, 'Trebuchet MS', Cantarell, sans-serif;
 }
 .editor-lab[data-font='mono'] .tiptap,
 [data-writing-font='mono'] .rich-read .tiptap {
@@ -1586,5 +1586,14 @@
   }
   .rich-writer .tiptap {
     padding-left: 14px;
+  }
+}
+@media (max-width: 600px) {
+  .studio-shell .notion-editor .rich-writer .tiptap {
+    padding-left: 18px;
+  }
+  .studio-shell .notion-editor .title-input,
+  .studio-shell .notion-editor .writing-music {
+    padding-left: 18px;
   }
 }

@@ -82,7 +82,6 @@ export default function Editor() {
         </section>
         <aside className="entry-settings">
           <section className="panel">
-            <h2>Page details</h2>
             <label htmlFor="visibility">Entry visibility</label>
             <div className="select-icon">
               {visibility === 'Private' ? (

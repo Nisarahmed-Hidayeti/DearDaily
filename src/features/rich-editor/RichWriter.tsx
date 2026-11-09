@@ -194,7 +194,7 @@ function ValidatedRichWriter({
     if (
       editor &&
       !editor.isDestroyed &&
-      JSON.stringify(editor.getJSON()) !== JSON.stringify(value.content)
+      !editor.state.doc.eq(editor.schema.nodeFromJSON(value.content))
     )
       editor.commands.setContent(value.content, { emitUpdate: false })
   }, [editor, value])

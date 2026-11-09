@@ -5,6 +5,7 @@ import {
   appearanceTokens,
   contrast,
   themeBackgrounds,
+  themeAccents,
 } from './appearance'
 it('accepts only bounded style tokens, never CSS or journal fields', () => {
   expect(validateAppearance({})).toEqual(defaultAppearance)
@@ -42,4 +43,13 @@ it('keeps all four theme defaults when no custom color is chosen', () => {
     expect(t['--bg']).toBeUndefined()
     expect(t['--accent']).toBeUndefined()
   }
+})
+
+it('keeps every shipped theme accent readable against its base background', () => {
+  for (const theme of Object.keys(
+    themeBackgrounds,
+  ) as (keyof typeof themeBackgrounds)[])
+    expect(
+      contrast(themeBackgrounds[theme], themeAccents[theme]),
+    ).toBeGreaterThanOrEqual(4.5)
 })

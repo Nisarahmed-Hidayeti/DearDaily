@@ -167,9 +167,9 @@ export function PageAppearance({
               {uploading && <p role="status">Preparing private cover…</p>}
               {error && <p role="alert">{error}</p>}
               <fieldset>
-                <legend>Curated photographs</legend>
+                <legend className="sr-only">Cover gallery</legend>
                 <label>
-                  Cover collection
+                  <span className="sr-only">Cover collection</span>
                   <select
                     value={collection}
                     onChange={(e) => setCollection(e.target.value)}

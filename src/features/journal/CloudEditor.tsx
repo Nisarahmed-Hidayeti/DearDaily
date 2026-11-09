@@ -161,7 +161,6 @@ function EntryForm({
       state.publicMetadata
     )
       patchPlan({})
-    setFocus(false)
     setDetailsOpen(next)
   }
   let invalidPublicTags = false
@@ -564,15 +563,6 @@ function EntryForm({
             </>
           )}
           <section className="panel">
-            <h2>Page details</h2>
-            <p>
-              {busy || !ready ? (
-                <span className="loading-orbit" aria-hidden="true" />
-              ) : (
-                <LockKeyhole size={14} />
-              )}{' '}
-              Private source entry
-            </p>
             <MoodPicker
               value={draft.mood}
               onChange={(mood) => patch({ mood })}
@@ -825,6 +815,13 @@ function EntryForm({
                         </a>
                       ) : (
                         'None — your music stays private'
+                      )}
+                      {publicMusic(row?.music)?.excerpt && (
+                        <small className="music-moment">
+                          {row!.music!.excerpt!.start}–
+                          {row!.music!.excerpt!.end}s · intended moment,
+                          reference only
+                        </small>
                       )}
                     </dd>
                   </>

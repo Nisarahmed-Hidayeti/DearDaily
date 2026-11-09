@@ -203,7 +203,7 @@ export function AdvancedAppearance() {
                 serif: 'var(--serif)',
                 sans: 'Inter,sans-serif',
                 literary: 'Palatino, Georgia, serif',
-                humanist: 'Optima, Candara, sans-serif',
+                humanist: 'Optima, Candara, Cantarell, sans-serif',
                 mono: 'ui-monospace, monospace',
               }[draft.font],
             } as CSSProperties

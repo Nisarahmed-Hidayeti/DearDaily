@@ -99,8 +99,10 @@ export async function saveProfile(
     throw new Error(
       'Choose 3–24 lowercase letters, numbers or underscores, starting with a letter. Reserved names are unavailable.',
     )
-  if (profile.public_panel) validateProfilePanel(profile.public_panel)
-  const { public_streak: readOnlyStreak, ...writable } = profile
+  const canonical = profile.public_panel
+    ? { ...profile, public_panel: validateProfilePanel(profile.public_panel) }
+    : profile
+  const { public_streak: readOnlyStreak, ...writable } = canonical
   void readOnlyStreak
   const query = previous
     ? client.from('public_profiles').update(writable).eq('username', previous)
@@ -116,7 +118,9 @@ export async function saveProfile(
   if (
     !saved ||
     !(Object.keys(writable) as (keyof PublicProfile)[]).every(
-      (key) => JSON.stringify(saved[key]) === JSON.stringify(profile[key]),
+      (key) =>
+        JSON.stringify(saved[key]) ===
+        JSON.stringify(writable[key as keyof typeof writable]),
     )
   )
     throw new Error(
