@@ -5,12 +5,10 @@ import { ProfilePhotos } from './ProfilePhotos'
 const mocks = vi.hoisted(() => ({
   client: {
     functions: {
-      invoke: vi
-        .fn()
-        .mockResolvedValue({
-          data: { cleaned: true, pending: 0 },
-          error: null,
-        }),
+      invoke: vi.fn().mockResolvedValue({
+        data: { cleaned: true, pending: 0 },
+        error: null,
+      }),
     },
   },
   own: vi.fn(),
@@ -124,6 +122,33 @@ it('cannot share private photos while the public profile is hidden', async () =>
     avatar_asset: null,
     share_avatar: false,
   })
+})
+it('routes a dropped banner through cropping and leaves it private before saving', async () => {
+  mocks.upload.mockResolvedValue(banner)
+  const user = userEvent.setup()
+  const { container } = render(<ProfilePhotos fallback="☾" publicVisible />)
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: 'Add banner' })).toBeEnabled(),
+  )
+  fireEvent.drop(container.querySelector('.profile-banner-editor')!, {
+    dataTransfer: {
+      files: [new File(['fixture'], 'banner.jpg', { type: 'image/jpeg' })],
+    },
+  })
+  await user.click(
+    await screen.findByRole('button', { name: 'Use crop fixture' }),
+  )
+  expect(mocks.upload).toHaveBeenCalledWith(
+    mocks.client,
+    'banner',
+    expect.any(Blob),
+  )
+  expect(
+    await screen.findByRole('checkbox', {
+      name: 'Show this banner on my public profile',
+    }),
+  ).not.toBeChecked()
+  expect(mocks.save).not.toHaveBeenCalled()
 })
 it('persists banner positioning and restores a preset without deleting journal content', async () => {
   mocks.own.mockResolvedValue({ ...empty, banner_asset: banner, version: 4 })
