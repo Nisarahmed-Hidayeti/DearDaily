@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { availableMoods, moodOptions, type Mood } from './entryMetadata'
 export function MoodPicker({
   value,
@@ -11,16 +10,12 @@ export function MoodPicker({
   disabled?: boolean
   preview?: boolean
 }) {
-  const [expanded, setExpanded] = useState(false)
   const options = preview ? moodOptions : availableMoods
-  const visible = expanded
-    ? options
-    : options.filter((m, index) => index < 4 || m[0] === value)
   return (
     <fieldset disabled={disabled} className="mood-picker">
       <legend>How are you feeling?</legend>
       <div className="moods">
-        {visible.map(([mood, icon]) => (
+        {options.map(([mood, icon]) => (
           <button
             type="button"
             key={mood}
@@ -28,21 +23,13 @@ export function MoodPicker({
             className={mood === value ? 'selected' : ''}
             onClick={() => onChange(mood)}
           >
-            <span aria-hidden="true">{icon}</span>
-            {mood}
+            <span className="mood-symbol" aria-hidden="true">
+              {icon}
+            </span>
+            <span className="mood-label">{mood}</span>
           </button>
         ))}
       </div>
-      {options.length > 4 && (
-        <button
-          type="button"
-          className="quiet mood-more"
-          aria-expanded={expanded}
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? 'Less' : 'More moods'}
-        </button>
-      )}
     </fieldset>
   )
 }

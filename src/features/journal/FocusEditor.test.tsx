@@ -103,3 +103,37 @@ it('dismisses the slash menu before Escape exits immersive focus', async () => {
   await userEvent.keyboard('{Escape}')
   expect(document.querySelector('.writer-focus')).toBeNull()
 })
+
+it('retains the live editor and selection through Preview/Edit and saves without opening details', async () => {
+  render(
+    <MemoryRouter>
+      <CloudEditor />
+    </MemoryRouter>,
+  )
+  const body = await screen.findByRole(
+    'textbox',
+    { name: 'Journal body' },
+    { timeout: 4000 },
+  )
+  const user = userEvent.setup()
+  await user.click(body)
+  await user.paste('Synthetic selection remains')
+  const offset = document.getSelection()?.anchorOffset
+  await user.click(screen.getByRole('button', { name: 'Preview' }))
+  expect(body.isConnected).toBe(true)
+  expect(screen.queryByRole('textbox', { name: 'Journal body' })).toBeNull()
+  await user.click(screen.getByRole('button', { name: 'Edit' }))
+  await waitFor(() => expect(body).toHaveFocus())
+  expect(screen.getByRole('textbox', { name: 'Journal body' })).toBe(body)
+  expect(document.getSelection()?.anchorOffset).toBe(offset)
+  expect(
+    screen.getByRole('button', { name: 'Share & details' }),
+  ).toHaveAttribute('aria-expanded', 'false')
+  await user.keyboard('{Control>}s{/Control}')
+  expect(
+    screen.getByRole('button', { name: 'Share & details' }),
+  ).toHaveAttribute('aria-expanded', 'false')
+  expect(body).toHaveFocus()
+  expect(screen.queryByLabelText('Journal date')).toBeNull()
+  expect(screen.getByText('Page options')).toBeInTheDocument()
+}, 10000)

@@ -7,11 +7,13 @@ export function MediaImage({
   publicId,
   alt,
   position,
+  fallback,
 }: {
   assetId?: string
   publicId?: string
   alt: string
   position?: number
+  fallback?: React.ReactNode
 }) {
   const { client, session } = useAuth(),
     who = session?.user.id
@@ -45,6 +47,7 @@ export function MediaImage({
       : loaded?.who === who && loaded?.asset === assetId
         ? loaded?.url
         : null
+  if (!source || error) if (fallback) return <>{fallback}</>
   if (!source || error)
     return (
       <span className="media-placeholder" role="status">

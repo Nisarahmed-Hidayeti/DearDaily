@@ -11,6 +11,7 @@ import { persistentMusicEnabled, publicMusic, musicUrl } from '../music/music'
 import { entryIcon } from '../rich-editor/emojis'
 import { EntryDetails } from './EntryDetails'
 import {
+  proposedPublicationPlan,
   defaultPublicationPlan,
   publicationTags,
   type PublicationPlan,
@@ -21,16 +22,12 @@ import { PageAppearance } from '../rich-editor/PageAppearance'
 import { PageCover } from '../rich-editor/PageCover'
 import { useWritingFocus } from '../rich-editor/useWritingFocus'
 import { LoadingState } from '../../components/Shared'
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { useAuth } from '../auth/AuthProvider'
-import {
-  communityEnabled,
-  categories,
-  myProfile,
-} from '../community/communityApi'
+import { communityEnabled, myProfile } from '../community/communityApi'
 import type { PublicProfile } from '../community/communityApi'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Eye, Feather, LockKeyhole, X } from 'lucide-react'
+import { Eye, LockKeyhole, X } from 'lucide-react'
 import { Modal, PageHeading } from '../../components/Shared'
 import { exportMarkdown } from './journalApi'
 import { useJournalEntry } from './useJournalEntry'
@@ -81,6 +78,30 @@ function EntryForm({
     return () => window.removeEventListener('keydown', shortcut)
   }, [state, ready, busy, dirty])
   const [preview, setPreview] = useState(false)
+  const selection = useRef<Range | null>(null)
+  const togglePreview = () => {
+    if (!preview) {
+      const current = document.getSelection()
+      if (
+        current?.rangeCount &&
+        current.anchorNode?.parentElement?.closest('.tiptap')
+      )
+        selection.current = current.getRangeAt(0).cloneRange()
+    }
+    setPreview(!preview)
+    if (preview)
+      requestAnimationFrame(() => {
+        const body = document.querySelector<HTMLElement>(
+          '.editor-canvas .tiptap, .editor-canvas textarea',
+        )
+        body?.focus({ preventScroll: true })
+        if (selection.current?.startContainer.isConnected) {
+          const current = document.getSelection()
+          current?.removeAllRanges()
+          current?.addRange(selection.current)
+        }
+      })
+  }
   const { focus, setFocus } = useWritingFocus()
   const {
     appearance,
@@ -117,7 +138,14 @@ function EntryForm({
   const navigate = useNavigate()
   const { client } = useAuth()
   const [profile, setProfile] = useState<PublicProfile | null>(null)
-  const [approvePhotos, setApprovePhotos] = useState(false)
+  const photoApprovalKey = documentAssetIds(row?.writing_document)
+    .sort()
+    .join(',')
+  const [approvedPhotosKey, setApprovedPhotosKey] = useState<string | null>(
+    null,
+  )
+  const approvePhotos =
+    Boolean(photoApprovalKey) && approvedPhotosKey === photoApprovalKey
   useEffect(() => {
     let active = true
     if (communityEnabled && client)
@@ -141,7 +169,9 @@ function EntryForm({
           tags: state.publicMetadata.public_tags?.join(', ') ?? '',
           byline: !!state.publicMetadata.public_username,
         }
-      : defaultPublicationPlan)
+      : communityEnabled
+        ? proposedPublicationPlan(draft)
+        : defaultPublicationPlan)
   const { category: publicCategory, tags: publicTags, byline } = plan
   const patchPlan = (values: Partial<PublicationPlan>) =>
     setDraft((current) => ({
@@ -176,30 +206,21 @@ function EntryForm({
       data-font={font}
       data-width={width}
     >
-      <button
-        className="focus-exit"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => setFocus(false)}
-      >
-        Exit Focus Mode <kbd>Esc</kbd>
-      </button>
       {richEditorEnabled ? (
         <header className="writer-topbar">
           <Link to="/app/journal" className="writer-breadcrumb">
             Journal <span>/</span> <span>Private page</span>
           </Link>
           <div className="row">
-            {focus && (
-              <button
-                className="quiet"
-                disabled={!ready || busy}
-                onClick={() => void state.save(true)}
-              >
-                {busy ? 'Saving…' : 'Save now'}
-              </button>
-            )}
             <button
               className="quiet"
+              disabled={!ready || busy}
+              onClick={() => void state.save(true)}
+            >
+              {busy ? 'Saving…' : 'Save now'}
+            </button>
+            <button
+              className="quiet focus-toggle"
               aria-pressed={focus}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
@@ -212,7 +233,8 @@ function EntryForm({
             <button
               className="quiet"
               aria-pressed={preview}
-              onClick={() => setPreview(!preview)}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={togglePreview}
             >
               {preview ? 'Edit' : 'Preview'}
             </button>
@@ -222,6 +244,55 @@ function EntryForm({
               onClick={toggleDetails}
             >
               Share & details
+            </button>
+            <details className="writer-page-options">
+              <summary>Page options</summary>
+              <div className="writer-preferences">
+                <label>
+                  Writing font
+                  <select
+                    value={font}
+                    disabled={appearanceStatus === 'saving'}
+                    onChange={(e) => {
+                      const font = e.target.value as Appearance['font']
+                      setFont(font)
+                      void savePagePreference({ font })
+                    }}
+                  >
+                    {(studioPolishEnabled
+                      ? writingFonts
+                      : writingFonts.slice(0, 2)
+                    ).map(([id, label]) => (
+                      <option key={id} value={id}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Page width
+                  <select
+                    value={width}
+                    disabled={appearanceStatus === 'saving'}
+                    onChange={(e) => {
+                      const width = e.target.value as Appearance['width']
+                      setWidth(width)
+                      void savePagePreference({ width })
+                    }}
+                  >
+                    <option value="narrow">Narrow</option>
+                    <option value="standard">Standard</option>
+                    <option value="wide">Wide</option>
+                  </select>
+                </label>
+              </div>
+            </details>
+            <button
+              className="focus-exit"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setFocus(false)}
+            >
+              Exit Focus Mode <kbd>Esc</kbd>
             </button>
           </div>
         </header>
@@ -234,15 +305,23 @@ function EntryForm({
             <button
               className="button secondary"
               aria-pressed={preview}
-              onClick={() => setPreview(!preview)}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={togglePreview}
             >
               <Eye size={16} />
-              {preview ? 'Keep writing' : 'Preview'}
+              {preview ? 'Edit' : 'Preview'}
             </button>
           </PageHeading>
         </>
       )}
-      <p className="draft-notice" role="status">
+      <p
+        className="draft-notice"
+        data-save-state={
+          busy ? 'saving' : dirty ? 'unsaved' : row ? 'saved' : 'new'
+        }
+        role="status"
+        hidden={ready && !busy && !dirty && !row && !error && online}
+      >
         {busy || !ready ? (
           <span className="loading-orbit" aria-hidden="true" />
         ) : (
@@ -260,84 +339,8 @@ function EntryForm({
                   ? 'Unsaved changes · autosave pending'
                   : row
                     ? 'Saved to your private account'
-                    : 'A new private page · start writing'}
+                    : ''}
       </p>
-      {richEditorEnabled && !focus && (
-        <div className="details-summary" aria-label="Entry details summary">
-          <button
-            className="quiet"
-            aria-expanded={detailsOpen}
-            onClick={toggleDetails}
-          >
-            Details{' '}
-            <span>
-              {draft.mood} · {draft.category}
-            </span>
-          </button>
-          {draft.tags.slice(0, 3).map((t) => (
-            <span className="tag" key={t}>
-              #{t}
-            </span>
-          ))}
-          {draft.tags.length > 3 && (
-            <span className="tiny">+{draft.tags.length - 3} tags</span>
-          )}
-          <span className="visibility">
-            {published ? 'Private draft · Public copy live' : 'Private draft'}
-          </span>
-          <button
-            className="quiet summary-save"
-            disabled={!ready || busy}
-            onClick={() => void state.save(true)}
-          >
-            {busy ? 'Saving…' : 'Save now'}
-          </button>
-        </div>
-      )}
-      {richEditorEnabled && (
-        <details className="writer-page-options">
-          <summary>Page options</summary>
-          <div className="writer-preferences">
-            <label>
-              Writing font
-              <select
-                value={font}
-                disabled={appearanceStatus === 'saving'}
-                onChange={(e) => {
-                  const font = e.target.value as Appearance['font']
-                  setFont(font)
-                  void savePagePreference({ font })
-                }}
-              >
-                {(studioPolishEnabled
-                  ? writingFonts
-                  : writingFonts.slice(0, 2)
-                ).map(([id, label]) => (
-                  <option key={id} value={id}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Page width
-              <select
-                value={width}
-                disabled={appearanceStatus === 'saving'}
-                onChange={(e) => {
-                  const width = e.target.value as Appearance['width']
-                  setWidth(width)
-                  void savePagePreference({ width })
-                }}
-              >
-                <option value="narrow">Narrow</option>
-                <option value="standard">Standard</option>
-                <option value="wide">Wide</option>
-              </select>
-            </label>
-          </div>
-        </details>
-      )}
       {appearanceError && <p role="alert">{appearanceError}</p>}
       {error && (
         <div role="alert" className="auth-notice">
@@ -415,29 +418,18 @@ function EntryForm({
               )}
             </>
           )}
-          {!preview && (
+          {
             <WritingMusic
               value={persistentMusicEnabled ? draft.music : undefined}
-              disabled={!ready}
+              disabled={!ready || preview}
               onChange={
-                persistentMusicEnabled ? (music) => patch({ music }) : undefined
+                persistentMusicEnabled && !preview
+                  ? (music) => patch({ music })
+                  : undefined
               }
             />
-          )}
-          <div className="row spread paper-meta">
-            <label>
-              Entry date{' '}
-              <input
-                aria-label="Entry date"
-                type="date"
-                value={draft.entry_date}
-                disabled={!ready}
-                onChange={(e) => patch({ entry_date: e.target.value })}
-              />
-            </label>
-            <Feather size={20} />
-          </div>
-          {preview ? (
+          }
+          {preview && (
             <article className="entry-preview">
               <h2>{draft.title || 'Untitled entry'}</h2>
               <RichRead
@@ -446,68 +438,65 @@ function EntryForm({
                 fallback={draft.body || 'Your words will appear here.'}
               />
             </article>
-          ) : (
-            <>
-              <label className="sr-only" htmlFor="entry-title">
-                Entry title
-              </label>
-              <input
-                id="entry-title"
-                className="title-input"
-                placeholder={
-                  richEditorEnabled ? 'Untitled' : 'A new day, a new page…'
-                }
-                value={draft.title}
-                maxLength={200}
-                disabled={!ready}
-                onChange={(e) => patch({ title: e.target.value })}
-              />
-              <label className="sr-only" htmlFor="entry-body">
-                Journal body
-              </label>
-              {richEditorEnabled ? (
-                <Suspense
-                  fallback={
-                    <LoadingState>Preparing your writing space…</LoadingState>
-                  }
-                >
-                  <RichWriter
-                    onUpload={
-                      mediaEnabled && client
-                        ? (file) =>
-                            uploadEntryPhoto(
-                              client,
-                              file,
-                              documentAssetIds(draft.writing_document).length,
-                              row,
-                              () => state.save(),
-                            )
-                        : undefined
-                    }
-                    disabled={!ready}
-                    value={
-                      draft.writing_document ?? documentFromText(draft.body)
-                    }
-                    onChange={(document) =>
-                      patch({
-                        writing_document: document,
-                        body: documentText(document),
-                      })
-                    }
-                  />
-                </Suspense>
-              ) : (
-                <textarea
-                  id="entry-body"
-                  placeholder="What’s on your mind today? Take your time. This space is yours."
-                  value={draft.body}
-                  maxLength={100000}
-                  disabled={!ready}
-                  onChange={(e) => patch({ body: e.target.value })}
-                />
-              )}
-            </>
           )}
+          <div className="editor-canvas" hidden={preview}>
+            <label className="sr-only" htmlFor="entry-title">
+              Entry title
+            </label>
+            <input
+              id="entry-title"
+              className="title-input"
+              placeholder={
+                richEditorEnabled ? 'Untitled' : 'A new day, a new page…'
+              }
+              value={draft.title}
+              maxLength={200}
+              disabled={!ready}
+              onChange={(e) => patch({ title: e.target.value })}
+            />
+            <label className="sr-only" htmlFor="entry-body">
+              Journal body
+            </label>
+            {richEditorEnabled ? (
+              <Suspense
+                fallback={
+                  <LoadingState>Preparing your writing space…</LoadingState>
+                }
+              >
+                <RichWriter
+                  onUpload={
+                    mediaEnabled && client
+                      ? (file) =>
+                          uploadEntryPhoto(
+                            client,
+                            file,
+                            documentAssetIds(draft.writing_document).length,
+                            row,
+                            () => state.save(),
+                          )
+                      : undefined
+                  }
+                  disabled={!ready}
+                  value={draft.writing_document ?? documentFromText(draft.body)}
+                  onChange={(document) =>
+                    patch({
+                      writing_document: document,
+                      body: documentText(document),
+                    })
+                  }
+                />
+              </Suspense>
+            ) : (
+              <textarea
+                id="entry-body"
+                placeholder="What’s on your mind today? Take your time. This space is yours."
+                value={draft.body}
+                maxLength={100000}
+                disabled={!ready}
+                onChange={(e) => patch({ body: e.target.value })}
+              />
+            )}
+          </div>
           {voiceNotesEnabled && (
             <VoiceNotes
               notes={draft.voice_notes ?? []}
@@ -530,7 +519,6 @@ function EntryForm({
             />
           )}
           <div className="paper-footer">
-            <span>Your words stay private until you choose to publish.</span>
             <output aria-live="polite">
               {count} {count === 1 ? 'word' : 'words'}
             </output>
@@ -548,19 +536,6 @@ function EntryForm({
             >
               {busy ? 'Saving…' : 'Save details'}
             </button>
-          )}
-          {richEditorEnabled && (
-            <>
-              <label>
-                Journal date
-                <input
-                  type="date"
-                  value={draft.entry_date}
-                  disabled={!ready}
-                  onChange={(e) => patch({ entry_date: e.target.value })}
-                />
-              </label>
-            </>
           )}
           <section className="panel">
             <MoodPicker
@@ -623,50 +598,6 @@ function EntryForm({
               ))}
             </select>
           </section>
-          {communityEnabled && richEditorEnabled && (
-            <fieldset disabled={busy || !ready}>
-              <legend>Public copy settings</legend>
-              <label>
-                Public category
-                <select
-                  value={publicCategory}
-                  onChange={(e) => patchPlan({ category: e.target.value })}
-                >
-                  {categories.map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Public tags (up to 5, comma separated)
-                <input
-                  maxLength={154}
-                  value={publicTags}
-                  onChange={(e) => patchPlan({ tags: e.target.value })}
-                />
-              </label>
-              {profile?.visible ? (
-                <label className="row">
-                  <input
-                    type="checkbox"
-                    checked={byline}
-                    onChange={(e) => patchPlan({ byline: e.target.checked })}
-                  />
-                  Attribute this story to @{profile.username}
-                </label>
-              ) : (
-                <p>
-                  Anonymous writer. Opt into a public profile separately to add
-                  a byline.
-                </p>
-              )}
-              <p>
-                Only these selected details are public. Each update replaces the
-                public metadata shown here; private tags and category are never
-                copied automatically.
-              </p>
-            </fieldset>
-          )}
           {invalidPublicTags && (
             <p role="alert">
               Choose up to five public tags, each under 31 characters. Private
@@ -687,11 +618,6 @@ function EntryForm({
             >
               Export private copy
             </button>
-            <p className="tiny muted">
-              A public story is a separate copy. Mood, tags, category and
-              account details stay private. Editing this draft does not update
-              an existing story.
-            </p>
             <button
               className="button secondary"
               disabled={
@@ -702,24 +628,36 @@ function EntryForm({
                 !draft.body.trim() ||
                 invalidPublicTags
               }
-              aria-describedby="publish-explanation"
+              aria-describedby={
+                !row || dirty || !draft.title.trim() || !draft.body.trim()
+                  ? 'publish-explanation'
+                  : undefined
+              }
               onClick={() => {
                 setDetailsOpen(false)
-                setApprovePhotos(false)
+                setApprovedPhotosKey(null)
+                if (
+                  communityEnabled &&
+                  richEditorEnabled &&
+                  !draft.writing_document?.publication
+                )
+                  patchPlan({})
                 setConfirmation('publish')
               }}
             >
               {published ? 'Update public story' : 'Publish story'}
             </button>
-            <p id="publish-explanation" className="tiny muted">
-              {!row
-                ? 'Save your entry before publishing.'
-                : dirty
-                  ? 'Wait for your latest edits to save before publishing.'
-                  : !draft.title.trim() || !draft.body.trim()
-                    ? 'Add a title and some words before publishing.'
-                    : 'Review the complete public copy in the next step.'}
-            </p>
+            {(!row || dirty || !draft.title.trim() || !draft.body.trim()) && (
+              <p id="publish-explanation" className="tiny muted">
+                {!row
+                  ? 'Save your entry before publishing.'
+                  : dirty
+                    ? 'Wait for your latest edits to save before publishing.'
+                    : !draft.title.trim() || !draft.body.trim()
+                      ? 'Add a title and some words before publishing.'
+                      : ''}
+              </p>
+            )}
             {published && (
               <>
                 <Link
@@ -770,7 +708,7 @@ function EntryForm({
         >
           <p>
             {confirmation === 'publish'
-              ? 'This public snapshot contains only the title, writing, page icon, cover and the choices shown below. Your private mood, date and private tags stay private.'
+              ? 'Publish this snapshot with only the category, tags, identity and photos you approve below. Your mood, journal date and account data stay private.'
               : confirmation === 'unpublish'
                 ? 'Remove the public copy from DearDaily. Your private entry stays saved. This cannot remove copies already saved by other people.'
                 : 'Permanently delete your entry and its public copy, if any. Export a copy first if you need it.'}
@@ -792,14 +730,47 @@ function EntryForm({
                   </>
                 )}
                 <dt>Public category</dt>
-                <dd>{publicCategory}</dd>
+                <dd>
+                  <select
+                    aria-label="Category to share"
+                    value={publicCategory}
+                    disabled={busy}
+                    onChange={(e) => patchPlan({ category: e.target.value })}
+                  >
+                    <option value="Uncategorized">Exclude category</option>
+                    {journalCategories.map((category) => (
+                      <option key={category}>{category}</option>
+                    ))}
+                  </select>
+                </dd>
                 <dt>Public tags</dt>
-                <dd>{publicTags.trim() || 'None'}</dd>
+                <dd>
+                  <input
+                    aria-label="Tags to share"
+                    placeholder="No public tags"
+                    maxLength={154}
+                    disabled={busy}
+                    value={publicTags}
+                    onChange={(e) => patchPlan({ tags: e.target.value })}
+                  />
+                </dd>
                 <dt>Public identity</dt>
                 <dd>
-                  {byline && profile?.visible
-                    ? `@${profile.username}`
-                    : 'Anonymous writer'}
+                  {profile?.visible ? (
+                    <label className="row">
+                      <input
+                        type="checkbox"
+                        checked={byline}
+                        disabled={busy}
+                        onChange={(e) =>
+                          patchPlan({ byline: e.target.checked })
+                        }
+                      />
+                      Attribute this story to @{profile.username}
+                    </label>
+                  ) : (
+                    'Anonymous'
+                  )}
                 </dd>
                 {persistentMusicEnabled && (
                   <>
@@ -839,7 +810,11 @@ function EntryForm({
                   <input
                     type="checkbox"
                     checked={approvePhotos}
-                    onChange={(e) => setApprovePhotos(e.target.checked)}
+                    onChange={(e) =>
+                      setApprovedPhotosKey(
+                        e.target.checked ? photoApprovalKey : null,
+                      )
+                    }
                   />
                   I approve publishing these photos and their alt text. Public
                   links may remain valid for up to 60 seconds after
@@ -887,6 +862,11 @@ function EntryForm({
               )}
             </article>
           )}
+          {invalidPublicTags && confirmation === 'publish' && (
+            <p role="alert">
+              Choose up to five public tags, each under 31 characters.
+            </p>
+          )}
           {error && <p role="alert">{error}</p>}
           <div className="row confirmation-actions">
             <button
@@ -933,7 +913,9 @@ function EntryForm({
               {confirmation === 'publish'
                 ? busy
                   ? 'Publishing…'
-                  : 'Publish now'
+                  : dirty
+                    ? 'Saving choices…'
+                    : 'Publish now'
                 : `Confirm ${confirmation}`}
             </button>
           </div>

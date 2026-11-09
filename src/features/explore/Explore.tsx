@@ -70,22 +70,16 @@ function PublicStories() {
     )
   return (
     <div className="page explore">
-      <PageHeading
-        eyebrow="Out in the world"
-        title="Different lives. Shared feelings."
-      />
-      <p className="page-subtitle">
-        Stories deliberately shared by their writers.
-      </p>
-      {status === 'loading' && (
-        <LoadingState>Loading public stories…</LoadingState>
-      )}
+      <PageHeading eyebrow="" title="Explore" />
       {status === 'error' && (
         <div role="alert">
           Could not load public stories.
           <button
             className="button secondary"
-            onClick={() => setRetry((n) => n + 1)}
+            onClick={() => {
+              setStatus('loading')
+              setRetry((n) => n + 1)
+            }}
           >
             Retry
           </button>
@@ -93,12 +87,15 @@ function PublicStories() {
       )}
       {status === 'ready' && !rows.length && (
         <p className="panel">
-          No stories published yet. Private drafts never appear here.
+          {search || category
+            ? 'No stories match these filters.'
+            : 'No public stories yet.'}
         </p>
       )}
       {communityEnabled && (
         <form
-          className="explore-controls panel"
+          className="explore-controls"
+          aria-label="Filter public stories"
           onSubmit={(e) => e.preventDefault()}
         >
           <label>
@@ -110,6 +107,7 @@ function PublicStories() {
               onChange={(e) => {
                 setSearch(e.target.value)
                 setPage(0)
+                setStatus('loading')
               }}
             />
           </label>
@@ -120,6 +118,7 @@ function PublicStories() {
               onChange={(e) => {
                 setCategory(e.target.value)
                 setPage(0)
+                setStatus('loading')
               }}
             >
               <option value="">All categories</option>
@@ -135,6 +134,7 @@ function PublicStories() {
               onChange={(e) => {
                 setOldest(e.target.value === 'oldest')
                 setPage(0)
+                setStatus('loading')
               }}
             >
               <option value="newest">Newest first</option>
@@ -143,17 +143,33 @@ function PublicStories() {
           </label>
         </form>
       )}
-      <div className="story-grid">
-        {rows.map((r) => (
-          <StoryCard key={r.id} story={r} />
-        ))}
+      <div className="story-grid" aria-busy={status === 'loading'}>
+        {status === 'loading' ? (
+          <>
+            <span className="sr-only" role="status">
+              Loading public stories…
+            </span>
+            {[0, 1, 2].map((id) => (
+              <div key={id} className="story-skeleton" aria-hidden="true">
+                <div />
+                <span />
+                <span />
+              </div>
+            ))}
+          </>
+        ) : (
+          rows.map((r) => <StoryCard key={r.id} story={r} />)
+        )}
       </div>
       {communityEnabled && (
         <div className="row">
           <button
             className="button secondary"
             disabled={!page || status === 'loading'}
-            onClick={() => setPage((p) => p - 1)}
+            onClick={() => {
+              setStatus('loading')
+              setPage((p) => p - 1)
+            }}
           >
             Previous
           </button>
@@ -161,7 +177,10 @@ function PublicStories() {
           <button
             className="button secondary"
             disabled={!more || status === 'loading'}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => {
+              setStatus('loading')
+              setPage((p) => p + 1)
+            }}
           >
             Next
           </button>

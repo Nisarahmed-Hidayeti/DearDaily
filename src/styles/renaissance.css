@@ -189,7 +189,7 @@
   background: var(--surface-hover);
   color: var(--text);
 }
-.journal-gallery {
+:is(.journal-gallery, .story-grid) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
@@ -220,9 +220,6 @@
 .journal-gallery .entry-row h3 {
   font-size: 22px;
 }
-.studio-main .story-grid {
-  gap: 28px;
-}
 .story-card {
   border: 0;
   background: transparent;
@@ -233,7 +230,7 @@
 .story-card .story-art {
   border-radius: 8px;
   overflow: hidden;
-  height: 190px;
+  height: 140px;
 }
 .story-content {
   padding: 18px 0 22px;
@@ -370,7 +367,7 @@
   .memory-cafe {
     height: 220px;
   }
-  .journal-gallery {
+  :is(.journal-gallery, .story-grid) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -411,7 +408,7 @@
   .studio-main .dashboard .stat strong {
     font-size: 24px;
   }
-  .journal-gallery {
+  :is(.journal-gallery, .story-grid) {
     gap: 14px;
   }
   .library-cover {
@@ -425,7 +422,7 @@
   }
 }
 @media (max-width: 420px) {
-  .journal-gallery {
+  :is(.journal-gallery, .story-grid) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -742,4 +739,155 @@
 .detail > .voice-notes {
   max-width: var(--reading-width, 760px);
   margin-inline: auto;
+}
+
+/* Public cards share the library's gallery geometry and editorial rhythm. */
+.studio-main .explore {
+  max-width: 1220px;
+}
+.explore .page-heading {
+  margin-bottom: 18px;
+}
+.explore .page-heading h1 {
+  font-size: clamp(30px, 4vw, 42px);
+}
+.explore-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 1fr 1fr;
+  gap: 12px;
+  margin: 0 0 24px;
+  padding: 0;
+}
+.explore-controls label {
+  min-width: 0;
+  font-size: 12px;
+}
+.explore-controls input,
+.explore-controls select {
+  width: 100%;
+  min-height: 40px;
+}
+.story-art {
+  display: block;
+  background: var(--surface);
+}
+.story-art .writer-cover {
+  height: 100%;
+  width: 100%;
+  margin: 0 !important;
+  border-radius: 0;
+}
+.story-art .media-placeholder {
+  display: none;
+}
+.story-art .story-icon-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 42px;
+}
+.story-card .story-content {
+  padding: 14px 0 16px;
+}
+.story-card h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+.story-card h2 > a {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.story-card h2 > a > span:last-child {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.story-card .story-page-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 29px;
+  margin: 0;
+  font-size: 23px;
+  line-height: 1;
+}
+.story-metadata {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.story-metadata > * + *::before {
+  content: '·';
+  margin-right: 8px;
+}
+.story-metadata .public-author {
+  font-size: inherit;
+  gap: 6px;
+}
+.story-metadata .author-symbol {
+  width: 23px;
+  height: 23px;
+}
+.story-skeleton > div {
+  height: 140px;
+  border-radius: 7px;
+  background: var(--surface);
+}
+.story-skeleton > span {
+  display: block;
+  height: 16px;
+  width: 75%;
+  margin-top: 14px;
+  background: var(--surface);
+  border-radius: 4px;
+}
+.story-skeleton > span:last-child {
+  width: 50%;
+  height: 10px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .story-skeleton {
+    animation: gallery-loading 1.4s ease-in-out infinite alternate;
+  }
+  .story-art img {
+    transition: transform 200ms ease;
+  }
+  .story-art:hover img {
+    transform: scale(1.025);
+  }
+}
+@keyframes gallery-loading {
+  to {
+    opacity: 0.55;
+  }
+}
+@media (max-width: 700px) {
+  :is(.journal-gallery, .story-grid) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .story-card .story-art,
+  .library-cover {
+    height: auto;
+    aspect-ratio: 2.1;
+  }
+  .explore-controls {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .explore-controls label:first-child {
+    grid-column: 1/-1;
+  }
+}
+
+.explore-controls label {
+  margin: 0;
 }

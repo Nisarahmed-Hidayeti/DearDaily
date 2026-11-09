@@ -1,11 +1,8 @@
-import { allJournalCategories } from './entryMetadata'
-import { studioPolishEnabled } from '../rich-editor/studioPolish'
+import { allJournalCategories, journalCategories } from './entryMetadata'
 /** Private editor preferences, never part of a public document snapshot. */
 export const publicCategories: readonly string[] = [
   'Uncategorized',
-  ...(studioPolishEnabled
-    ? allJournalCategories
-    : allJournalCategories.slice(0, 4)),
+  ...journalCategories,
 ]
 export interface PublicationPlan {
   category: string
@@ -43,4 +40,20 @@ export function publicationTags(value: string) {
   if (tags.length > 5 || tags.some((t) => t.length > 30))
     throw Error('Choose up to five public tags, each under 31 characters.')
   return tags
+}
+
+/** Proposal only. No public write occurs before the final explicit confirmation. */
+export function proposedPublicationPlan(draft: {
+  category: string
+  tags: string[]
+}): PublicationPlan {
+  return {
+    category: allJournalCategories.some(
+      (category) => category === draft.category,
+    )
+      ? draft.category
+      : 'Uncategorized',
+    tags: draft.tags.slice(0, 5).join(','),
+    byline: false,
+  }
 }

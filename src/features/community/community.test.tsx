@@ -1,5 +1,6 @@
+import { documentFromText } from '../rich-editor/document'
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import {
@@ -78,8 +79,14 @@ describe('public surfaces', () => {
     )
     expect(screen.getByRole('heading').textContent).toBe(story.title)
     expect(document.querySelector('script')).toBeNull()
-    expect(screen.getByText('Anonymous writer')).toBeVisible()
-    expect(screen.getByText('#chosen')).toBeVisible()
+    expect(screen.queryByText('Anonymous writer')).toBeNull()
+    expect(screen.queryByText('#chosen')).toBeNull()
+    expect(screen.queryByText(story.body)).toBeNull()
+    expect(screen.getByText('Growth')).toBeVisible()
+    expect(document.querySelector('time')).toHaveAttribute(
+      'dateTime',
+      story.published_at,
+    )
   })
   it('links an explicitly chosen pseudonym after confirming its public profile', async () => {
     const query = {
@@ -305,4 +312,28 @@ it('removes an own public profile only after its confirmation dialog', async () 
     ),
   ).toBeVisible()
   expect(eq).toHaveBeenCalledWith('username', 'synthetic_writer')
+})
+
+it('replaces a failed public cover with its page symbol instead of a broken placeholder', () => {
+  render(
+    <MemoryRouter>
+      <StoryCard
+        story={{
+          ...story,
+          writing_document: {
+            ...documentFromText(story.body),
+            page: { cover: 'forest-light', position: 50 },
+          },
+          page_icon: '🌿',
+        }}
+      />
+    </MemoryRouter>,
+  )
+  const image = screen.getByRole('img')
+  fireEvent.error(image)
+  expect(screen.queryByRole('img')).toBeNull()
+  expect(
+    document.querySelector('.story-art .story-icon-fallback'),
+  ).toHaveTextContent('🌿')
+  expect(screen.queryByText('Selected page cover')).toBeNull()
 })

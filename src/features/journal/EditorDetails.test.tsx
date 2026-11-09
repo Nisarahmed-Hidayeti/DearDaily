@@ -74,7 +74,7 @@ function show() {
     </MemoryRouter>,
   )
 }
-it('saves public choices once, preserves private metadata and confirms a read-only receipt', async () => {
+it('reviews editable public choices once without changing private metadata or historical dates', async () => {
   show()
   await screen.findByText('Saved to your private account')
   const editor = await screen.findByRole(
@@ -83,37 +83,49 @@ it('saves public choices once, preserves private metadata and confirms a read-on
     { timeout: 4000 },
   )
   await userEvent.click(screen.getByRole('button', { name: /Share & details/ }))
-  await userEvent.selectOptions(
-    screen.getByLabelText('Public category'),
-    'Gratitude',
-  )
-  await userEvent.click(screen.getByRole('button', { name: 'Save entry' }))
-  await waitFor(() =>
-    expect(saveEntry).toHaveBeenCalledWith(
-      expect.anything(),
-      'A',
-      fixture.id,
-      expect.objectContaining({
-        category: 'Personal',
-        tags: ['private-tag'],
-        writing_document: expect.objectContaining({
-          publication: {
-            category: 'Gratitude',
-            tags: 'public, beta',
-            byline: true,
-          },
-        }),
-      }),
-      1,
-    ),
-  )
+  expect(screen.queryByLabelText('Journal date')).toBeNull()
+  expect(screen.queryByLabelText('Public category')).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: 'Publish story' }))
   const dialog = screen.getByRole('dialog', { name: 'Ready to publish?' })
-  expect(within(dialog).queryByRole('combobox')).not.toBeInTheDocument()
-  expect(dialog).toHaveTextContent('Gratitude')
-  expect(dialog).toHaveTextContent('@quiet_writer')
-  expect(dialog).not.toHaveTextContent('private-tag')
+  expect(within(dialog).getByLabelText('Category to share')).toHaveValue(
+    'Travel',
+  )
+  expect(within(dialog).getByLabelText('Tags to share')).toHaveValue(
+    'public, beta',
+  )
+  await userEvent.selectOptions(
+    within(dialog).getByLabelText('Category to share'),
+    'Gratitude',
+  )
+  await waitFor(
+    () =>
+      expect(saveEntry).toHaveBeenCalledWith(
+        expect.anything(),
+        'A',
+        fixture.id,
+        expect.objectContaining({
+          category: 'Personal',
+          tags: ['private-tag'],
+          entry_date: fixture.entry_date,
+          writing_document: expect.objectContaining({
+            publication: {
+              category: 'Gratitude',
+              tags: 'public, beta',
+              byline: true,
+            },
+          }),
+        }),
+        1,
+      ),
+    { timeout: 4000 },
+  )
   expect(publishStory).not.toHaveBeenCalled()
+  expect(dialog).not.toHaveTextContent('private-tag')
+  await waitFor(() =>
+    expect(
+      within(dialog).getByRole('button', { name: 'Publish now' }),
+    ).toBeEnabled(),
+  )
   await userEvent.click(
     within(dialog).getByRole('button', { name: 'Publish now' }),
   )
@@ -131,6 +143,58 @@ it('saves public choices once, preserves private metadata and confirms a read-on
     ),
   )
   expect(screen.getByRole('textbox', { name: 'Journal body' })).toBe(editor)
+}, 15000)
+
+it('proposes private category/tags but permits excluding them before explicit publication', async () => {
+  vi.mocked(loadEntry).mockResolvedValue({
+    ...fixture,
+    writing_document: documentFromText(fixture.body),
+  })
+  show()
+  await screen.findByText('Saved to your private account')
+  await userEvent.click(screen.getByRole('button', { name: /Share & details/ }))
+  await userEvent.click(screen.getByRole('button', { name: 'Publish story' }))
+  const dialog = screen.getByRole('dialog', { name: 'Ready to publish?' })
+  expect(within(dialog).getByLabelText('Category to share')).toHaveValue(
+    'Personal',
+  )
+  expect(within(dialog).getByLabelText('Tags to share')).toHaveValue(
+    'private-tag',
+  )
+  expect(publishStory).not.toHaveBeenCalled()
+  await userEvent.selectOptions(
+    within(dialog).getByLabelText('Category to share'),
+    'Uncategorized',
+  )
+  await userEvent.clear(within(dialog).getByLabelText('Tags to share'))
+  await waitFor(
+    () =>
+      expect(
+        within(dialog).getByRole('button', { name: 'Publish now' }),
+      ).toBeEnabled(),
+    { timeout: 4000 },
+  )
+  await userEvent.click(
+    within(dialog).getByRole('button', { name: 'Publish now' }),
+  )
+  await waitFor(() =>
+    expect(publishStory).toHaveBeenCalledWith(
+      expect.anything(),
+      'A',
+      expect.anything(),
+      false,
+      {
+        public_username: null,
+        public_category: 'Uncategorized',
+        public_tags: [],
+      },
+    ),
+  )
+  expect(vi.mocked(saveEntry).mock.calls.at(-1)?.[3]).toMatchObject({
+    category: 'Personal',
+    tags: ['private-tag'],
+    entry_date: fixture.entry_date,
+  })
 }, 15000)
 it('opens a compact mobile sheet, respects available keyboard space and returns to the same editor', async () => {
   vi.stubGlobal('matchMedia', () => ({
@@ -184,13 +248,6 @@ it('retains legacy explicit public choices privately without copying private tag
   show()
   await screen.findByText('Saved to your private account')
   await userEvent.click(screen.getByRole('button', { name: /Share & details/ }))
-  expect(screen.getByLabelText('Public category')).toHaveValue('Travel')
-  expect(
-    screen.getByLabelText('Public tags (up to 5, comma separated)'),
-  ).toHaveValue('previous-public')
-  expect(
-    screen.getByRole('checkbox', { name: /Attribute this story/ }),
-  ).not.toBeChecked()
   await userEvent.click(screen.getByRole('button', { name: 'Save entry' }))
   await waitFor(() =>
     expect(saveEntry).toHaveBeenCalledWith(
@@ -210,6 +267,14 @@ it('retains legacy explicit public choices privately without copying private tag
       1,
     ),
   )
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Update public story' }),
+  )
+  expect(screen.getByLabelText('Category to share')).toHaveValue('Travel')
+  expect(screen.getByLabelText('Tags to share')).toHaveValue('previous-public')
+  expect(
+    screen.getByRole('checkbox', { name: /Attribute this story/ }),
+  ).not.toBeChecked()
 })
 it('preserves legacy plaintext when adding and removing a page icon', async () => {
   vi.mocked(loadEntry).mockResolvedValue({ ...fixture, writing_document: null })

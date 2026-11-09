@@ -2,7 +2,6 @@ import { entryIcon } from '../rich-editor/emojis'
 import { PublicAuthor } from './PublicAuthor'
 import { PageCover } from '../rich-editor/PageCover'
 import { Link } from 'react-router-dom'
-import { readingTime } from './communityApi'
 import type { CommunityStory } from './communityApi'
 export function StoryCard({ story: s }: { story: CommunityStory }) {
   return (
@@ -14,7 +13,15 @@ export function StoryCard({ story: s }: { story: CommunityStory }) {
       >
         {s.writing_document?.page ||
         (s.cover_preset && s.cover_preset !== 'none') ? (
-          <PageCover document={s.writing_document} preset={s.cover_preset} />
+          <PageCover
+            document={s.writing_document}
+            preset={s.cover_preset}
+            fallback={
+              <span className="story-icon-fallback" aria-hidden="true">
+                {entryIcon(s.writing_document, s.page_icon) || '✧'}
+              </span>
+            }
+          />
         ) : (
           <span className="story-icon-fallback" aria-hidden="true">
             {entryIcon(s.writing_document, s.page_icon) || '✧'}
@@ -22,32 +29,22 @@ export function StoryCard({ story: s }: { story: CommunityStory }) {
         )}
       </Link>
       <div className="story-content">
-        {entryIcon(s.writing_document, s.page_icon) && (
-          <span className="story-page-icon" aria-label="Story page icon">
-            {entryIcon(s.writing_document, s.page_icon)}
-          </span>
-        )}
-        <p className="eyebrow">{s.public_category ?? 'Published story'}</p>
         <h2>
-          <Link to={`/explore/published/${s.id}`}>{s.title}</Link>
+          <Link to={`/explore/published/${s.id}`}>
+            {entryIcon(s.writing_document, s.page_icon) && (
+              <span className="story-page-icon" aria-hidden="true">
+                {entryIcon(s.writing_document, s.page_icon)}
+              </span>
+            )}
+            <span>{s.title}</span>
+          </Link>
         </h2>
-        <p>
-          {s.body.slice(0, 160)}
-          {s.body.length > 160 ? '…' : ''}
-        </p>
-        <p className="story-byline">
-          <PublicAuthor username={s.public_username} />
-        </p>
-        <small>
-          {new Date(s.published_at).toLocaleDateString()} ·{' '}
-          {readingTime(s.body)} min read
-        </small>
-        <div className="tag-list">
-          {s.public_tags?.map((t) => (
-            <span className="tag" key={t}>
-              #{t}
-            </span>
-          ))}
+        <div className="story-metadata">
+          <PublicAuthor username={s.public_username} compact />
+          {s.public_category && <span>{s.public_category}</span>}
+          <time dateTime={s.published_at}>
+            {new Date(s.published_at).toLocaleDateString()}
+          </time>
         </div>
       </div>
     </article>
