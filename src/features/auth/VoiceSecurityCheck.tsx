@@ -1,4 +1,5 @@
 import { hostedProfileImageChecks } from './hostedProfileImageChecks'
+import { isMediaId } from '../media/mediaApi'
 import { useState } from 'react'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { useAuth } from './AuthProvider'
@@ -22,6 +23,7 @@ export default function VoiceSecurityCheck() {
     [busy, setBusy] = useState(false),
     [revision, setRevision] = useState(0),
     [link, setLink] = useState(''),
+    [cleanupIds, setCleanupIds] = useState(''),
     [receipt, setReceipt] = useState<
       | Awaited<ReturnType<typeof hostedVoiceChecks>>
       | Awaited<ReturnType<typeof hostedProfileImageChecks>>
@@ -240,6 +242,53 @@ export default function VoiceSecurityCheck() {
       >
         Clear test captures
       </button>
+      {profileMode && (
+        <section aria-label="Exact queued fixture cleanup">
+          <label>
+            Exact fixture image IDs · comma separated
+            <input
+              value={cleanupIds}
+              onChange={(e) => setCleanupIds(e.target.value)}
+              disabled={busy}
+            />
+          </label>
+          <button
+            className="button secondary"
+            disabled={busy || !client}
+            onClick={async () => {
+              const ids = cleanupIds.split(',').map((id) => id.trim())
+              if (
+                !client ||
+                !ids.length ||
+                ids.length > 32 ||
+                !ids.every(isMediaId)
+              ) {
+                setMessage('Enter only the exact reviewed fixture UUIDs.')
+                return
+              }
+              setBusy(true)
+              try {
+                const result = await client.functions.invoke('media-gateway', {
+                  body: { action: 'profile-cleanup', ids },
+                })
+                if (result.error || result.data?.pending !== 0)
+                  throw Error(
+                    'Exact object cleanup is not confirmed. Retry when connected.',
+                  )
+                setMessage(
+                  'Exact queued fixture objects cleaned. No active asset or unrelated object was removed.',
+                )
+              } catch (e) {
+                setMessage((e as Error).message)
+              } finally {
+                setBusy(false)
+              }
+            }}
+          >
+            Clean only these queued image objects
+          </button>
+        </section>
+      )}
       {receipt && (
         <pre aria-label="Verification receipt">
           {JSON.stringify(receipt, null, 2)}

@@ -39,6 +39,8 @@
 }
 .profile-photo-action {
   position: absolute;
+  /* Keep the banner control above the overlapping avatar row's hit area. */
+  z-index: 1;
   right: 12px;
   bottom: 12px;
   display: flex;
