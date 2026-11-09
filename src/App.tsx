@@ -92,6 +92,20 @@ function ThemedRoutes() {
             />
             {import.meta.env.DEV && VoiceSecurityCheck && (
               <Route
+                path="/dev/profile-image-check"
+                element={
+                  <Suspense
+                    fallback={
+                      <LoadingState>Preparing image checks…</LoadingState>
+                    }
+                  >
+                    <VoiceSecurityCheck />
+                  </Suspense>
+                }
+              />
+            )}
+            {import.meta.env.DEV && VoiceSecurityCheck && (
+              <Route
                 path="/dev/voice-check"
                 element={
                   <Suspense

@@ -1,9 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { readBounded, sanitizePhoto } from './image.ts'
-const uuid = (v: unknown): v is string =>
+const profileUuid = (v: unknown): v is string =>
   typeof v === 'string' &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(v)
-const optionalId = (v: unknown) => v === null || uuid(v)
+const optionalId = (v: unknown) => v === null || profileUuid(v)
 export function profileImageSave(value: unknown) {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw Error('Invalid profile images')
@@ -44,7 +44,7 @@ export function profileImageSave(value: unknown) {
   }
 }
 export async function profilePublicImage(admin: SupabaseClient, id: string) {
-  if (!uuid(id)) return null
+  if (!profileUuid(id)) return null
   const record = await admin.rpc('public_profile_image_record', { media: id })
   if (record.error || typeof record.data !== 'string') return null
   const signed = await admin.storage
@@ -108,7 +108,7 @@ export async function profileMediaRequest(
       throw Error('Upload not confirmed; retry when connected')
     }
   }
-  if (body?.action === 'profile-read' && uuid(body.id)) {
+  if (body?.action === 'profile-read' && profileUuid(body.id)) {
     const asset = await admin
       .from('profile_image_assets')
       .select('object_key')
@@ -201,27 +201,50 @@ export async function profileMediaRequest(
     }
   }
   if (body?.action === 'profile-cleanup') {
-    const pruned = await client.rpc('prune_profile_images')
-    if (pruned.error) throw Error('Cleanup not confirmed')
-    const jobs = await admin
+    if (
+      body.ids !== undefined &&
+      (!Array.isArray(body.ids) ||
+        body.ids.length > 32 ||
+        body.ids.some((id) => !profileUuid(id)))
+    )
+      throw Error('Invalid cleanup identifiers')
+    if (body.prune === true) {
+      const pruned = await client.rpc('prune_profile_images')
+      if (pruned.error) throw Error('Cleanup not confirmed')
+    }
+    let query = admin
       .from('media_gc')
       .select('id,bucket,object_key')
       .eq('user_id', who)
       .like('object_key', 'profile/%')
       .limit(50)
+    if (Array.isArray(body.ids)) {
+      if (!body.ids.length) return { cleaned: true, pending: 0 }
+      query = query.in(
+        'object_key',
+        body.ids.flatMap((id) => [
+          'profile/' + who + '/' + id + '.webp',
+          'profile/' + id + '.webp',
+        ]),
+      )
+    }
+    const jobs = await query
     if (jobs.error) throw Error('Cleanup unavailable')
+    let pending = 0
     for (const job of jobs.data ?? []) {
       const removed = await admin.storage
         .from(job.bucket)
         .remove([job.object_key])
-      if (!removed.error)
-        await admin
+      if (!removed.error) {
+        const deleted = await admin
           .from('media_gc')
           .delete()
           .eq('id', job.id)
           .eq('user_id', who)
+        if (deleted.error) pending++
+      } else pending++
     }
-    return { cleaned: true }
+    return { cleaned: pending === 0, pending }
   }
   throw Error('Unsupported profile image request')
 }

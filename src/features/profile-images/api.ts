@@ -129,9 +129,5 @@ export async function saveImages(client: SupabaseClient, value: ProfileImages) {
   )
     throw Error('Reload to reconcile the saved profile photos.')
   window.dispatchEvent(new Event('deardaily:profile-images'))
-  // Only exact, owner-bound queued profile objects; failed deletion remains queued for retry.
-  void client.functions
-    .invoke('media-gateway', { body: { action: 'profile-cleanup' } })
-    .catch(() => {})
   return result
 }

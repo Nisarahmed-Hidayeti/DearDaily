@@ -73,6 +73,11 @@ export function ProfilePhotos({
       setDraft(v)
       setSaved(v)
       setMessage('Photos saved.')
+      void client.functions
+        .invoke('media-gateway', {
+          body: { action: 'profile-cleanup', prune: true },
+        })
+        .catch(() => {})
     } catch (e) {
       setMessage((e as Error).message)
     } finally {

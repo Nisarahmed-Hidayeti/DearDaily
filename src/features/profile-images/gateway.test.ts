@@ -87,3 +87,19 @@ it('validates profile requests before any privileged access', async () => {
   ).rejects.toThrow()
   expect(from).not.toHaveBeenCalled()
 })
+
+it('validates exact cleanup identifiers before pruning or privileged reads', async () => {
+  const rpc = vi.fn(),
+    from = vi.fn()
+  await expect(
+    profileMediaRequest(
+      new Request('https://local.invalid'),
+      { from } as unknown as SupabaseClient,
+      { rpc } as unknown as SupabaseClient,
+      id,
+      { action: 'profile-cleanup', prune: true, ids: ['../private'] },
+    ),
+  ).rejects.toThrow('Invalid cleanup identifiers')
+  expect(rpc).not.toHaveBeenCalled()
+  expect(from).not.toHaveBeenCalled()
+})

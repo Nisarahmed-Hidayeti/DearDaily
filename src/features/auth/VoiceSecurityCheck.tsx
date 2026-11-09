@@ -1,3 +1,4 @@
+import { hostedProfileImageChecks } from './hostedProfileImageChecks'
 import { useState } from 'react'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { useAuth } from './AuthProvider'
@@ -12,6 +13,8 @@ if (import.meta.hot)
     data.voiceSessions = captures
   })
 export default function VoiceSecurityCheck() {
+  const profileMode = location.pathname === '/dev/profile-image-check'
+  const label = profileMode ? 'profile image' : 'audio'
   const { client } = useAuth(),
     [message, setMessage] = useState(
       'Capture two different approved confirmed accounts. Passwords and tokens never leave the SDK.',
@@ -19,9 +22,11 @@ export default function VoiceSecurityCheck() {
     [busy, setBusy] = useState(false),
     [revision, setRevision] = useState(0),
     [link, setLink] = useState(''),
-    [receipt, setReceipt] = useState<Awaited<
-      ReturnType<typeof hostedVoiceChecks>
-    > | null>(null)
+    [receipt, setReceipt] = useState<
+      | Awaited<ReturnType<typeof hostedVoiceChecks>>
+      | Awaited<ReturnType<typeof hostedProfileImageChecks>>
+      | null
+    >(null)
   async function capture(slot: 'A' | 'B') {
     if (!client || !authConfig) return
     setBusy(true)
@@ -31,7 +36,12 @@ export default function VoiceSecurityCheck() {
         user = identity.data.user
       const allowed =
         slot === 'A'
-          ? ['nisarahmedhidayeti@gmail.com']
+          ? [
+              'nisarahmedhidayeti@gmail.com',
+              ...(profileMode
+                ? ['nisarahmedhidayeti+deardaily-beta@gmail.com']
+                : []),
+            ]
           : ['deardailywebsite@gmail.com', 'hidayetiahmed@gmail.com']
       if (
         identity.error ||
@@ -74,7 +84,11 @@ export default function VoiceSecurityCheck() {
   return (
     <div className="page account-page" data-revision={revision}>
       <p className="eyebrow">Development only</p>
-      <h1>Audio privacy verification</h1>
+      <h1>
+        {profileMode
+          ? 'Profile image privacy verification'
+          : 'Audio privacy verification'}
+      </h1>
       <p role="status">{message}</p>
       <button
         className="button secondary"
@@ -131,30 +145,90 @@ export default function VoiceSecurityCheck() {
           if (!a || !b || a.id === b.id) return
           setBusy(true)
           setMessage(
-            'Testing synthetic audio, private ownership, deliberate publishing and unpublishing…',
+            `Testing synthetic ${label}, private ownership, explicit sharing and revocation…`,
           )
           try {
-            const result = await hostedVoiceChecks(
-              a.client,
-              b.client,
-              a.id,
-              b.id,
-            )
+            const result = await (
+              profileMode ? hostedProfileImageChecks : hostedVoiceChecks
+            )(a.client, b.client, a.id, b.id)
             setReceipt(result)
             setMessage(
-              `${result.passed ? 'PASS' : 'FAIL'}: ${result.checks} hosted audio checks. Different IDs: ${result.distinctIdentities ? 'PASS' : 'FAIL'}. Cleanup: ${result.cleanup ? 'PASS' : 'FAIL'}. Stage: ${result.stage}. ${result.failure}`,
+              `${result.passed ? 'PASS' : 'FAIL'}: ${result.checks} hosted ${label} checks. Different IDs: ${result.distinctIdentities ? 'PASS' : 'FAIL'}. Cleanup: ${result.cleanup ? 'PASS' : 'FAIL'}. Stage: ${result.stage}. ${result.failure}`,
             )
           } catch {
             setMessage(
-              'Audio verification interrupted; inspect exact fixture cleanup.',
+              'Verification interrupted; inspect exact fixture cleanup.',
             )
           } finally {
             setBusy(false)
           }
         }}
       >
-        Run synthetic audio tests
+        Run synthetic {label} tests
       </button>
+      {profileMode && receipt && 'fixtureAssetIds' in receipt && (
+        <button
+          className="button secondary"
+          disabled={busy || !receipt.securityPassed}
+          onClick={async () => {
+            setBusy(true)
+            try {
+              const ids = [
+                ...receipt.fixtureAssetIds,
+                ...receipt.fixturePublicIds,
+              ]
+              for (const capture of captures.values()) {
+                const identity = await capture.client.auth.getUser()
+                if (identity.error || identity.data.user?.id !== capture.id)
+                  throw Error('Fresh verified sessions required')
+                const result = await capture.client.functions.invoke(
+                  'media-gateway',
+                  { body: { action: 'profile-cleanup', ids } },
+                )
+                const settings = await capture.client.rpc('my_profile_images')
+                if (
+                  result.error ||
+                  result.data?.pending !== 0 ||
+                  settings.error ||
+                  settings.data.version !== 0
+                )
+                  throw Error('Protected exact cleanup is still required')
+                for (const id of receipt.fixtureAssetIds) {
+                  const read = await capture.client.functions.invoke(
+                    'media-gateway',
+                    { body: { action: 'profile-read', id } },
+                  )
+                  if (!read.error) throw Error('Fixture remains readable')
+                }
+              }
+              for (const id of receipt.fixturePublicIds) {
+                const r = await fetch(
+                  `${authConfig!.url}/functions/v1/media-gateway?profile=${id}`,
+                  { cache: 'no-store' },
+                )
+                if (r.ok) throw Error('Public fixture remains readable')
+              }
+              const updated = {
+                ...receipt,
+                passed: receipt.securityPassed && receipt.profileCleanup,
+                cleanup: true,
+                protectedCleanupRequired: false,
+                stage: 'complete',
+              }
+              setReceipt(updated)
+              setMessage(
+                `${updated.passed ? 'PASS' : 'FAIL'}: ${updated.checks} hosted profile image checks. Exact synthetic cleanup verified.`,
+              )
+            } catch (e) {
+              setMessage((e as Error).message)
+            } finally {
+              setBusy(false)
+            }
+          }}
+        >
+          Verify exact fixture cleanup
+        </button>
+      )}
       <button
         className="text-button"
         disabled={busy}
@@ -167,7 +241,7 @@ export default function VoiceSecurityCheck() {
         Clear test captures
       </button>
       {receipt && (
-        <pre aria-label="Audio verification receipt">
+        <pre aria-label="Verification receipt">
           {JSON.stringify(receipt, null, 2)}
         </pre>
       )}

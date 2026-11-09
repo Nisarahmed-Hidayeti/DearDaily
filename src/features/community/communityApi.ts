@@ -126,6 +126,7 @@ export async function saveProfile(
     throw new Error(
       'Profile not confirmed. Reload to reconcile the server version.',
     )
+  window.dispatchEvent(new Event('deardaily:profile-images'))
   return saved
 }
 export async function removePublicProfile(

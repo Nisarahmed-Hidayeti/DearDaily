@@ -3,7 +3,16 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { ProfilePhotos } from './ProfilePhotos'
 const mocks = vi.hoisted(() => ({
-  client: {},
+  client: {
+    functions: {
+      invoke: vi
+        .fn()
+        .mockResolvedValue({
+          data: { cleaned: true, pending: 0 },
+          error: null,
+        }),
+    },
+  },
   own: vi.fn(),
   save: vi.fn(),
   upload: vi.fn(),

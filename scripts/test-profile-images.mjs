@@ -133,6 +133,11 @@ try {
   )
   const avatar = await upload(a.token, avatarBytes, 'avatar'),
     banner = await upload(a.token, bannerBytes, 'banner')
+  check(
+    (await call(a.token, { action: 'profile-read', id: banner })).status ===
+      200,
+    'owner can read its banner',
+  )
   const read = await call(a.token, { action: 'profile-read', id: avatar })
   check(read.status === 200, 'A can read own processed avatar')
   const signed = await read.json()
@@ -161,6 +166,19 @@ try {
       ).error,
     ),
     'B direct private Storage download denied',
+  )
+  const bAvatar = await upload(b.token, avatarBytes, 'avatar')
+  check(
+    (await call(a.token, { action: 'profile-read', id: bAvatar })).status >=
+      400,
+    'A cannot read B private image',
+  )
+  check(
+    Boolean(
+      (await a.client.from('profile_image_assets').delete().eq('id', bAvatar))
+        .error,
+    ),
+    'A cannot delete B image',
   )
   const base = {
     action: 'profile-save',
@@ -210,7 +228,7 @@ try {
   settings = (await r.json()).settings
   pub = await anon.rpc('public_profile_images', { handle: a.handle })
   assert.ifError(pub.error)
-  const approved = pub.data
+  let approved = pub.data
   copies.push(approved.avatar, approved.banner)
   check(
     Object.keys(approved).sort().join(',') === 'avatar,banner,banner_position',
@@ -241,6 +259,27 @@ try {
     ),
     'anonymous direct bucket download denied',
   )
+  const publicReplacement = await upload(a.token, avatarBytes, 'avatar')
+  r = await call(a.token, {
+    ...base,
+    avatar_asset: publicReplacement,
+    version: settings.version,
+    share_avatar: true,
+    share_banner: true,
+  })
+  check(r.status === 200, 'replace deliberately public avatar')
+  settings = (await r.json()).settings
+  check(
+    (await publicGet(approved.avatar)).status === 404,
+    'replacement revokes the previous public avatar ID',
+  )
+  pub = await anon.rpc('public_profile_images', { handle: a.handle })
+  approved = pub.data
+  copies.push(approved.avatar, approved.banner)
+  check(
+    (await publicGet(approved.avatar)).status === 302,
+    'replacement copy becomes publicly readable',
+  )
   const hidden = await a.client
     .from('public_profiles')
     .update({ visible: false })
@@ -256,7 +295,7 @@ try {
   const current = await a.client.rpc('my_profile_images')
   assert.ifError(current.error)
   check(
-    current.data.avatar_asset === avatar &&
+    current.data.avatar_asset === publicReplacement &&
       !current.data.share_avatar &&
       !current.data.share_banner,
     'hiding preserves originals and clears consent',
