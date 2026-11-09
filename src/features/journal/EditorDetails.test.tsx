@@ -224,7 +224,6 @@ it('preserves legacy plaintext when adding and removing a page icon', async () =
   await userEvent.click(
     screen.getByRole('button', { name: /Cover & page icon/ }),
   )
-  await userEvent.click(screen.getByRole('button', { name: /^Page icon$/ }))
   await userEvent.type(
     screen.getByRole('searchbox', { name: 'Search page icons' }),
     'kitten',

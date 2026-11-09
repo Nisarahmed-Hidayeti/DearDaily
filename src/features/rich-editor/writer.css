@@ -1487,22 +1487,6 @@
 .page-style-dialog {
   width: min(480px, calc(100vw - 24px));
 }
-.page-style-tabs {
-  display: flex;
-  gap: 6px;
-  margin: 12px 0;
-}
-.page-style-tabs button {
-  padding: 8px 14px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--muted);
-}
-.page-style-tabs button[aria-pressed='true'] {
-  background: var(--surface);
-  color: var(--text);
-}
 .page-style-dialog .appearance-cover-preview,
 .page-style-dialog .appearance-cover-preview .writer-cover {
   height: 90px;
@@ -1517,7 +1501,7 @@
   min-height: 145px;
 }
 .page-style-dialog .cover-collection h4 {
-  display: none;
+  display: block;
 }
 .page-style-dialog .appearance-actions {
   position: sticky;
@@ -1596,4 +1580,110 @@
   .studio-shell .notion-editor .writing-music {
     padding-left: 18px;
   }
+}
+
+/* One combined picker; all cover collections share a single scrolling canvas. */
+.page-style-dialog {
+  width: min(680px, calc(100vw - 24px));
+  max-width: 680px;
+  padding: 20px;
+}
+.appearance-cover-tools {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin-block: 12px;
+}
+.page-style-dialog .appearance-cover-preview {
+  flex: 0 0 150px;
+  width: 150px;
+  height: 60px;
+}
+.page-style-dialog .appearance-cover-preview .writer-cover {
+  height: 60px;
+}
+.page-style-dialog .cover-upload {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.page-style-dialog .cover-upload input {
+  width: 100%;
+  min-width: 0;
+}
+.appearance-cover-adjustments {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.appearance-cover-adjustments .cover-position {
+  flex: 1;
+  min-width: 160px;
+  margin: 0;
+}
+.page-icon-picker h3 {
+  margin: 14px 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.page-style-dialog .page-icon-picker fieldset {
+  margin: 0;
+}
+.page-style-dialog .emoji-grid {
+  max-height: 96px;
+}
+.cover-collections {
+  max-height: clamp(160px, 32dvh, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 0 6px 8px 0;
+}
+.cover-collections:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.page-style-dialog .cover-collection {
+  min-height: 0;
+}
+.page-style-dialog .cover-collection h4 {
+  margin: 16px 0 8px;
+}
+.page-style-dialog .cover-collection:first-child h4 {
+  margin-top: 0;
+}
+.page-style-dialog .cover-collection .cover-gallery {
+  max-height: none;
+  overflow: visible;
+}
+.page-style-dialog .cover-collection .cover-gallery img {
+  height: 72px;
+}
+@media (max-width: 480px) {
+  .page-style-dialog .appearance-cover-preview {
+    flex-basis: 90px;
+    width: 90px;
+    height: 50px;
+  }
+  .page-style-dialog .appearance-cover-preview .writer-cover {
+    height: 50px;
+  }
+  .page-style-dialog .cover-collection .cover-gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .page-style-dialog .cover-collection .cover-gallery img {
+    height: 54px;
+  }
+  .cover-collections {
+    max-height: 220px;
+  }
+}
+.page-style-dialog .cover-browser {
+  overflow: hidden;
+}
+.page-style-dialog .page-icon-picker input[type='search'] {
+  width: 100%;
 }
