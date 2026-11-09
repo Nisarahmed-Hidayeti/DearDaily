@@ -663,7 +663,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .page {
-    animation: studio-arrive 180ms ease-out both;
+    animation: studio-arrive 180ms ease-out backwards;
   }
   .cover-gallery img {
     transition:

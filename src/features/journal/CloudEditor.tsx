@@ -1,3 +1,4 @@
+import type { Appearance } from '../appearance/appearance'
 import { studioPolishEnabled, writingFonts } from '../rich-editor/studioPolish'
 import { VoiceNotes } from '../audio/VoiceNotes'
 import { voiceNotesEnabled } from '../audio/audio'
@@ -81,7 +82,19 @@ function EntryForm({
   }, [state, ready, busy, dirty])
   const [preview, setPreview] = useState(false)
   const { focus, setFocus } = useWritingFocus()
-  const { appearance } = useAppearance()
+  const {
+    appearance,
+    save: saveAppearance,
+    status: appearanceStatus,
+  } = useAppearance()
+  const [appearanceError, setAppearanceError] = useState('')
+  const savePagePreference = async (next: Partial<Appearance>) => {
+    setAppearanceError('')
+    if (!(await saveAppearance({ ...appearance, ...next }, appearance)))
+      setAppearanceError(
+        'Writing preference not synced. Your words are unchanged. Retry in Appearance settings.',
+      )
+  }
   const [fontChoice, setFont] = useState<string | null>(null)
   const font = fontChoice ?? appearance.font
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -288,7 +301,15 @@ function EntryForm({
           <div className="writer-preferences">
             <label>
               Writing font
-              <select value={font} onChange={(e) => setFont(e.target.value)}>
+              <select
+                value={font}
+                disabled={appearanceStatus === 'saving'}
+                onChange={(e) => {
+                  const font = e.target.value as Appearance['font']
+                  setFont(font)
+                  void savePagePreference({ font })
+                }}
+              >
                 {(studioPolishEnabled
                   ? writingFonts
                   : writingFonts.slice(0, 2)
@@ -301,7 +322,15 @@ function EntryForm({
             </label>
             <label>
               Page width
-              <select value={width} onChange={(e) => setWidth(e.target.value)}>
+              <select
+                value={width}
+                disabled={appearanceStatus === 'saving'}
+                onChange={(e) => {
+                  const width = e.target.value as Appearance['width']
+                  setWidth(width)
+                  void savePagePreference({ width })
+                }}
+              >
                 <option value="narrow">Narrow</option>
                 <option value="standard">Standard</option>
                 <option value="wide">Wide</option>
@@ -310,6 +339,7 @@ function EntryForm({
           </div>
         </details>
       )}
+      {appearanceError && <p role="alert">{appearanceError}</p>}
       {error && (
         <div role="alert" className="auth-notice">
           <p>{error}</p>

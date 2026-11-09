@@ -1,3 +1,4 @@
+import { ImagePlus } from 'lucide-react'
 import { BlockControls } from './BlockControls'
 import { SlashMenu, type SlashState } from './SlashMenu'
 import {
@@ -353,6 +354,21 @@ function ValidatedRichWriter({
       />
       {uploading && (
         <LoadingState>Preparing and uploading your private photo…</LoadingState>
+      )}
+      {onUpload && (
+        <button
+          type="button"
+          className="mobile-photo-insert quiet"
+          aria-label="Insert photo"
+          title="Insert photo"
+          disabled={disabled || uploading}
+          onClick={() => {
+            pendingPhoto.current = null
+            fileInput.current?.click()
+          }}
+        >
+          <ImagePlus size={20} />
+        </button>
       )}
       <BlockControls
         editor={editor}

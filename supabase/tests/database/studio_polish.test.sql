@@ -30,7 +30,7 @@ select lives_ok($$insert into public.user_settings(user_id,theme_id,appearance) 
 select set_config('request.jwt.claims','{"sub":"12000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
 select is((select count(*)::int from public.journal_entries where id='22000000-0000-0000-0000-000000000001'),0,'B cannot read A private music');
 select is((select count(*)::int from public.public_profiles where username='studio_fixture'),0,'B cannot read hidden profile panel');
-select is((with changed as (update public.public_profiles set public_panel='{}' where username='studio_fixture' returning username) select count(*)::int from changed),0,'B cannot edit A profile panel');
+with changed as (update public.public_profiles set public_panel='{}' where username='studio_fixture' returning username) select is((select count(*)::int from changed),0,'B cannot edit A profile panel');
 reset role;
 set local role anon;
 select is((select count(*)::int from public.public_profiles where username='studio_fixture'),0,'anonymous cannot read hidden profile panel');

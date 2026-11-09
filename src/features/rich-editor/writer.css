@@ -1538,3 +1538,24 @@
 .writer-focus .paper-meta {
   display: none;
 }
+
+.mobile-photo-insert {
+  display: none;
+}
+@media (max-width: 600px) {
+  .mobile-photo-insert {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+  }
+  .block-gutter button {
+    width: 26px;
+    min-height: 30px;
+  }
+  .block-gutter {
+    left: -24px;
+  }
+}
