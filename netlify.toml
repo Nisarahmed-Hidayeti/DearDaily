@@ -5,6 +5,9 @@
 [build.environment]
   NODE_VERSION = "22"
 
+[context.production.environment]
+  VITE_ENABLE_PROFILE_IMAGES = "true"
+
 # Preserve static assets; route all other paths through React Router.
 [[redirects]]
   from = "/*"

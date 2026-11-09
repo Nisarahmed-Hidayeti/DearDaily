@@ -27,5 +27,11 @@ jobs:
         run: npx supabase start
       - run: npx supabase db reset
       - run: npx supabase test db
+      - name: Verify real local profile image permissions
+        run: |
+          umask 077
+          npx supabase status -o env > "$RUNNER_TEMP/deardaily-local-profile.env" 2>/dev/null
+          node --experimental-strip-types scripts/test-profile-images.mjs "$RUNNER_TEMP/deardaily-local-profile.env"
+          rm "$RUNNER_TEMP/deardaily-local-profile.env"
       - if: always() && steps.ci_supabase.outcome == 'success'
         run: npx supabase stop --no-backup

@@ -1,9 +1,11 @@
+import { ProfileImage, usePublicImages } from '../profile-images/ProfileImage'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { avatars, validUsername } from './communityApi'
 type Author = { username: string; display_name: string; avatar: string }
 export function PublicAuthor({ username }: { username?: string | null }) {
+  const photos = usePublicImages(username)
   const { client } = useAuth()
   const [author, setAuthor] = useState<Author | null>(null)
   useEffect(() => {
@@ -28,7 +30,11 @@ export function PublicAuthor({ username }: { username?: string | null }) {
   return (
     <Link className="public-author" to={`/u/${author.username}`}>
       <span className="author-symbol" aria-hidden="true">
-        {avatars[author.avatar] ?? '✧'}
+        <ProfileImage
+          publicId={photos?.avatar}
+          fallback={avatars[author.avatar] ?? '✧'}
+          alt=""
+        />
       </span>
       <span>{author.display_name || `@${author.username}`}</span>
     </Link>

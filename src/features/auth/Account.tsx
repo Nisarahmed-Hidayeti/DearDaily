@@ -1,3 +1,4 @@
+import { OwnProfileAvatar } from '../profile-images/ProfileImage'
 import { communityEnabled } from '../community/communityApi'
 import { journalEnabled } from '../journal/journalApi'
 import { useEffect, useState } from 'react'
@@ -87,6 +88,9 @@ export default function Account() {
       <div className="account-overview-grid">
         <section className="panel account-identity">
           <p className="eyebrow">Your identity</p>
+          <span className="profile-avatar">
+            <OwnProfileAvatar fallback="✧" />
+          </span>
           <h2>Personal information</h2>
           <dl>
             <dt>Email address</dt>

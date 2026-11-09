@@ -8,6 +8,7 @@ vi.stubEnv('VITE_SUPABASE_URL', '')
 vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', '')
 vi.stubEnv('VITE_ALLOW_SIGNUP', 'false')
 vi.stubEnv('VITE_ENABLE_JOURNALS', 'false')
+vi.stubEnv('VITE_ENABLE_PROFILE_IMAGES', 'false')
 
 beforeEach(() => {
   localStorage.clear()

@@ -1,3 +1,4 @@
+import { OwnProfileAvatar } from '../features/profile-images/ProfileImage'
 import { useRef, useState, useEffect } from 'react'
 import { communityEnabled } from '../features/community/communityApi'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
@@ -101,7 +102,7 @@ export default function Shell() {
   const accountLinks = (
     <nav aria-label="Account controls">
       <Link to={session ? '/account' : '/auth/sign-in'} onClick={closeMenus}>
-        <UserRound size={17} />
+        <OwnProfileAvatar fallback={<UserRound size={17} />} />
         {session ? 'Account information' : 'Sign in'}
       </Link>
       <Link
@@ -211,7 +212,7 @@ export default function Shell() {
         >
           <summary aria-label="Open account menu" data-tooltip="Your account">
             <span className="avatar" aria-hidden="true">
-              <UserRound size={17} />
+              <OwnProfileAvatar fallback={<UserRound size={17} />} />
             </span>
             <span className="account-caption">
               {session ? 'Your space' : 'DearDaily'}

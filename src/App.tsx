@@ -15,6 +15,9 @@ import { lazy, Suspense } from 'react'
 const VoiceSecurityCheck = import.meta.env.DEV
   ? lazy(() => import('./features/auth/VoiceSecurityCheck'))
   : null
+const ProfilePhotoWorkshop = import.meta.env.DEV
+  ? lazy(() => import('./features/profile-images/ProfilePhotoWorkshop'))
+  : null
 const EditorWorkshop = import.meta.env.DEV
   ? lazy(() => import('./features/rich-editor/EditorPreview'))
   : null
@@ -89,6 +92,20 @@ function ThemedRoutes() {
             />
             {import.meta.env.DEV && VoiceSecurityCheck && (
               <Route
+                path="/dev/profile-image-check"
+                element={
+                  <Suspense
+                    fallback={
+                      <LoadingState>Preparing image checks…</LoadingState>
+                    }
+                  >
+                    <VoiceSecurityCheck />
+                  </Suspense>
+                }
+              />
+            )}
+            {import.meta.env.DEV && VoiceSecurityCheck && (
+              <Route
                 path="/dev/voice-check"
                 element={
                   <Suspense
@@ -97,6 +114,20 @@ function ThemedRoutes() {
                     }
                   >
                     <VoiceSecurityCheck />
+                  </Suspense>
+                }
+              />
+            )}
+            {import.meta.env.DEV && ProfilePhotoWorkshop && (
+              <Route
+                path="/dev/profile-photo-workshop"
+                element={
+                  <Suspense
+                    fallback={
+                      <LoadingState>Preparing photo preview…</LoadingState>
+                    }
+                  >
+                    <ProfilePhotoWorkshop />
                   </Suspense>
                 }
               />
