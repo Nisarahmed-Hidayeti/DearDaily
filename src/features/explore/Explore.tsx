@@ -246,7 +246,6 @@ export function PublishedStory() {
             {new Date(story.published_at).toLocaleDateString()}
           </p>
           <PublicAuthor username={story.public_username} />
-          <h1>{story.title}</h1>
           <PageCover
             document={story.writing_document}
             preset={story.cover_preset}
@@ -263,6 +262,7 @@ export function PublishedStory() {
               {entryIcon(story.writing_document, story.page_icon)}
             </div>
           )}
+          <h1>{story.title}</h1>
           <article>
             <RichRead document={story.writing_document} fallback={story.body} />
           </article>

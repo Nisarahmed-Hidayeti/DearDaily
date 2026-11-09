@@ -17,7 +17,12 @@ it('publishes only approved canonical music through the actual API', async () =>
     returns: () => q,
     single: async () => ({ data: { id: 'synthetic' }, error: null }),
   }
-  const client = { from: () => q } as unknown as SupabaseClient
+  const client = {
+    from: () => q,
+    functions: {
+      invoke: vi.fn().mockResolvedValue({ data: { notes: [] }, error: null }),
+    },
+  } as unknown as SupabaseClient
   const entry = {
     id: 'synthetic',
     title: 'Public',

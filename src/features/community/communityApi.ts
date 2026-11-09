@@ -1,3 +1,6 @@
+import { studioPolishEnabled } from '../rich-editor/studioPolish'
+import { validateProfilePanel, type ProfilePanel } from './profilePanel'
+import { publicCategories } from '../journal/publicationPlan'
 import { voiceNotesEnabled } from '../audio/audio'
 import { publicStreaksEnabled } from './publicStreakConfig'
 import { musicFields } from '../music/music'
@@ -6,13 +9,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PublicStory } from '../journal/journalApi'
 import { richPublicFields } from '../rich-editor/config'
 export const communityEnabled = import.meta.env.VITE_ENABLE_COMMUNITY === 'true'
-export const categories = [
-  'Uncategorized',
-  'Personal',
-  'Gratitude',
-  'Growth',
-  'Travel',
-]
+export const categories = publicCategories
 export const avatars: Record<string, string> = {
   leaf: '❧',
   moon: '☾',
@@ -20,6 +17,8 @@ export const avatars: Record<string, string> = {
   book: '▤',
 }
 export interface PublicProfile {
+  public_panel?: ProfilePanel
+
   public_streak?: number | null
   cover_id?: string | null
   username: string
@@ -38,7 +37,8 @@ export type CommunityStory = PublicStory & Partial<StoryMetadata>
 export const profileFields =
   'username,display_name,bio,avatar,visible,joined_month' +
   (appearanceEnabled ? ',cover_id' : '') +
-  (publicStreaksEnabled ? ',public_streak' : '')
+  (publicStreaksEnabled ? ',public_streak' : '') +
+  (studioPolishEnabled ? ',public_panel' : '')
 export const storyFields: string =
   'id,title,body,published_at,public_username,public_category,public_tags' +
   richPublicFields +
@@ -69,15 +69,26 @@ export async function myProfile(
 ): Promise<PublicProfile | null> {
   const { data, error } = await client.rpc('my_public_profile')
   if (error) throw new Error('Profile unavailable')
-  if (!data || !publicStreaksEnabled) return data
+  if (!data || (!publicStreaksEnabled && !studioPolishEnabled)) return data
   // Keep the legacy RPC response writable for already-deployed clients.
   const streak = await client
     .from('public_profiles')
-    .select('public_streak')
+    .select(
+      [
+        ...(publicStreaksEnabled ? ['public_streak'] : []),
+        ...(studioPolishEnabled ? ['public_panel'] : []),
+      ].join(','),
+    )
     .eq('username', data.username)
-    .single()
+    .single<{ public_streak?: number | null; public_panel?: ProfilePanel }>()
   if (streak.error) throw new Error('Profile unavailable')
-  return { ...data, public_streak: streak.data.public_streak }
+  return {
+    ...data,
+    ...streak.data,
+    ...(studioPolishEnabled
+      ? { public_panel: validateProfilePanel(streak.data.public_panel ?? {}) }
+      : {}),
+  }
 }
 export async function saveProfile(
   client: SupabaseClient,
@@ -88,6 +99,7 @@ export async function saveProfile(
     throw new Error(
       'Choose 3–24 lowercase letters, numbers or underscores, starting with a letter. Reserved names are unavailable.',
     )
+  if (profile.public_panel) validateProfilePanel(profile.public_panel)
   const { public_streak: readOnlyStreak, ...writable } = profile
   void readOnlyStreak
   const query = previous
@@ -104,7 +116,7 @@ export async function saveProfile(
   if (
     !saved ||
     !(Object.keys(writable) as (keyof PublicProfile)[]).every(
-      (key) => saved[key] === profile[key],
+      (key) => JSON.stringify(saved[key]) === JSON.stringify(profile[key]),
     )
   )
     throw new Error(

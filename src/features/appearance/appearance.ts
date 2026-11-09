@@ -4,7 +4,7 @@ export interface Appearance {
   accent: string | null
   background: string | null
   surface: 'default' | 'soft' | 'flat'
-  font: 'sans' | 'serif'
+  font: 'sans' | 'serif' | 'literary' | 'humanist' | 'mono'
   size: 16 | 18 | 20
   width: 'narrow' | 'standard' | 'wide'
   spacing: 'comfortable' | 'compact'
@@ -32,7 +32,7 @@ export function validateAppearance(value: unknown): Appearance {
     !hex(v.accent) ||
     !hex(v.background) ||
     !['default', 'soft', 'flat'].includes(v.surface) ||
-    !['sans', 'serif'].includes(v.font) ||
+    !['sans', 'serif', 'literary', 'humanist', 'mono'].includes(v.font) ||
     ![16, 18, 20].includes(v.size) ||
     !['narrow', 'standard', 'wide'].includes(v.width) ||
     !['comfortable', 'compact'].includes(v.spacing) ||
@@ -71,12 +71,16 @@ export const themeAccents = {
   'forest-green': '#8ccba5',
   'paper-white': '#70532c',
   'obsidian-black': '#c4c4c4',
+  'warm-sepia': '#805331',
+  'deep-ocean': '#80c9dd',
 }
 export const themeBackgrounds = {
   'midnight-purple': '#090a12',
   'forest-green': '#09120f',
   'paper-white': '#faf8f3',
   'obsidian-black': '#050505',
+  'warm-sepia': '#f5eddd',
+  'deep-ocean': '#081820',
 }
 export function appearanceTokens(
   input: Appearance,

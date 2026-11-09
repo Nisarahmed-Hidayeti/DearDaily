@@ -1,7 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 /** Layout only: never replace the editor, document, selection or save state. */
 export function useWritingFocus() {
-  const [focus, setFocus] = useState(false)
+  const [focus, updateFocus] = useState(() => {
+    try {
+      return localStorage.getItem('deardaily.writing-focus') !== 'false'
+    } catch {
+      return true
+    }
+  })
+  const setFocus = useCallback((next: boolean) => {
+    updateFocus(next)
+    try {
+      localStorage.setItem('deardaily.writing-focus', String(next))
+    } catch {
+      /* Layout remains usable when storage is unavailable. */
+    }
+  }, [])
   useEffect(() => {
     if (!focus) return
     const exit = (event: KeyboardEvent) => {
@@ -19,6 +33,6 @@ export function useWritingFocus() {
     }
     document.addEventListener('keydown', exit)
     return () => document.removeEventListener('keydown', exit)
-  }, [focus])
+  }, [focus, setFocus])
   return { focus, setFocus }
 }

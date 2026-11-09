@@ -1,3 +1,5 @@
+import { studioPolishEnabled } from '../rich-editor/studioPolish'
+import { validateProfilePanel } from './profilePanel'
 import { publicStreaksEnabled } from './publicStreakConfig'
 import { photographicCovers } from '../rich-editor/covers'
 import { useEffect, useState } from 'react'
@@ -96,51 +98,118 @@ export default function PublicProfile() {
               title={profile.display_name}
             />
             <p className="profile-bio">{profile.bio}</p>
-            {publicStreaksEnabled &&
-              typeof profile.public_streak === 'number' && (
-                <p className="muted">
-                  Shared writing streak: {profile.public_streak}{' '}
-                  {profile.public_streak === 1 ? 'day' : 'days'}
+          </section>
+          <div className="profile-writing-layout">
+            <div>
+              <div className="story-grid">
+                {stories.map((s) => (
+                  <StoryCard key={s.id} story={s} />
+                ))}
+              </div>
+              {!stories.length && (
+                <p className="panel">
+                  A quiet beginning. No attributed stories here yet.
                 </p>
               )}
-            <p className="muted">
-              {count} published {count === 1 ? 'story' : 'stories'}
-              {profile.joined_month
-                ? ` · Joined ${new Date(profile.joined_month + 'T12:00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}`
-                : ''}
-            </p>
-          </section>
-          <div className="story-grid">
-            {stories.map((s) => (
-              <StoryCard key={s.id} story={s} />
-            ))}
-          </div>
-          {!stories.length && (
-            <p className="panel">
-              A quiet beginning. No attributed stories here yet.
-            </p>
-          )}
-          <div className="row">
-            <button
-              className="button secondary"
-              disabled={!page}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Previous
-            </button>
-            <span>Page {page + 1}</span>
-            <button
-              className="button secondary"
-              disabled={!more}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </button>
+              <div className="row">
+                <button
+                  className="button secondary"
+                  disabled={!page}
+                  onClick={() => setPage((p) => p - 1)}
+                >
+                  Previous
+                </button>
+                <span>Page {page + 1}</span>
+                <button
+                  className="button secondary"
+                  disabled={!more}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+            <ProfileDetails profile={profile} count={count} />
           </div>
         </>
       ) : (
         <h1>This public profile is not available.</h1>
       )}
     </div>
+  )
+}
+
+function ProfileDetails({
+  profile,
+  count,
+}: {
+  profile: Profile
+  count: number
+}) {
+  let panel
+  try {
+    panel = studioPolishEnabled
+      ? validateProfilePanel(profile.public_panel ?? {})
+      : null
+  } catch {
+    panel = null
+  }
+  const streak =
+    publicStreaksEnabled && typeof profile.public_streak === 'number'
+      ? profile.public_streak
+      : null
+  const showCount = panel ? panel.show_count : true
+  if (
+    !showCount &&
+    !profile.joined_month &&
+    streak === null &&
+    !panel?.interests.length &&
+    !panel?.link
+  )
+    return null
+  return (
+    <aside className="profile-details" aria-label="Shared profile details">
+      <dl>
+        {showCount && (
+          <>
+            <dt>Published stories</dt>
+            <dd>{count}</dd>
+          </>
+        )}
+        {streak !== null && (
+          <>
+            <dt>Shared writing streak</dt>
+            <dd>
+              {streak} {streak === 1 ? 'day' : 'days'}
+            </dd>
+          </>
+        )}
+        {profile.joined_month && (
+          <>
+            <dt>Public identity since</dt>
+            <dd>
+              {new Date(profile.joined_month + 'T12:00:00').toLocaleDateString(
+                undefined,
+                { month: 'long', year: 'numeric' },
+              )}
+            </dd>
+          </>
+        )}
+      </dl>
+      {!!panel?.interests.length && (
+        <div className="profile-interests">
+          {panel.interests.filter(Boolean).map((interest, i) => (
+            <span className="tag" key={i}>
+              {interest}
+            </span>
+          ))}
+        </div>
+      )}
+      {panel?.link && (
+        <a href={panel.link} target="_blank" rel="noopener noreferrer">
+          Personal website ↗
+        </a>
+      )}
+    </aside>
   )
 }

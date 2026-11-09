@@ -30,6 +30,7 @@ it('searches and applies a new emoji in structured content without changing lega
   await userEvent.click(
     screen.getByRole('button', { name: /Cover & page icon/ }),
   )
+  await userEvent.click(screen.getByRole('button', { name: /^Page icon$/ }))
   await userEvent.type(
     screen.getByRole('searchbox', { name: 'Search page icons' }),
     'kitten',

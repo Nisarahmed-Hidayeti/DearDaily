@@ -1,11 +1,12 @@
+import { allJournalCategories } from './entryMetadata'
+import { studioPolishEnabled } from '../rich-editor/studioPolish'
 /** Private editor preferences, never part of a public document snapshot. */
-export const publicCategories = [
+export const publicCategories: readonly string[] = [
   'Uncategorized',
-  'Personal',
-  'Gratitude',
-  'Growth',
-  'Travel',
-] as const
+  ...(studioPolishEnabled
+    ? allJournalCategories
+    : allJournalCategories.slice(0, 4)),
+]
 export interface PublicationPlan {
   category: string
   tags: string
@@ -22,7 +23,7 @@ export function validatePublicationPlan(input: unknown): PublicationPlan {
   const p = input as PublicationPlan
   if (
     Object.keys(p).some((k) => !['category', 'tags', 'byline'].includes(k)) ||
-    !publicCategories.some((c) => c === p.category) ||
+    !['Uncategorized', ...allJournalCategories].some((c) => c === p.category) ||
     typeof p.tags !== 'string' ||
     p.tags.length > 154 ||
     typeof p.byline !== 'boolean'

@@ -325,22 +325,6 @@ function ValidatedRichWriter({
         if ((event.target as Element).closest('button')) event.preventDefault()
       }}
     >
-      <button
-        type="button"
-        className="inline-photo-upload quiet"
-        disabled={disabled || uploading || !onUpload}
-        title={
-          onUpload
-            ? 'JPEG, PNG or WebP · up to 5 MiB'
-            : 'Private photo setup is not available in this preview.'
-        }
-        onClick={() => {
-          pendingPhoto.current = null
-          fileInput.current?.click()
-        }}
-      >
-        ＋ Add photo from computer
-      </button>
       <BubbleMenu editor={editor}>
         <div
           className="writer-toolbar writer-bubble"

@@ -1,5 +1,5 @@
 import { useState, type KeyboardEvent } from 'react'
-import { emojiCatalog, emojiCategories } from './emojis'
+import { emojiCatalog } from './emojis'
 export function EmojiPicker({
   value,
   onChange,
@@ -8,17 +8,14 @@ export function EmojiPicker({
   onChange: (value: string) => void
 }) {
   const [query, setQuery] = useState(''),
-    [category, setCategory] = useState(''),
     [focused, setFocused] = useState(value)
   const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean)
-  const choices = emojiCatalog.filter(
-    (item) =>
-      (!category || category === item.category) &&
-      words.every((word) =>
-        `${item.emoji} ${item.keywords} ${item.category}`
-          .toLowerCase()
-          .includes(word),
-      ),
+  const choices = emojiCatalog.filter((item) =>
+    words.every((word) =>
+      `${item.emoji} ${item.keywords} ${item.category}`
+        .toLowerCase()
+        .includes(word),
+    ),
   )
   const active = choices.some((v) => v.emoji === focused)
     ? focused
@@ -74,15 +71,6 @@ export function EmojiPicker({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      <label>
-        Emoji category
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">All categories</option>
-          {emojiCategories.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </select>
-      </label>
       <div
         className="emoji-grid"
         role="group"
@@ -104,7 +92,7 @@ export function EmojiPicker({
           </button>
         ))}
       </div>
-      {!choices.length && <p>No icons found. Try another word or category.</p>}
+      {!choices.length && <p>No icons found. Try another word.</p>}
       <button type="button" className="text-link" onClick={() => onChange('')}>
         Remove icon
       </button>

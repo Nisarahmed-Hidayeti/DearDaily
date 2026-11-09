@@ -23,11 +23,12 @@ function PhotoBlock({
         publicId={node.attrs.publicId ?? undefined}
         alt={node.attrs.alt}
       />
+      {node.attrs.alt && <figcaption>{node.attrs.alt}</figcaption>}
       {editor.isEditable && (
         <details className="image-block-controls">
           <summary>Photo options</summary>
           <label>
-            Alt text
+            Caption & alt text
             <input
               maxLength={300}
               value={node.attrs.alt}

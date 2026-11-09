@@ -1,3 +1,4 @@
+import { studioPolishEnabled, writingFonts } from '../rich-editor/studioPolish'
 import { VoiceNotes } from '../audio/VoiceNotes'
 import { voiceNotesEnabled } from '../audio/audio'
 import { uploadVoice, approvedVoice } from '../audio/audioApi'
@@ -247,7 +248,7 @@ function EntryForm({
             aria-expanded={detailsOpen}
             onClick={toggleDetails}
           >
-            The little details{' '}
+            Details{' '}
             <span>
               {draft.mood} · {draft.category}
             </span>
@@ -279,8 +280,14 @@ function EntryForm({
             <label>
               Writing font
               <select value={font} onChange={(e) => setFont(e.target.value)}>
-                <option value="serif">Serif</option>
-                <option value="sans">Sans serif</option>
+                {(studioPolishEnabled
+                  ? writingFonts
+                  : writingFonts.slice(0, 2)
+                ).map(([id, label]) => (
+                  <option key={id} value={id}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </label>
             <label>
@@ -518,7 +525,7 @@ function EntryForm({
             </>
           )}
           <section className="panel">
-            <h2>The little details</h2>
+            <h2>Page details</h2>
             <p>
               {busy || !ready ? (
                 <span className="loading-orbit" aria-hidden="true" />

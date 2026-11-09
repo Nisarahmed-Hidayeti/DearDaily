@@ -49,7 +49,7 @@ export function EntryDetails({
   if (mobile)
     return open ? (
       <Modal
-        title="The little details"
+        title="Page details"
         className="editor-details-sheet"
         style={{ '--available-height': `${height}px` } as CSSProperties}
         onClose={onClose}

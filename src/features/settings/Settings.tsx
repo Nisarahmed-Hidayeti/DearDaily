@@ -133,6 +133,11 @@ export default function Settings() {
         )}
       </section>
       <AdvancedAppearance />
+      <p className="tiny muted">
+        <a href="/covers/LICENSES.md" target="_blank" rel="noopener noreferrer">
+          Cover credits & licenses ↗
+        </a>
+      </p>
       <MediaMaintenance />
       <section className="panel settings-privacy">
         <LockKeyhole size={23} />

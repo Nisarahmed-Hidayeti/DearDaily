@@ -82,9 +82,7 @@ it('saves public choices once, preserves private metadata and confirms a read-on
     { name: 'Journal body' },
     { timeout: 4000 },
   )
-  await userEvent.click(
-    screen.getByRole('button', { name: /The little details/ }),
-  )
+  await userEvent.click(screen.getByRole('button', { name: /^Details / }))
   await userEvent.selectOptions(
     screen.getByLabelText('Public category'),
     'Gratitude',
@@ -153,10 +151,8 @@ it('opens a compact mobile sheet, respects available keyboard space and returns 
       { name: 'Journal body' },
       { timeout: 4000 },
     )
-    await userEvent.click(
-      screen.getByRole('button', { name: /The little details/ }),
-    )
-    const dialog = screen.getByRole('dialog', { name: 'The little details' })
+    await userEvent.click(screen.getByRole('button', { name: /^Details / }))
+    const dialog = screen.getByRole('dialog', { name: 'Page details' })
     expect(dialog).toHaveClass('editor-details-sheet')
     expect(dialog.style.getPropertyValue('--available-height')).toBe('420px')
     fireEvent(dialog, new Event('cancel', { cancelable: true }))
@@ -185,9 +181,7 @@ it('retains legacy explicit public choices privately without copying private tag
   vi.mocked(readStories).mockResolvedValue([snapshot])
   show()
   await screen.findByText('Saved to your private account')
-  await userEvent.click(
-    screen.getByRole('button', { name: /The little details/ }),
-  )
+  await userEvent.click(screen.getByRole('button', { name: /^Details / }))
   expect(screen.getByLabelText('Public category')).toHaveValue('Travel')
   expect(
     screen.getByLabelText('Public tags (up to 5, comma separated)'),
@@ -228,6 +222,7 @@ it('preserves legacy plaintext when adding and removing a page icon', async () =
   await userEvent.click(
     screen.getByRole('button', { name: /Cover & page icon/ }),
   )
+  await userEvent.click(screen.getByRole('button', { name: /^Page icon$/ }))
   await userEvent.type(
     screen.getByRole('searchbox', { name: 'Search page icons' }),
     'kitten',

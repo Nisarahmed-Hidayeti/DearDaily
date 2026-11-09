@@ -1,3 +1,4 @@
+import { NodeSelection } from '@tiptap/pm/state'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Editor } from '@tiptap/core'
@@ -66,6 +67,18 @@ export function BlockControls({
       <div className="block-gutter" style={{ top }}>
         <button
           className="block-handle"
+          draggable
+          title="Drag to move · click for block actions"
+          onDragStart={(event) => {
+            beginBlockDrag(editor)
+            event.dataTransfer.effectAllowed = 'move'
+            // Non-sensitive marker: the actual slice stays inside this editor.
+            event.dataTransfer.setData('text/plain', 'DearDaily block')
+            setOpen(false)
+          }}
+          onDragEnd={() => {
+            endBlockDrag(editor)
+          }}
           aria-label="Block actions"
           aria-expanded={open}
           onMouseDown={(e) => e.preventDefault()}
@@ -148,4 +161,15 @@ export function BlockControls({
         )}
     </>
   )
+}
+
+/** ProseMirror owns this imperative drag state, outside React render state. */
+function beginBlockDrag(editor: Editor) {
+  const current = currentBlock(editor)
+  const selection = NodeSelection.create(editor.state.doc, current.from)
+  editor.view.dispatch(editor.state.tr.setSelection(selection))
+  editor.view.dragging = { slice: selection.content(), move: true }
+}
+function endBlockDrag(editor: Editor) {
+  editor.view.dragging = null
 }
