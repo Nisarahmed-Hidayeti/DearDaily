@@ -3,7 +3,6 @@ import { compatibleLegacyIcon, entryIcon } from './emojis'
 import { useState } from 'react'
 import { Modal } from '../../components/Shared'
 import {
-  coverPresets,
   documentFromText,
   validateDocument,
   type WritingDocument,
@@ -40,7 +39,8 @@ export function PageAppearance({
     [emoji, setEmoji] = useState(entryIcon(document, icon) ?? ''),
     [collection, setCollection] = useState('The Met · Hudson River School'),
     [uploading, setUploading] = useState(false),
-    [error, setError] = useState('')
+    [error, setError] = useState(''),
+    [section, setSection] = useState<'cover' | 'icon'>('cover')
   let unsupported = false
   try {
     if (document) validateDocument(document)
@@ -62,7 +62,8 @@ export function PageAppearance({
     setDraft(next)
     setCover(id)
   }
-  const openAppearance = () => {
+  const openAppearance = (part: 'cover' | 'icon' = 'cover') => {
+    setSection(part)
     setDraft(document ?? documentFromText(''))
     setCover(preset ?? null)
     setEmoji(entryIcon(document, icon) ?? '')
@@ -77,7 +78,7 @@ export function PageAppearance({
           aria-label="Change or remove cover"
           title="Change, remove or reposition cover"
           disabled={disabled || unsupported}
-          onClick={openAppearance}
+          onClick={() => openAppearance('cover')}
         >
           <PageCover privateMedia document={document} preset={preset} />
         </button>
@@ -89,7 +90,9 @@ export function PageAppearance({
           title="Cover & page icon"
           aria-label={`${entryIcon(document, icon) || '＋'} Cover & page icon`}
           disabled={disabled || unsupported}
-          onClick={openAppearance}
+          onClick={() =>
+            openAppearance(entryIcon(document, icon) ? 'icon' : 'cover')
+          }
         >
           <span>
             {entryIcon(document, icon) || (hasAppearance ? '✧' : '＋')}
@@ -100,178 +103,157 @@ export function PageAppearance({
           </span>
         </button>
         {open && (
-          <Modal title="Make this page yours" onClose={() => setOpen(false)}>
-            <div className="appearance-cover-preview">
-              <PageCover privateMedia document={draft} preset={cover} />
+          <Modal
+            title="Make this page yours"
+            className="page-style-dialog"
+            onClose={() => setOpen(false)}
+          >
+            <div
+              className="page-style-tabs"
+              role="group"
+              aria-label="Page appearance section"
+            >
+              <button
+                type="button"
+                aria-pressed={section === 'cover'}
+                onClick={() => setSection('cover')}
+              >
+                Cover
+              </button>
+              <button
+                type="button"
+                aria-pressed={section === 'icon'}
+                onClick={() => setSection('icon')}
+              >
+                Page icon
+              </button>
             </div>
-            <label className="cover-upload">
-              Upload cover from computer
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                disabled={!onUpload || uploading}
-                onChange={async (e) => {
-                  const f = e.target.files?.[0]
-                  e.currentTarget.value = ''
-                  if (!f || !onUpload) return
-                  setUploading(true)
-                  setError('')
-                  try {
-                    const id = await onUpload(f)
-                    setDraft((current) => ({
-                      ...current,
-                      page: { cover: 'upload', assetId: id, position: 50 },
-                    }))
-                    setCover(null)
-                  } catch (failure) {
-                    setError(
-                      (failure instanceof Error
-                        ? failure.message
-                        : 'Cover upload failed.') +
-                        ' Your previous cover is unchanged.',
-                    )
-                  } finally {
-                    setUploading(false)
-                  }
-                }}
-              />
-            </label>
-            {uploading && <p role="status">Preparing private cover…</p>}
-            {error && <p role="alert">{error}</p>}
-            {!onUpload && (
-              <p className="tiny muted">
-                Upload your own photos in the signed-in cloud editor. This
-                preview does not upload personal files.
-              </p>
-            )}
-            <fieldset>
-              <legend>Curated photographs</legend>
-              <label>
-                Cover collection
-                <select
-                  value={collection}
-                  onChange={(e) => setCollection(e.target.value)}
-                >
-                  <option value="">All collections</option>
-                  {[
-                    ...new Set(photographicCovers.map((c) => c.collection)),
-                  ].map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </select>
-              </label>
-              {[...new Set(photographicCovers.map((c) => c.collection))]
-                .filter((group) => !collection || group === collection)
-                .map((group) => (
-                  <section
-                    className="cover-collection"
-                    key={group}
-                    aria-label={group}
-                  >
-                    <h4>{group}</h4>
-                    <div className="cover-gallery">
-                      {photographicCovers
-                        .filter((c) => c.collection === group)
-                        .map((c) => (
-                          <button
-                            type="button"
-                            key={c.id}
-                            disabled={uploading}
-                            title={`${c.name} · ${c.credit}`}
-                            aria-label={c.name}
-                            aria-pressed={draft.page?.cover === c.id}
-                            onClick={() => choosePhoto(c.id)}
-                          >
-                            <img
-                              src={coverThumbnail(c)}
-                              alt=""
-                              loading="lazy"
-                            />
-                            <span className="sr-only">{c.name}</span>
-                          </button>
-                        ))}
-                    </div>
-                  </section>
-                ))}
-              <details className="photo-credit">
-                <summary>Artwork &amp; photograph credits</summary>
-                <p>
-                  Images by{' '}
-                  {photographicCovers.map((c, i) => (
-                    <span key={c.id}>
-                      {i ? ', ' : ''}
-                      <a
-                        href={c.source}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {c.credit}
-                      </a>
-                    </span>
-                  ))}{' '}
-                  ·{' '}
-                  <a
-                    href="https://www.pexels.com/license/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Pexels License
-                  </a>
-                  {' · '}
-                  <a
-                    href="https://www.metmuseum.org/hubs/open-access"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    The Met · Public domain / CC0
-                  </a>
-                </p>
-              </details>
-            </fieldset>
-            <fieldset>
-              <legend>Color studies</legend>
-              <div className="cover-colors">
-                {coverPresets.map((c) => (
-                  <button
-                    type="button"
-                    key={c}
-                    disabled={uploading}
-                    aria-pressed={!draft.page && cover === c}
-                    onClick={() => chooseColor(c)}
-                  >
-                    {c === 'none' ? 'No cover' : c}
-                  </button>
-                ))}
+            <div hidden={section !== 'cover'}>
+              <div className="appearance-cover-preview">
+                <PageCover privateMedia document={draft} preset={cover} />
               </div>
-            </fieldset>
-            {draft.page && (
-              <label className="cover-position">
-                Reposition cover
+              <label className="cover-upload">
+                Upload cover from computer
                 <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={draft.page.position}
-                  onChange={(e) =>
-                    setDraft({
-                      ...draft,
-                      page: {
-                        ...draft.page!,
-                        position: Number(e.target.value),
-                      },
-                    })
-                  }
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  disabled={!onUpload || uploading}
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0]
+                    e.currentTarget.value = ''
+                    if (!f || !onUpload) return
+                    setUploading(true)
+                    setError('')
+                    try {
+                      const id = await onUpload(f)
+                      setDraft((current) => ({
+                        ...current,
+                        page: { cover: 'upload', assetId: id, position: 50 },
+                      }))
+                      setCover(null)
+                    } catch (failure) {
+                      setError(
+                        (failure instanceof Error
+                          ? failure.message
+                          : 'Cover upload failed.') +
+                          ' Your previous cover is unchanged.',
+                      )
+                    } finally {
+                      setUploading(false)
+                    }
+                  }}
                 />
-                <span>
-                  Focal position {draft.page.position}% · wide and mobile crops
-                  use this point.
-                </span>
-                <div className="cover-mobile-crop">
-                  <PageCover privateMedia document={draft} />
-                </div>
               </label>
-            )}
-            <EmojiPicker value={emoji} onChange={setEmoji} />
+              {uploading && <p role="status">Preparing private cover…</p>}
+              {error && <p role="alert">{error}</p>}
+              <fieldset>
+                <legend className="sr-only">Cover gallery</legend>
+                <label>
+                  <span className="sr-only">Cover collection</span>
+                  <select
+                    value={collection}
+                    onChange={(e) => setCollection(e.target.value)}
+                  >
+                    <option value="">All collections</option>
+                    {[
+                      ...new Set(photographicCovers.map((c) => c.collection)),
+                    ].map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </select>
+                </label>
+                {[...new Set(photographicCovers.map((c) => c.collection))]
+                  .filter((group) => !collection || group === collection)
+                  .map((group) => (
+                    <section
+                      className="cover-collection"
+                      key={group}
+                      aria-label={group}
+                    >
+                      <h4>{group}</h4>
+                      <div className="cover-gallery">
+                        {photographicCovers
+                          .filter((c) => c.collection === group)
+                          .map((c) => (
+                            <button
+                              type="button"
+                              key={c.id}
+                              disabled={uploading}
+                              title={`${c.name} · ${c.credit}`}
+                              aria-label={c.name}
+                              aria-pressed={draft.page?.cover === c.id}
+                              onClick={() => choosePhoto(c.id)}
+                            >
+                              <img
+                                src={coverThumbnail(c)}
+                                alt=""
+                                loading="lazy"
+                              />
+                              <span className="sr-only">{c.name}</span>
+                            </button>
+                          ))}
+                      </div>
+                    </section>
+                  ))}
+              </fieldset>
+              <button
+                type="button"
+                className="text-button"
+                disabled={uploading}
+                onClick={() => chooseColor('none')}
+              >
+                Remove cover
+              </button>
+              {draft.page && (
+                <label className="cover-position">
+                  Reposition cover
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={draft.page.position}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        page: {
+                          ...draft.page!,
+                          position: Number(e.target.value),
+                        },
+                      })
+                    }
+                  />
+                  <details>
+                    <summary>Mobile crop</summary>
+                    <div className="cover-mobile-crop">
+                      <PageCover privateMedia document={draft} />
+                    </div>
+                  </details>
+                </label>
+              )}
+            </div>
+            <div hidden={section !== 'icon'}>
+              <EmojiPicker value={emoji} onChange={setEmoji} />
+            </div>
             <div className="appearance-actions">
               <button
                 className="button"

@@ -1,3 +1,4 @@
+import { studioPolishEnabled, writingFonts } from './studioPolish'
 import { type PrivateMusic } from '../music/music'
 import { VoiceNotes } from '../audio/VoiceNotes'
 import { type VoiceNote } from '../audio/audio'
@@ -86,8 +87,14 @@ export default function EditorPreview() {
           <label>
             Writing font
             <select value={font} onChange={(e) => setFont(e.target.value)}>
-              <option value="serif">Serif</option>
-              <option value="sans">Sans serif</option>
+              {(studioPolishEnabled
+                ? writingFonts
+                : writingFonts.slice(0, 2)
+              ).map(([id, label]) => (
+                <option key={id} value={id}>
+                  {label}
+                </option>
+              ))}
             </select>
           </label>
           <label>

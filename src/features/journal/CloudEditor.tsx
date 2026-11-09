@@ -1,3 +1,5 @@
+import type { Appearance } from '../appearance/appearance'
+import { studioPolishEnabled, writingFonts } from '../rich-editor/studioPolish'
 import { VoiceNotes } from '../audio/VoiceNotes'
 import { voiceNotesEnabled } from '../audio/audio'
 import { uploadVoice, approvedVoice } from '../audio/audioApi'
@@ -80,7 +82,19 @@ function EntryForm({
   }, [state, ready, busy, dirty])
   const [preview, setPreview] = useState(false)
   const { focus, setFocus } = useWritingFocus()
-  const { appearance } = useAppearance()
+  const {
+    appearance,
+    save: saveAppearance,
+    status: appearanceStatus,
+  } = useAppearance()
+  const [appearanceError, setAppearanceError] = useState('')
+  const savePagePreference = async (next: Partial<Appearance>) => {
+    setAppearanceError('')
+    if (!(await saveAppearance({ ...appearance, ...next }, appearance)))
+      setAppearanceError(
+        'Writing preference not synced. Your words are unchanged. Retry in Appearance settings.',
+      )
+  }
   const [fontChoice, setFont] = useState<string | null>(null)
   const font = fontChoice ?? appearance.font
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -147,7 +161,6 @@ function EntryForm({
       state.publicMetadata
     )
       patchPlan({})
-    setFocus(false)
     setDetailsOpen(next)
   }
   let invalidPublicTags = false
@@ -176,6 +189,15 @@ function EntryForm({
             Journal <span>/</span> <span>Private page</span>
           </Link>
           <div className="row">
+            {focus && (
+              <button
+                className="quiet"
+                disabled={!ready || busy}
+                onClick={() => void state.save(true)}
+              >
+                {busy ? 'Saving…' : 'Save now'}
+              </button>
+            )}
             <button
               className="quiet"
               aria-pressed={focus}
@@ -240,14 +262,14 @@ function EntryForm({
                     ? 'Saved to your private account'
                     : 'A new private page · start writing'}
       </p>
-      {richEditorEnabled && (
+      {richEditorEnabled && !focus && (
         <div className="details-summary" aria-label="Entry details summary">
           <button
             className="quiet"
             aria-expanded={detailsOpen}
             onClick={toggleDetails}
           >
-            The little details{' '}
+            Details{' '}
             <span>
               {draft.mood} · {draft.category}
             </span>
@@ -278,14 +300,36 @@ function EntryForm({
           <div className="writer-preferences">
             <label>
               Writing font
-              <select value={font} onChange={(e) => setFont(e.target.value)}>
-                <option value="serif">Serif</option>
-                <option value="sans">Sans serif</option>
+              <select
+                value={font}
+                disabled={appearanceStatus === 'saving'}
+                onChange={(e) => {
+                  const font = e.target.value as Appearance['font']
+                  setFont(font)
+                  void savePagePreference({ font })
+                }}
+              >
+                {(studioPolishEnabled
+                  ? writingFonts
+                  : writingFonts.slice(0, 2)
+                ).map(([id, label]) => (
+                  <option key={id} value={id}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </label>
             <label>
               Page width
-              <select value={width} onChange={(e) => setWidth(e.target.value)}>
+              <select
+                value={width}
+                disabled={appearanceStatus === 'saving'}
+                onChange={(e) => {
+                  const width = e.target.value as Appearance['width']
+                  setWidth(width)
+                  void savePagePreference({ width })
+                }}
+              >
                 <option value="narrow">Narrow</option>
                 <option value="standard">Standard</option>
                 <option value="wide">Wide</option>
@@ -294,6 +338,7 @@ function EntryForm({
           </div>
         </details>
       )}
+      {appearanceError && <p role="alert">{appearanceError}</p>}
       {error && (
         <div role="alert" className="auth-notice">
           <p>{error}</p>
@@ -518,15 +563,6 @@ function EntryForm({
             </>
           )}
           <section className="panel">
-            <h2>The little details</h2>
-            <p>
-              {busy || !ready ? (
-                <span className="loading-orbit" aria-hidden="true" />
-              ) : (
-                <LockKeyhole size={14} />
-              )}{' '}
-              Private source entry
-            </p>
             <MoodPicker
               value={draft.mood}
               onChange={(mood) => patch({ mood })}
@@ -779,6 +815,13 @@ function EntryForm({
                         </a>
                       ) : (
                         'None — your music stays private'
+                      )}
+                      {publicMusic(row?.music)?.excerpt && (
+                        <small className="music-moment">
+                          {row!.music!.excerpt!.start}–
+                          {row!.music!.excerpt!.end}s · intended moment,
+                          reference only
+                        </small>
                       )}
                     </dd>
                   </>

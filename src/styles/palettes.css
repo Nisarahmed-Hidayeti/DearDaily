@@ -132,3 +132,65 @@
   --shadow: color-mix(in srgb, var(--text) 7%, transparent);
   --backdrop: #000b;
 }
+
+[data-theme='warm-sepia'] {
+  color-scheme: light;
+  --bg: #f5eddd;
+  --elevated: #fffefb;
+  --surface: #e9dfcb;
+  --sidebar: #eee3d0;
+  --accent: #805331;
+  --emphasis: #694b27;
+  --text: #29261f;
+  --muted: #686155;
+  --border: #d8d0c2;
+  --border-strong: #938674;
+  --button-start: #715536;
+  --button-end: #604529;
+  --button-hover: #51391f;
+  --on-accent: #fffdf7;
+  --focus: #785022;
+  --heat-0: #e5dfd2;
+  --heat-1: #c8b89b;
+  --heat-2: #a58c65;
+  --heat-3: #83643f;
+  --heat-4: #5d4225;
+  --sky-top: #e6e2d6;
+  --sky-middle: #d3cab5;
+  --sky-horizon: #bba98a;
+  --ridge-back: #c3b79d;
+  --ridge-front: #a69c86;
+  --moon: #fffef8;
+  --scene-opacity: 0.48;
+}
+
+[data-theme='deep-ocean'] {
+  color-scheme: dark;
+  --bg: #081820;
+  --elevated: #10232d;
+  --surface: #172f3a;
+  --sidebar: #0c1c25;
+  --accent: #80c9dd;
+  --emphasis: #acddeb;
+  --text: #eaf4f7;
+  --muted: #a0b6c2;
+  --border: #2a4351;
+  --border-strong: #607f91;
+  --button-start: #9dd8e6;
+  --button-end: #71b6d0;
+  --button-hover: #b5e4ed;
+  --on-accent: #081b25;
+  --focus: #b0e4f2;
+  --heat-0: #272335;
+  --heat-1: #503b69;
+  --heat-2: #79559e;
+  --heat-3: #a675d2;
+  --heat-4: #d4acff;
+  --sky-top: #10152c;
+  --sky-middle: #3c3055;
+  --sky-horizon: #ae7996;
+  --ridge-back: #342d4d;
+  --ridge-front: #101524;
+  --moon: #e0c9f5;
+  --scene-opacity: 1;
+}

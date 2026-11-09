@@ -1,3 +1,4 @@
+import { studioPolishEnabled, writingFonts } from '../rich-editor/studioPolish'
 import { useTheme } from '../theme/ThemeProvider'
 import { useState } from 'react'
 import { useAppearance } from './AppearanceProvider'
@@ -85,8 +86,14 @@ export function AdvancedAppearance() {
                 change({ font: e.target.value as Appearance['font'] })
               }
             >
-              <option value="sans">Sans serif</option>
-              <option value="serif">Editorial serif</option>
+              {(studioPolishEnabled
+                ? writingFonts
+                : writingFonts.slice(0, 2)
+              ).map(([id, label]) => (
+                <option key={id} value={id}>
+                  {label}
+                </option>
+              ))}
             </select>
           </label>
           <label>
@@ -192,8 +199,13 @@ export function AdvancedAppearance() {
           style={
             {
               ...appearanceTokens(draft, themeBackgrounds[theme]),
-              fontFamily:
-                draft.font === 'serif' ? 'var(--serif)' : 'Inter,sans-serif',
+              fontFamily: {
+                serif: 'var(--serif)',
+                sans: 'Inter,sans-serif',
+                literary: 'Palatino, Georgia, serif',
+                humanist: 'Optima, Candara, Cantarell, sans-serif',
+                mono: 'ui-monospace, monospace',
+              }[draft.font],
             } as CSSProperties
           }
         >

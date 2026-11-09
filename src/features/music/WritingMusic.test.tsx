@@ -103,7 +103,7 @@ it('keeps the player compact and has no custom Space or playback controls', asyn
   expect(document.querySelector('script[src*="spotify"]')).toBeNull()
 })
 
-it('gives playlists enough space without adding provider scripts to the journal', async () => {
+it('keeps playlists compact without adding provider scripts to the journal', async () => {
   render(
     <WritingMusic
       value={{
@@ -122,8 +122,35 @@ it('gives playlists enough space without adding provider scripts to the journal'
   )
   expect(screen.getByTitle('Spotify music player')).toHaveAttribute(
     'height',
-    '352',
+    '152',
   )
   expect(document.querySelector('script[src*="spotify"]')).toBeNull()
   expect(screen.getByText(/Spotify controls preview length/)).toBeVisible()
+})
+
+it('retains the loaded iframe through unrelated edits and sharing changes', async () => {
+  const selected = {
+    provider: 'spotify',
+    kind: 'track',
+    id: '4uLU6hMCjMI75M1A2tKUQC',
+    share: false,
+  } as const
+  const { rerender } = render(
+    <WritingMusic value={selected} onChange={() => {}} />,
+  )
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Open Spotify player' }),
+  )
+  const player = screen.getByTitle('Spotify music player')
+  rerender(
+    <WritingMusic value={{ ...selected, share: true }} onChange={() => {}} />,
+  )
+  expect(screen.getByTitle('Spotify music player')).toBe(player)
+  rerender(
+    <WritingMusic
+      value={{ ...selected, id: '4uLU6hMCjMI75M1A2tKUQD' }}
+      onChange={() => {}}
+    />,
+  )
+  expect(screen.queryByTitle('Spotify music player')).toBeNull()
 })

@@ -19,7 +19,8 @@ const auth = vi.hoisted(() => ({
   session: null as unknown,
 }))
 vi.mock('../auth/AuthProvider', () => ({ useAuth: () => auth }))
-// Preserve coverage of the deployed, streak-disabled client contract.
+// Preserve coverage of the legacy client contract independently of rollout flags.
+vi.mock('../rich-editor/studioPolish', () => ({ studioPolishEnabled: false }))
 vi.mock('./publicStreakConfig', () => ({ publicStreaksEnabled: false }))
 const story = {
   id: 'synthetic',

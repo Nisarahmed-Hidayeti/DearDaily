@@ -1,3 +1,5 @@
+import { studioPolishEnabled } from '../rich-editor/studioPolish'
+import { emptyProfilePanel } from './profilePanel'
 import PublicStreakControl from './PublicStreakControl'
 import { appearanceEnabled } from '../appearance/appearance'
 import { profileCovers } from '../rich-editor/covers'
@@ -171,6 +173,61 @@ export default function ProfileSettings() {
               Banner synchronization awaits the reviewed settings migration.
               Your existing profile controls remain available.
             </p>
+          )}
+          {studioPolishEnabled && (
+            <fieldset className="public-panel-options">
+              <legend>Optional public details</legend>
+              <label className="row">
+                <input
+                  type="checkbox"
+                  checked={form.public_panel?.show_count ?? false}
+                  onChange={(e) =>
+                    patch({
+                      public_panel: {
+                        ...emptyProfilePanel,
+                        ...form.public_panel,
+                        show_count: e.target.checked,
+                      },
+                    })
+                  }
+                />
+                Show public story count
+              </label>
+              <label>
+                Interests · comma separated
+                <input
+                  maxLength={245}
+                  value={form.public_panel?.interests.join(',') ?? ''}
+                  onChange={(e) =>
+                    patch({
+                      public_panel: {
+                        ...emptyProfilePanel,
+                        ...form.public_panel,
+                        interests: e.target.value.split(',').slice(0, 6),
+                      },
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Personal link · optional
+                <input
+                  type="url"
+                  placeholder="https://"
+                  maxLength={300}
+                  value={form.public_panel?.link ?? ''}
+                  onChange={(e) =>
+                    patch({
+                      public_panel: {
+                        ...emptyProfilePanel,
+                        ...form.public_panel,
+                        link: e.target.value || null,
+                      },
+                    })
+                  }
+                />
+              </label>
+            </fieldset>
           )}
           <label className="row">
             <input

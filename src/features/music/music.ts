@@ -5,6 +5,7 @@ export interface StoryMusic {
   provider: 'spotify'
   kind: 'track' | 'album' | 'playlist'
   id: string
+  excerpt?: { start: number; end: number }
 }
 export interface PrivateMusic extends StoryMusic {
   share: boolean
@@ -21,8 +22,8 @@ export function validateMusic(
       (key) =>
         !(
           privateCopy
-            ? ['provider', 'kind', 'id', 'share']
-            : ['provider', 'kind', 'id']
+            ? ['provider', 'kind', 'id', 'share', 'excerpt']
+            : ['provider', 'kind', 'id', 'excerpt']
         ).includes(key),
     ) ||
     m.provider !== 'spotify' ||
@@ -32,15 +33,38 @@ export function validateMusic(
     (privateCopy && typeof m.share !== 'boolean')
   )
     throw Error('Invalid music selection')
-  return privateCopy
-    ? { provider: 'spotify', kind: m.kind, id: m.id, share: m.share }
-    : { provider: 'spotify', kind: m.kind, id: m.id }
+  const excerpt = m.excerpt
+  if (
+    excerpt !== undefined &&
+    (!excerpt ||
+      typeof excerpt !== 'object' ||
+      Array.isArray(excerpt) ||
+      Object.keys(excerpt).some((k) => !['start', 'end'].includes(k)) ||
+      !Number.isInteger(excerpt.start) ||
+      !Number.isInteger(excerpt.end) ||
+      excerpt.start < 0 ||
+      excerpt.end <= excerpt.start ||
+      excerpt.end > 86400)
+  )
+    throw Error('Invalid intended music excerpt')
+  const selection: StoryMusic = {
+    provider: 'spotify',
+    kind: m.kind,
+    id: m.id,
+    ...(excerpt ? { excerpt: { start: excerpt.start, end: excerpt.end } } : {}),
+  }
+  return privateCopy ? { ...selection, share: m.share } : selection
 }
 export function publicMusic(value?: PrivateMusic | null): StoryMusic | null {
   if (!value) return null
   const selected = validateMusic(value, true) as PrivateMusic
   return selected.share
-    ? { provider: selected.provider, kind: selected.kind, id: selected.id }
+    ? {
+        provider: selected.provider,
+        kind: selected.kind,
+        id: selected.id,
+        ...(selected.excerpt ? { excerpt: selected.excerpt } : {}),
+      }
     : null
 }
 export function musicUrl(value: StoryMusic) {

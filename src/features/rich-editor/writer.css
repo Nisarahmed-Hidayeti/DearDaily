@@ -1356,3 +1356,244 @@
     gap: 10px;
   }
 }
+
+/* Focus is document-first, while save, publication and accessible block actions remain available. */
+.writer-focus > .writer-topbar {
+  display: flex;
+  padding-right: 150px;
+}
+.writer-focus .writer-breadcrumb,
+.writer-focus .writer-topbar [aria-pressed='true'] {
+  display: none;
+}
+.writer-focus .details-summary {
+  display: flex;
+}
+.writer-focus .details-summary .tag,
+.writer-focus .details-summary .visibility {
+  display: none;
+}
+.writer-focus .block-gutter,
+.writer-focus .image-block-controls {
+  display: flex;
+}
+.writer-focus .block-gutter {
+  opacity: 0;
+}
+.writer-focus .rich-writer:focus-within .block-gutter,
+.writer-focus .block-gutter:hover {
+  opacity: 1;
+}
+.emoji-grid button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  line-height: 1;
+  aspect-ratio: 1;
+}
+.appearance-cover-preview {
+  height: 120px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.appearance-cover-preview .writer-cover {
+  height: 120px;
+  margin: 0;
+}
+.cover-collection {
+  min-height: 160px;
+}
+.cover-collection .cover-gallery {
+  max-height: 210px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.studio-shell .notion-editor .writing-paper > .writing-music {
+  width: min(100%, var(--writing-width));
+  margin-inline: auto;
+}
+.writing-music {
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .writer-focus > .writer-topbar {
+    padding-right: 0;
+    padding-top: 10px;
+  }
+  .writer-focus .writer-topbar .row {
+    flex-wrap: wrap;
+  }
+  .writer-focus .block-gutter {
+    opacity: 1;
+  }
+}
+
+.editor-lab[data-font='literary'] .tiptap,
+[data-writing-font='literary'] .rich-read .tiptap {
+  font-family: Palatino, 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+}
+.editor-lab[data-font='humanist'] .tiptap,
+[data-writing-font='humanist'] .rich-read .tiptap {
+  font-family: Optima, Candara, 'Trebuchet MS', Cantarell, sans-serif;
+}
+.editor-lab[data-font='mono'] .tiptap,
+[data-writing-font='mono'] .rich-read .tiptap {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.93em;
+}
+.writer-focus > .auth-notice {
+  display: block;
+}
+.music-excerpt {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.music-excerpt > p {
+  grid-column: 1/-1;
+  margin: 0;
+}
+.music-moment {
+  display: block;
+  padding-block: 6px;
+  color: var(--muted);
+}
+.writer-focus .page-appearance-controls {
+  display: flex;
+}
+.writer-focus .writer-customize {
+  display: flex;
+}
+.ProseMirror-dropcursor {
+  border-color: var(--accent) !important;
+}
+
+.writer-focus .entry-settings:not([hidden]) {
+  display: block;
+  position: fixed;
+  right: 20px;
+  top: 74px;
+  z-index: 45;
+  width: min(340px, calc(100vw - 32px));
+  max-height: calc(100dvh - 96px);
+  overflow: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 16px 48px #0003;
+}
+
+.page-style-dialog {
+  width: min(480px, calc(100vw - 24px));
+}
+.page-style-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0;
+}
+.page-style-tabs button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+}
+.page-style-tabs button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--text);
+}
+.page-style-dialog .appearance-cover-preview,
+.page-style-dialog .appearance-cover-preview .writer-cover {
+  height: 90px;
+}
+.page-style-dialog .cover-upload {
+  margin-block: 12px;
+}
+.page-style-dialog fieldset {
+  margin: 12px 0;
+}
+.page-style-dialog .cover-collection {
+  min-height: 145px;
+}
+.page-style-dialog .cover-collection h4 {
+  display: none;
+}
+.page-style-dialog .appearance-actions {
+  position: sticky;
+  bottom: -1px;
+  background: var(--bg);
+  padding-block: 12px 4px;
+  margin-top: 14px;
+}
+.page-style-dialog .emoji-grid {
+  max-height: 280px;
+  grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+}
+.page-style-dialog .cover-position {
+  gap: 8px;
+}
+
+.writer-focus .details-summary,
+.writer-focus .paper-meta {
+  display: none;
+}
+
+.mobile-photo-insert {
+  display: none;
+}
+@media (max-width: 600px) {
+  .mobile-photo-insert {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+  }
+  .block-gutter button {
+    width: 26px;
+    min-height: 30px;
+  }
+  .block-gutter {
+    left: -24px;
+  }
+}
+
+.block-handle {
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.block-handle:active {
+  cursor: grabbing;
+}
+.block-drop-indicator {
+  position: fixed;
+  height: 3px;
+  background: var(--accent);
+  z-index: 90;
+  pointer-events: none;
+  border-radius: 2px;
+}
+
+.writer-focus .block-gutter {
+  display: grid;
+}
+@media (max-width: 600px) {
+  .block-gutter {
+    left: -14px;
+  }
+  .rich-writer .tiptap {
+    padding-left: 14px;
+  }
+}
+@media (max-width: 600px) {
+  .studio-shell .notion-editor .rich-writer .tiptap {
+    padding-left: 18px;
+  }
+  .studio-shell .notion-editor .title-input,
+  .studio-shell .notion-editor .writing-music {
+    padding-left: 18px;
+  }
+}

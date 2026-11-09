@@ -597,3 +597,149 @@
   border: 0;
   border-radius: 12px;
 }
+
+/* A quiet account center: coherent sections rather than a wall of dashboard cards. */
+.account-center {
+  max-width: 1040px;
+}
+.account-center .account-overview-grid {
+  gap: 32px;
+  margin-top: 30px;
+}
+.account-center .panel {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  padding: 22px 0;
+}
+.account-center .panel h2 {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 400;
+  margin: 8px 0 20px;
+}
+.account-center .account-identity dl {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 16px;
+}
+.account-center .account-identity dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+.account-center .account-identity dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.account-center .account-form {
+  border-block: 1px solid var(--border);
+  max-width: none;
+  display: flex;
+  gap: 18px;
+  align-items: end;
+}
+.account-center .account-form label {
+  flex: 1;
+}
+.account-center .account-actions {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .account-center .account-form {
+    display: grid;
+  }
+  .account-center .account-overview-grid {
+    gap: 8px;
+  }
+  .account-center .account-identity dl {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .account-center .account-identity dd {
+    margin-bottom: 12px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .page {
+    animation: studio-arrive 180ms ease-out backwards;
+  }
+  .cover-gallery img {
+    transition:
+      transform 180ms ease-out,
+      opacity 180ms ease-out;
+  }
+  .cover-gallery button:hover img {
+    transform: scale(1.035);
+  }
+  .emoji-grid button {
+    transition:
+      background-color 140ms ease-out,
+      transform 140ms ease-out;
+  }
+  .emoji-grid button[aria-pressed='true'] {
+    transform: scale(1.08);
+  }
+  @keyframes studio-arrive {
+    from {
+      opacity: 0.6;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+.profile-writing-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 36px;
+  align-items: start;
+}
+.profile-details {
+  padding-block: 10px;
+  font-size: 13px;
+}
+.profile-details dl {
+  display: grid;
+  gap: 8px;
+}
+.profile-details dt {
+  color: var(--muted);
+}
+.profile-details dd {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+.profile-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 16px;
+}
+@media (max-width: 767px) {
+  .profile-writing-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .profile-details {
+    order: -1;
+    width: 100%;
+  }
+  .profile-details dl {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .profile-details dt {
+    margin: 0;
+  }
+}
+.detail > .writing-music,
+.detail > .voice-notes {
+  max-width: var(--reading-width, 760px);
+  margin-inline: auto;
+}

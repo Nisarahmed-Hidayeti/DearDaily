@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { startBlockDrag, type DropIndicator } from './blockDrag'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Editor } from '@tiptap/core'
 import { GripVertical, Plus } from 'lucide-react'
@@ -13,11 +14,18 @@ import {
 export function BlockControls({
   editor,
   disabled,
+  onPhoto,
 }: {
   editor: Editor
   disabled: boolean
+  onPhoto?: () => void
 }) {
   const [open, setOpen] = useState(false)
+  const [indicator, setIndicator] = useState<DropIndicator | null>(null)
+  const [announcement, setAnnouncement] = useState('')
+  const dragCleanup = useRef<(() => void) | null>(null)
+  const suppressClick = useRef(false)
+  useEffect(() => () => dragCleanup.current?.(), [])
   const [top, setTop] = useState(0)
   const [position, setPosition] = useState({ left: 12, top: 12, width: 280 })
   useEffect(() => {
@@ -63,13 +71,54 @@ export function BlockControls({
   const block = currentBlock(editor)
   return (
     <>
+      <span className="sr-only" role="status">
+        {announcement}
+      </span>
+      {indicator &&
+        createPortal(
+          <div
+            className="block-drop-indicator"
+            style={indicator}
+            aria-hidden="true"
+          />,
+          document.body,
+        )}
       <div className="block-gutter" style={{ top }}>
         <button
           className="block-handle"
+          title="Drag to move · click for block actions"
+          onPointerDown={(event) => {
+            if (event.button !== 0) return
+            event.preventDefault()
+            dragCleanup.current?.()
+            dragCleanup.current = startBlockDrag(
+              editor,
+              event.currentTarget,
+              {
+                x: event.clientX,
+                y: event.clientY,
+                pointerId: event.pointerId,
+              },
+              currentBlock(editor).index,
+              setIndicator,
+              (moved, attempted) => {
+                suppressClick.current = attempted
+                if (attempted)
+                  setAnnouncement(
+                    moved
+                      ? 'Block moved.'
+                      : 'Block unchanged. Use Move up or Move down in Block actions.',
+                  )
+              },
+            )
+          }}
           aria-label="Block actions"
           aria-expanded={open}
-          onMouseDown={(e) => e.preventDefault()}
           onClick={(e) => {
+            if (suppressClick.current) {
+              suppressClick.current = false
+              return
+            }
             setPosition(menuPosition(e.currentTarget.getBoundingClientRect()))
             setOpen(!open)
           }}
@@ -77,9 +126,16 @@ export function BlockControls({
           <GripVertical size={17} />
         </button>
         <button
-          aria-label="Add a paragraph after this block"
+          aria-label="Add a block"
+          aria-expanded={open}
           onMouseDown={(e) => e.preventDefault()}
-          onClick={() => editBlock(editor, 'add')}
+          onClick={(event) => {
+            editBlock(editor, 'add')
+            setPosition(
+              menuPosition(event.currentTarget.getBoundingClientRect()),
+            )
+            setOpen(true)
+          }}
         >
           <Plus size={15} />
         </button>
@@ -93,13 +149,25 @@ export function BlockControls({
             style={position}
           >
             <p className="eyebrow">This block</p>
+            {onPhoto && (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false)
+                  onPhoto()
+                }}
+              >
+                Insert photo…
+              </button>
+            )}
             <label>
               Convert to
               <select
                 aria-label="Convert this block"
                 defaultValue=""
                 onChange={(e) => {
-                  applyBlock(editor, e.target.value as BlockCommand)
+                  if (e.target.value === 'image') onPhoto?.()
+                  else applyBlock(editor, e.target.value as BlockCommand)
                   setOpen(false)
                 }}
               >

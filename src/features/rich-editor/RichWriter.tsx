@@ -1,3 +1,4 @@
+import { ImagePlus } from 'lucide-react'
 import { BlockControls } from './BlockControls'
 import { SlashMenu, type SlashState } from './SlashMenu'
 import {
@@ -112,6 +113,11 @@ function ValidatedRichWriter({
         if (!photo) return false
         if (onUpload) {
           event.preventDefault()
+          const point = _view.posAtCoords({
+            left: event.clientX,
+            top: event.clientY,
+          })
+          if (point) pendingPhoto.current = { from: point.pos, to: point.pos }
           void addPhoto(photo)
           return true
         }
@@ -188,7 +194,7 @@ function ValidatedRichWriter({
     if (
       editor &&
       !editor.isDestroyed &&
-      JSON.stringify(editor.getJSON()) !== JSON.stringify(value.content)
+      !editor.state.doc.eq(editor.schema.nodeFromJSON(value.content))
     )
       editor.commands.setContent(value.content, { emitUpdate: false })
   }, [editor, value])
@@ -322,25 +328,13 @@ function ValidatedRichWriter({
     <div
       className="rich-writer"
       onMouseDown={(event) => {
-        if ((event.target as Element).closest('button')) event.preventDefault()
+        if (
+          (event.target as Element).closest('button') &&
+          !(event.target as Element).closest('[draggable="true"]')
+        )
+          event.preventDefault()
       }}
     >
-      <button
-        type="button"
-        className="inline-photo-upload quiet"
-        disabled={disabled || uploading || !onUpload}
-        title={
-          onUpload
-            ? 'JPEG, PNG or WebP · up to 5 MiB'
-            : 'Private photo setup is not available in this preview.'
-        }
-        onClick={() => {
-          pendingPhoto.current = null
-          fileInput.current?.click()
-        }}
-      >
-        ＋ Add photo from computer
-      </button>
       <BubbleMenu editor={editor}>
         <div
           className="writer-toolbar writer-bubble"
@@ -365,7 +359,11 @@ function ValidatedRichWriter({
       {uploading && (
         <LoadingState>Preparing and uploading your private photo…</LoadingState>
       )}
-      <BlockControls editor={editor} disabled={disabled} />
+      <BlockControls
+        editor={editor}
+        disabled={disabled}
+        onPhoto={onUpload ? () => choose(editor, 'image') : undefined}
+      />
       {slash && (
         <SlashMenu
           state={slash}
@@ -441,6 +439,21 @@ function ValidatedRichWriter({
         </form>
       )}
       <EditorContent editor={editor} />
+      {onUpload && (
+        <button
+          type="button"
+          className="mobile-photo-insert quiet"
+          aria-label="Insert photo"
+          title="Insert photo"
+          disabled={disabled || uploading}
+          onClick={() => {
+            pendingPhoto.current = null
+            fileInput.current?.click()
+          }}
+        >
+          <ImagePlus size={20} />
+        </button>
+      )}
       {error && (
         <p role="alert">
           {error} The last valid document is retained. Undo or remove the

@@ -22,7 +22,16 @@ export default function CloudDashboard({
   const [search, setSearch] = useState('')
   const [mood, setMood] = useState('All moods')
   const [date, setDate] = useState('')
-  const [view, setView] = useState<'list' | 'gallery'>('list')
+  const [order, setOrder] = useState('newest')
+  const [view, setView] = useState<'list' | 'gallery'>(() => {
+    try {
+      return localStorage.getItem('deardaily.library-view') === 'list'
+        ? 'list'
+        : 'gallery'
+    } catch {
+      return 'gallery'
+    }
+  })
   useEffect(() => {
     if (!client || !session) return
     let active = true
@@ -47,16 +56,23 @@ export default function CloudDashboard({
     }
   }, [client, session, refresh])
   const stats = journalStats(rows)
-  const filtered = rows.filter(
-    (r) =>
-      (!search ||
-        [r.title, r.body, ...r.tags]
-          .join(' ')
-          .toLowerCase()
-          .includes(search.toLowerCase())) &&
-      (mood === 'All moods' || r.mood === mood) &&
-      (!date || r.entry_date === date),
-  )
+  const filtered = rows
+    .filter(
+      (r) =>
+        (!search ||
+          [r.title, r.body, ...r.tags]
+            .join(' ')
+            .toLowerCase()
+            .includes(search.toLowerCase())) &&
+        (mood === 'All moods' || r.mood === mood) &&
+        (!date || r.entry_date === date),
+    )
+    .sort((a, b) =>
+      order === 'title'
+        ? a.title.localeCompare(b.title)
+        : (order === 'oldest' ? 1 : -1) *
+          a.entry_date.localeCompare(b.entry_date),
+    )
   return (
     <div className={`page dashboard ${library ? 'journal-library' : ''}`}>
       <PageHeading
@@ -131,19 +147,44 @@ export default function CloudDashboard({
               >
                 <button
                   aria-pressed={view === 'list'}
-                  onClick={() => setView('list')}
+                  onClick={() => {
+                    setView('list')
+                    try {
+                      localStorage.setItem('deardaily.library-view', 'list')
+                    } catch {
+                      /* Storage unavailable. */
+                    }
+                  }}
                 >
                   List
                 </button>
                 <button
                   aria-pressed={view === 'gallery'}
-                  onClick={() => setView('gallery')}
+                  onClick={() => {
+                    setView('gallery')
+                    try {
+                      localStorage.setItem('deardaily.library-view', 'gallery')
+                    } catch {
+                      /* Storage unavailable. */
+                    }
+                  }}
                 >
                   Gallery
                 </button>
               </div>
             </div>
             <div className="filters">
+              <label>
+                Sort
+                <select
+                  value={order}
+                  onChange={(e) => setOrder(e.target.value)}
+                >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="title">Title</option>
+                </select>
+              </label>
               <label>
                 Search
                 <input
@@ -197,6 +238,7 @@ export default function CloudDashboard({
                       {r.writing_document?.page ||
                       (r.cover_preset && r.cover_preset !== 'none') ? (
                         <PageCover
+                          privateMedia
                           document={r.writing_document}
                           preset={r.cover_preset}
                         />

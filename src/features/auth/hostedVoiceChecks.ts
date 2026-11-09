@@ -1,3 +1,4 @@
+import { hostedStudioChecks } from './hostedStudioChecks'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { authConfig } from '../../lib/supabase/client'
 import { encodeWav, voiceNotesEnabled, type VoiceNote } from '../audio/audio'
@@ -53,6 +54,9 @@ export async function hostedVoiceChecks(
     )
     const ownerAccess = await a.rpc('my_owner_access')
     check(!ownerAccess.error && ownerAccess.data?.owner === true)
+    stage = 'studio metadata and profile isolation'
+    const studio = await hostedStudioChecks(a, b, aId, bId)
+    checks += studio.checks
     stage = 'private audio save and isolation'
     let row = await saveEntry(
       a,

@@ -1,3 +1,4 @@
+import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { useEffect, useId, useState } from 'react'
 import {
   musicUrl,
@@ -50,6 +51,13 @@ export function WritingMusic({
   const [loaded, setLoaded] = useState(false)
   const [playerVisible, setPlayerVisible] = useState(true)
   const playerId = useId()
+  // A different entry must never inherit another entry's loaded soundtrack.
+  const selectedEntity = value ? `spotify:${value.kind}:${value.id}` : null
+  const activeEntity =
+    entity &&
+    ((!onChange && !publicCopy && !rawValue) || entity === selectedEntity)
+      ? entity
+      : null
   useEffect(() => {
     if (!entity || loaded) return
     const timer = window.setTimeout(
@@ -69,6 +77,20 @@ export function WritingMusic({
         >
           ♫ Music
         </button>
+        {value && !activeEntity && !open && (
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              setError('')
+              setLoaded(false)
+              setEntity(selectedEntity)
+              setPlayerVisible(true)
+            }}
+          >
+            Open Spotify player
+          </button>
+        )}
         {entity && (
           <button
             type="button"
@@ -143,6 +165,73 @@ export function WritingMusic({
           )}
           {value && (
             <>
+              {studioPolishEnabled && onChange && 'share' in value && (
+                <fieldset className="music-excerpt">
+                  <legend>Intended moment</legend>
+                  <p className="tiny muted">
+                    Reference only. Spotify controls playback; this does not
+                    trim the song.
+                  </p>
+                  <label>
+                    Start (seconds)
+                    <input
+                      type="number"
+                      min="0"
+                      max="86399"
+                      step="1"
+                      value={value.excerpt?.start ?? 0}
+                      disabled={disabled}
+                      onChange={(e) => {
+                        const start = Number(e.target.value)
+                        const end = Math.max(
+                          start + 1,
+                          value.excerpt?.end ?? start + 10,
+                        )
+                        if (
+                          Number.isInteger(start) &&
+                          start >= 0 &&
+                          end <= 86400
+                        )
+                          onChange({ ...value, excerpt: { start, end } })
+                      }}
+                    />
+                  </label>
+                  <label>
+                    End (seconds)
+                    <input
+                      type="number"
+                      min={(value.excerpt?.start ?? 0) + 1}
+                      max="86400"
+                      step="1"
+                      value={value.excerpt?.end ?? 10}
+                      disabled={disabled}
+                      onChange={(e) => {
+                        const end = Number(e.target.value),
+                          start = value.excerpt?.start ?? 0
+                        if (
+                          Number.isInteger(end) &&
+                          end > start &&
+                          end <= 86400
+                        )
+                          onChange({ ...value, excerpt: { start, end } })
+                      }}
+                    />
+                  </label>
+                  {value.excerpt && (
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() => {
+                        const next = { ...value }
+                        delete next.excerpt
+                        onChange(next)
+                      }}
+                    >
+                      Remove moment
+                    </button>
+                  )}
+                </fieldset>
+              )}
               <a
                 href={musicUrl(value)}
                 target="_blank"
@@ -197,24 +286,30 @@ export function WritingMusic({
           )}
         </div>
       )}
-      {entity && (
+      {activeEntity && (
         <small className="music-playback-note">
           Spotify controls preview length. Open Spotify for full playback.
         </small>
       )}
+      {value?.excerpt && (
+        <small className="music-moment">
+          {formatMoment(value.excerpt.start)}–{formatMoment(value.excerpt.end)}{' '}
+          · intended moment, not a playback clip
+        </small>
+      )}
       {error && <p role="alert">{error}</p>}
-      {entity && !loaded && !error && (
+      {activeEntity && !loaded && !error && (
         <small role="status">Loading music…</small>
       )}
-      {entity && (
+      {activeEntity && (
         <iframe
           id={playerId}
           hidden={!playerVisible}
-          key={entity}
+          key={activeEntity}
           title="Spotify music player"
-          src={`https://open.spotify.com/embed/${entity.split(':')[1]}/${entity.split(':')[2]}`}
+          src={`https://open.spotify.com/embed/${activeEntity.split(':')[1]}/${activeEntity.split(':')[2]}`}
           width="100%"
-          height={!entity.startsWith('spotify:track:') ? 352 : 152}
+          height={152}
           referrerPolicy="no-referrer"
           sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
           allow="encrypted-media"
@@ -229,4 +324,10 @@ export function WritingMusic({
       )}
     </section>
   )
+}
+
+function formatMoment(seconds: number) {
+  return `${Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`
 }

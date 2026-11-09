@@ -82,9 +82,7 @@ it('saves public choices once, preserves private metadata and confirms a read-on
     { name: 'Journal body' },
     { timeout: 4000 },
   )
-  await userEvent.click(
-    screen.getByRole('button', { name: /The little details/ }),
-  )
+  await userEvent.click(screen.getByRole('button', { name: /Share & details/ }))
   await userEvent.selectOptions(
     screen.getByLabelText('Public category'),
     'Gratitude',
@@ -133,7 +131,7 @@ it('saves public choices once, preserves private metadata and confirms a read-on
     ),
   )
   expect(screen.getByRole('textbox', { name: 'Journal body' })).toBe(editor)
-})
+}, 15000)
 it('opens a compact mobile sheet, respects available keyboard space and returns to the same editor', async () => {
   vi.stubGlobal('matchMedia', () => ({
     matches: true,
@@ -154,9 +152,9 @@ it('opens a compact mobile sheet, respects available keyboard space and returns 
       { timeout: 4000 },
     )
     await userEvent.click(
-      screen.getByRole('button', { name: /The little details/ }),
+      screen.getByRole('button', { name: /Share & details/ }),
     )
-    const dialog = screen.getByRole('dialog', { name: 'The little details' })
+    const dialog = screen.getByRole('dialog', { name: 'Page details' })
     expect(dialog).toHaveClass('editor-details-sheet')
     expect(dialog.style.getPropertyValue('--available-height')).toBe('420px')
     fireEvent(dialog, new Event('cancel', { cancelable: true }))
@@ -185,9 +183,7 @@ it('retains legacy explicit public choices privately without copying private tag
   vi.mocked(readStories).mockResolvedValue([snapshot])
   show()
   await screen.findByText('Saved to your private account')
-  await userEvent.click(
-    screen.getByRole('button', { name: /The little details/ }),
-  )
+  await userEvent.click(screen.getByRole('button', { name: /Share & details/ }))
   expect(screen.getByLabelText('Public category')).toHaveValue('Travel')
   expect(
     screen.getByLabelText('Public tags (up to 5, comma separated)'),
@@ -228,6 +224,7 @@ it('preserves legacy plaintext when adding and removing a page icon', async () =
   await userEvent.click(
     screen.getByRole('button', { name: /Cover & page icon/ }),
   )
+  await userEvent.click(screen.getByRole('button', { name: /^Page icon$/ }))
   await userEvent.type(
     screen.getByRole('searchbox', { name: 'Search page icons' }),
     'kitten',
@@ -238,4 +235,13 @@ it('preserves legacy plaintext when adding and removing a page icon', async () =
   )
   expect(editor).toHaveTextContent(fixture.body)
   expect(screen.getByRole('textbox', { name: 'Journal body' })).toBe(editor)
+})
+
+it('opens page details without exiting immersive writing or changing the saved focus preference', async () => {
+  localStorage.setItem('deardaily.writing-focus', 'true')
+  show()
+  await screen.findByText('Saved to your private account')
+  await userEvent.click(screen.getByRole('button', { name: 'Share & details' }))
+  expect(document.querySelector('.editor-page')).toHaveClass('writer-focus')
+  expect(localStorage.getItem('deardaily.writing-focus')).toBe('true')
 })

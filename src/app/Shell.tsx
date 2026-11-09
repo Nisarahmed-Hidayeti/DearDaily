@@ -238,11 +238,7 @@ export default function Shell() {
         </header>
         {!writing &&
           !pathname.startsWith('/dev/') &&
-          (publicPage ? (
-            <div className="demo-notice">
-              Public stories · Shared explicitly by their writers
-            </div>
-          ) : session ? (
+          (publicPage ? null : session ? (
             <div className="demo-notice">
               Your private journal · Share only what you choose
             </div>
