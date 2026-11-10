@@ -27,3 +27,13 @@ Focused/full frontend checks, TypeScript, lint, build; database YouTube acceptan
 ## Browser evidence
 
 Actual YouTube oEmbed returned the official demonstration video's title/channel. Its official iframe played after its own Play control was clicked and continued through an unrelated title edit. No player existed before interaction. 360/768/1440px checks found no horizontal overflow; player stayed at least 200px high. Profile rhythm is alongside identity at desktop/tablet widths and below it on mobile. Only synthetic in-memory preview entries were used; no hosted mutation has been performed for this rollout.
+
+## Approved hosted rollout — 2026-11-10
+
+User explicitly approved the YouTube update and tests. CI for 578132a passed 296 frontend tests, 481 pgTAP checks and 43 real local profile-image checks. Local frontend suite passed 298 tests (two additional local theme cases), TypeScript, lint and production build.
+
+Preflight confirmed deardaily-dev, both existing constraints exactly matched the prior Spotify-only format, source-consent trigger intact and no unexpected providers. Hosted migration history table remains absent, a previously known operational gap; no history repair was attempted. Actual definitions prove this extension had not already been applied. Applied only the reviewed transactional migration, SHA256 `4526b42e55c5f1e4e8d2986d522902b2a0598fb822a9918a41b94a2dd7d93219`. No rows, grants, triggers, Auth or Storage settings changed.
+
+Sixteen genuine hosted checks passed using two different verified authenticated IDs plus an anonymous client: private save/reload, bidirectional isolation, anonymous private denial, unapproved music rejection, explicit sharing, exact public projection, hidden owner ID, draft denial, unauthorized writes, snapshot independence, removal and unpublication. Exact two-entry cleanup passed.
+
+Actual cloud editor additionally passed URL attach → share preference → save → reload → publication confirmation → anonymous-identity public attachment → unpublish → exact synthetic deletion. Fixture `5d05126d-74b8-4c02-bc59-cd215eae82ad` confirmed absent from private and public tables. Postflight confirmed both widened checks and forced RLS. No real writing modified. Production selection flag may now be enabled after final revision CI.
