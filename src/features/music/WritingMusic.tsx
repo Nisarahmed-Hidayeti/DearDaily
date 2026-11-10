@@ -1,3 +1,7 @@
+import { spotifyEntity } from './spotify'
+export { spotifyEntity } from './spotify'
+import { YouTubeMusic } from './YouTubeMusic'
+import { youtubeVideoId, youtubeMusicEnabled } from './youtube'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { useEffect, useId, useState } from 'react'
 import {
@@ -6,26 +10,6 @@ import {
   type PrivateMusic,
   type StoryMusic,
 } from './music'
-
-export function spotifyEntity(value: string): string | null {
-  try {
-    const url = new URL(value.trim())
-    if (
-      url.protocol !== 'https:' ||
-      url.hostname !== 'open.spotify.com' ||
-      url.username ||
-      url.password ||
-      url.port
-    )
-      return null
-    const match = /^\/(track|album|playlist)\/([A-Za-z0-9]{22})\/?$/.exec(
-      url.pathname,
-    )
-    return match ? `spotify:${match[1]}:${match[2]}` : null
-  } catch {
-    return null
-  }
-}
 
 export function WritingMusic({
   value: rawValue,
@@ -66,6 +50,10 @@ export function WritingMusic({
     )
     return () => window.clearTimeout(timer)
   }, [entity, loaded])
+  if (value?.provider === 'youtube')
+    return (
+      <YouTubeMusic value={value} onChange={onChange} disabled={disabled} />
+    )
   return (
     <section className="writing-music" aria-label="Writing music">
       <div className="row spread">
@@ -117,9 +105,27 @@ export function WritingMusic({
               <form
                 onSubmit={(event) => {
                   event.preventDefault()
+                  const videoId = youtubeMusicEnabled
+                    ? youtubeVideoId(url)
+                    : null
+                  if (videoId && onChange) {
+                    onChange({
+                      provider: 'youtube',
+                      kind: 'video',
+                      id: videoId,
+                      share: false,
+                    })
+                    setOpen(false)
+                    setEntity(null)
+                    return
+                  }
                   const next = spotifyEntity(url)
                   if (!next) {
-                    setError('Paste a Spotify track, album or playlist link.')
+                    setError(
+                      youtubeMusicEnabled
+                        ? 'Paste a YouTube video or Spotify track, album or playlist link.'
+                        : 'Paste a Spotify track, album or playlist link.',
+                    )
                     return
                   }
                   setError('')
@@ -137,7 +143,9 @@ export function WritingMusic({
                 }}
               >
                 <label>
-                  Spotify link
+                  {youtubeMusicEnabled
+                    ? 'YouTube or Spotify link'
+                    : 'Spotify link'}
                   <input
                     type="url"
                     value={url}
@@ -152,7 +160,7 @@ export function WritingMusic({
                   className="button secondary"
                   disabled={disabled}
                 >
-                  Load Spotify player
+                  {youtubeMusicEnabled ? 'Attach music' : 'Load Spotify player'}
                 </button>
               </form>
               {value && value.kind !== 'track' && (
@@ -269,7 +277,11 @@ export function WritingMusic({
               )}
             </>
           )}
-          <small>Loads Spotify. Your writing stays private.</small>
+          <small>
+            {youtubeMusicEnabled
+              ? 'Loads music from its provider.'
+              : 'Loads Spotify. Your writing stays private.'}
+          </small>
           {!publicCopy && (entity || (value && onChange)) && (
             <button
               type="button"

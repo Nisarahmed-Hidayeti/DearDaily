@@ -104,18 +104,21 @@ export default function PublicProfile() {
             )
           )}
           <section className="profile-masthead panel">
-            <span className="profile-avatar" aria-hidden="true">
-              <ProfileImage
-                publicId={photos?.avatar}
-                fallback={avatars[profile.avatar]}
-                alt=""
+            <div className="profile-identity">
+              <span className="profile-avatar" aria-hidden="true">
+                <ProfileImage
+                  publicId={photos?.avatar}
+                  fallback={avatars[profile.avatar]}
+                  alt=""
+                />
+              </span>
+              <PageHeading
+                eyebrow={`@${profile.username}`}
+                title={profile.display_name}
               />
-            </span>
-            <PageHeading
-              eyebrow={`@${profile.username}`}
-              title={profile.display_name}
-            />
-            <p className="profile-bio">{profile.bio}</p>
+              <p className="profile-bio">{profile.bio}</p>
+            </div>
+            <PublicRhythm count={profile.public_streak} />
           </section>
           <div className="profile-writing-layout">
             <div>
@@ -172,15 +175,10 @@ function ProfileDetails({
   } catch {
     panel = null
   }
-  const streak =
-    publicStreaksEnabled && typeof profile.public_streak === 'number'
-      ? profile.public_streak
-      : null
   const showCount = panel ? panel.show_count : true
   if (
     !showCount &&
     !profile.joined_month &&
-    streak === null &&
     !panel?.interests.length &&
     !panel?.link
   )
@@ -192,14 +190,6 @@ function ProfileDetails({
           <>
             <dt>Published stories</dt>
             <dd>{count}</dd>
-          </>
-        )}
-        {streak !== null && (
-          <>
-            <dt>Shared writing streak</dt>
-            <dd>
-              {streak} {streak === 1 ? 'day' : 'days'}
-            </dd>
           </>
         )}
         {profile.joined_month && (
@@ -228,6 +218,28 @@ function ProfileDetails({
           Personal website ↗
         </a>
       )}
+    </aside>
+  )
+}
+
+export function PublicRhythm({ count }: { count?: number | null }) {
+  if (
+    !publicStreaksEnabled ||
+    typeof count !== 'number' ||
+    !Number.isInteger(count) ||
+    count < 0
+  )
+    return null
+  // The existing RPC shares a count snapshot only. Never infer calendar dates from it.
+  return (
+    <aside className="profile-rhythm" aria-label="Shared writing rhythm">
+      <span className="eyebrow">Writing rhythm</span>
+      <div className="profile-rhythm-count">
+        <span aria-hidden="true">✓</span>
+        <strong>{count}</strong>
+        <span>{count === 1 ? 'day' : 'days'}</span>
+      </div>
+      <small>Shared streak snapshot</small>
     </aside>
   )
 }

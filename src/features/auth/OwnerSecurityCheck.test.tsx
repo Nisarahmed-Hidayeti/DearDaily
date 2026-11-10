@@ -226,6 +226,7 @@ it('runs music checks with two verified distinct sessions while retaining the se
       state.clients[1],
       'owner-a',
       'writer-b',
+      'spotify',
     ),
   )
   expect(

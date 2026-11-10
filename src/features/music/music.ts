@@ -2,8 +2,8 @@ export const persistentMusicEnabled =
   import.meta.env.VITE_ENABLE_WRITING_MUSIC === 'true'
 export const musicFields = persistentMusicEnabled ? ',music' : ''
 export interface StoryMusic {
-  provider: 'spotify'
-  kind: 'track' | 'album' | 'playlist'
+  provider: 'spotify' | 'youtube'
+  kind: 'track' | 'album' | 'playlist' | 'video'
   id: string
   excerpt?: { start: number; end: number }
 }
@@ -26,10 +26,14 @@ export function validateMusic(
             : ['provider', 'kind', 'id', 'excerpt']
         ).includes(key),
     ) ||
-    m.provider !== 'spotify' ||
-    !['track', 'album', 'playlist'].includes(m.kind) ||
     typeof m.id !== 'string' ||
-    !/^[A-Za-z0-9]{22}$/.test(m.id) ||
+    !(m.provider === 'spotify'
+      ? ['track', 'album', 'playlist'].includes(m.kind) &&
+        /^[A-Za-z0-9]{22}$/.test(m.id)
+      : m.provider === 'youtube' &&
+        m.kind === 'video' &&
+        /^[A-Za-z0-9_-]{11}$/.test(m.id) &&
+        m.excerpt === undefined) ||
     (privateCopy && typeof m.share !== 'boolean')
   )
     throw Error('Invalid music selection')
@@ -48,7 +52,7 @@ export function validateMusic(
   )
     throw Error('Invalid intended music excerpt')
   const selection: StoryMusic = {
-    provider: 'spotify',
+    provider: m.provider,
     kind: m.kind,
     id: m.id,
     ...(excerpt ? { excerpt: { start: excerpt.start, end: excerpt.end } } : {}),
@@ -69,5 +73,7 @@ export function publicMusic(value?: PrivateMusic | null): StoryMusic | null {
 }
 export function musicUrl(value: StoryMusic) {
   const safe = validateMusic(value, 'share' in value)
-  return `https://open.spotify.com/${safe.kind}/${safe.id}`
+  return safe.provider === 'youtube'
+    ? `https://www.youtube.com/watch?v=${safe.id}`
+    : `https://open.spotify.com/${safe.kind}/${safe.id}`
 }

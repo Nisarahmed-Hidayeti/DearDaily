@@ -20,6 +20,9 @@ const labels = {
 }
 export default function OwnerSecurityCheck() {
   const { client } = useAuth()
+  const [musicProvider, setMusicProvider] = useState<'spotify' | 'youtube'>(
+    'spotify',
+  )
   const [message, setMessage] = useState(
     'Capture the owner before MFA, then the same owner after MFA, then an empty approved test writer. Sessions stay only in this tab’s memory.',
   )
@@ -202,6 +205,18 @@ export default function OwnerSecurityCheck() {
           </button>
         </section>
       ))}
+      <label>
+        Music test provider
+        <select
+          value={musicProvider}
+          onChange={(event) =>
+            setMusicProvider(event.target.value as 'spotify' | 'youtube')
+          }
+        >
+          <option value="spotify">Spotify</option>
+          <option value="youtube">YouTube</option>
+        </select>
+      </label>
       <div className="account-actions">
         <button
           className="button secondary"
@@ -224,6 +239,7 @@ export default function OwnerSecurityCheck() {
                 b.client,
                 a.id,
                 b.id,
+                musicProvider,
               )
               setMusicReceipt(result)
               setMessage(
