@@ -89,7 +89,12 @@ export default function ActivityHeatmap({
               )
               const monthLabel =
                 weekIndex === 0
-                  ? monthFormatter.format(start)
+                  ? compact &&
+                    weeks[1]?.some(
+                      (day) => parseLocalDate(day.date).getDate() === 1,
+                    )
+                    ? ''
+                    : monthFormatter.format(start)
                   : monthDay
                     ? monthFormatter.format(parseLocalDate(monthDay.date))
                     : ''

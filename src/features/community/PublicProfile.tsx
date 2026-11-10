@@ -220,7 +220,8 @@ export function PublicRhythm({
   name?: string
   snapshot?: unknown
 }) {
-  const firstName = name.trim().split(/\s+/)[0] || 'Writer'
+  const firstWord = name.trim().split(/\s+/)[0] || 'Writer'
+  const firstName = firstWord.toLowerCase() === 'the' ? name.trim() : firstWord
   const title = `${firstName}’s writing rhythm`
   const activity = publicRhythmEnabled ? rhythmActivity(snapshot) : null
   if (activity)
