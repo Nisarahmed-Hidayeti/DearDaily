@@ -14,6 +14,7 @@ export async function hostedMusicChecks(
   b: SupabaseClient,
   aId: string,
   bId: string,
+  provider: 'spotify' | 'youtube' = 'spotify',
 ) {
   const anonymous = createClient(authConfig!.url, authConfig!.key, {
     auth: {
@@ -34,9 +35,9 @@ export async function hostedMusicChecks(
     checks++
   }
   const selection: PrivateMusic = {
-    provider: 'spotify',
-    kind: 'track',
-    id: '4uLU6hMCjMI75M1A2tKUQC',
+    provider,
+    kind: provider === 'youtube' ? 'video' : 'track',
+    id: provider === 'youtube' ? 'M7lc1UVf-VE' : '4uLU6hMCjMI75M1A2tKUQC',
     share: false,
   }
   try {
@@ -74,7 +75,11 @@ export async function hostedMusicChecks(
         ...newDraft(),
         title: marker,
         body: 'Synthetic B draft',
-        music: { ...selection, kind: 'playlist', share: true },
+        music: {
+          ...selection,
+          kind: provider === 'youtube' ? 'video' : 'playlist',
+          share: true,
+        },
       },
       null,
     )
@@ -117,15 +122,13 @@ export async function hostedMusicChecks(
     check(
       Boolean(
         (
-          await a
-            .from('public_stories')
-            .insert({
-              id: ids[0],
-              user_id: aId,
-              title: marker,
-              body: 'Synthetic public snapshot',
-              music: publicSelection,
-            })
+          await a.from('public_stories').insert({
+            id: ids[0],
+            user_id: aId,
+            title: marker,
+            body: 'Synthetic public snapshot',
+            music: publicSelection,
+          })
         ).error,
       ),
     )

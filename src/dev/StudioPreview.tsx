@@ -82,6 +82,7 @@ const tables: Record<string, Row[]> = {
       visible: true,
       joined_month: null,
       cover_id: 'forest-light',
+      public_streak: 6,
     },
   ],
   profiles: [{ id: uid, display_name: 'Studio writer', created_at: stamp }],

@@ -891,3 +891,130 @@
 .explore-controls label {
   margin: 0;
 }
+
+/* Header-level rhythm uses only the consented count, never inferred private dates. */
+.public-profile .profile-masthead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 32px;
+}
+.profile-identity {
+  min-width: 0;
+}
+.profile-rhythm {
+  min-width: 190px;
+  padding: 12px 0 12px 32px;
+}
+.profile-rhythm .eyebrow {
+  font-size: 10px;
+}
+.profile-rhythm-count {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-block: 12px 6px;
+}
+.profile-rhythm-count > span:first-child {
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  background: var(--surface);
+  border-radius: 5px;
+  color: var(--accent);
+}
+.profile-rhythm-count strong {
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 500;
+}
+.profile-rhythm small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.music-attachment {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 8px;
+}
+.music-attachment > img {
+  flex: 0 0 72px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.music-attachment-label {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 4px;
+}
+.music-attachment-label a {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-attachment-label small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.youtube-player {
+  margin-top: 12px;
+}
+.youtube-player iframe {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  min-height: 200px;
+  border: 0;
+  border-radius: 8px;
+}
+.music-play {
+  min-width: 36px;
+  min-height: 36px;
+}
+@media (max-width: 700px) {
+  .public-profile .profile-masthead {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .profile-rhythm {
+    padding: 0;
+    min-width: 0;
+  }
+  .profile-rhythm-count {
+    margin-block: 8px 4px;
+  }
+  .profile-rhythm-count strong {
+    font-size: 30px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .youtube-player {
+    animation: music-player-reveal 180ms ease-out;
+  }
+  @keyframes music-player-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+.music-artwork-fallback {
+  display: grid;
+  place-items: center;
+  flex: 0 0 72px;
+  height: 56px;
+  background: var(--surface);
+  color: var(--accent);
+  border-radius: 6px;
+  font-size: 24px;
+}

@@ -782,7 +782,10 @@ function EntryForm({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Approved Spotify {row?.music?.kind}
+                          Approved{' '}
+                          {row?.music?.provider === 'youtube'
+                            ? 'YouTube video'
+                            : `Spotify ${row?.music?.kind}`}
                         </a>
                       ) : (
                         'None — your music stays private'
