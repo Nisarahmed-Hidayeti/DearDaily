@@ -83,6 +83,7 @@ const tables: Record<string, Row[]> = {
       joined_month: null,
       cover_id: 'forest-light',
       public_streak: 6,
+      public_activity_live: true,
       public_rhythm: {
         start: '2026-08-24',
         days: [
@@ -216,6 +217,27 @@ const listeners = new Set<(event: string, value: Session | null) => void>()
 const client = {
   from: query,
   rpc: async (name: string) => {
+    if (name === 'my_profile_images')
+      return {
+        data: {
+          avatar_asset: null,
+          banner_asset: null,
+          share_avatar: false,
+          share_banner: false,
+          banner_position: 50,
+          version: 0,
+        },
+        error: null,
+      }
+    if (name === 'get_public_writing_activity') {
+      const p = tables.public_profiles[0]
+      return {
+        data: p
+          ? { public_streak: p.public_streak, public_rhythm: p.public_rhythm }
+          : null,
+        error: null,
+      }
+    }
     if (name === 'my_public_profile') {
       const p = tables.public_profiles[0]
       if (!p) return { data: null, error: null }

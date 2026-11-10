@@ -1155,3 +1155,22 @@
 .story-listen:hover {
   color: var(--accent);
 }
+.profile-photo-consent:empty {
+  display: none;
+}
+.profile-photo-save[hidden] {
+  display: none;
+}
+.profile-settings .account-form {
+  max-width: none;
+  width: 100%;
+}
+.profile-username-field > small {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.profile-settings .profile-banner-editor {
+  height: 160px;
+}

@@ -235,7 +235,12 @@ export function ProfilePhotos({
           </small>
         )}
       </fieldset>
-      <div className="row profile-photo-save">
+      <div
+        className="row profile-photo-save"
+        hidden={
+          ready && !busy && JSON.stringify(draft) === JSON.stringify(saved)
+        }
+      >
         <button
           type="button"
           className="button secondary small"

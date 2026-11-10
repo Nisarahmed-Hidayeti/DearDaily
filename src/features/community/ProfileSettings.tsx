@@ -114,21 +114,20 @@ export default function ProfileSettings() {
         }}
       >
         <fieldset disabled={!ready || busy}>
-          <label>
-            Username
-            <input
-              required
-              minLength={3}
-              maxLength={24}
-              pattern="[a-z][a-z0-9_]{2,23}"
-              value={form.username}
-              onChange={(e) => patch({ username: e.target.value })}
-            />
-          </label>
-          <small>
-            3–24 lowercase letters, numbers or underscores. Start with a letter.
-            Names are unique, not identity verification.
-          </small>
+          <div className="profile-username-field">
+            <label>
+              Username
+              <input
+                required
+                minLength={3}
+                maxLength={24}
+                pattern="[a-z][a-z0-9_]{2,23}"
+                value={form.username}
+                onChange={(e) => patch({ username: e.target.value })}
+              />
+            </label>
+            <small>3–24 lowercase letters, numbers or underscores.</small>
+          </div>
           <label>
             Public display name
             <input
