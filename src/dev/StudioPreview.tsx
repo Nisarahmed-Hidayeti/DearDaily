@@ -83,6 +83,17 @@ const tables: Record<string, Row[]> = {
       joined_month: null,
       cover_id: 'forest-light',
       public_streak: 6,
+      public_rhythm: {
+        start: '2026-08-24',
+        days: [
+          '2026-11-03',
+          '2026-11-04',
+          '2026-11-05',
+          '2026-11-06',
+          '2026-11-07',
+          '2026-11-08',
+        ],
+      },
     },
   ],
   profiles: [{ id: uid, display_name: 'Studio writer', created_at: stamp }],

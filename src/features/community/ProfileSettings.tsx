@@ -1,3 +1,4 @@
+import PublicRhythmControl from './PublicRhythmControl'
 import { OwnProfileAvatar } from '../profile-images/ProfileImage'
 import { ProfilePhotos } from '../profile-images/ProfilePhotos'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
@@ -272,6 +273,11 @@ export default function ProfileSettings() {
         </fieldset>
       </form>
       <p role="status">{message}</p>
+      <PublicRhythmControl
+        key={`${previous}:calendar`}
+        saved={!!previous}
+        initial={savedProfile.public_rhythm}
+      />
       <PublicStreakControl
         key={`${previous ?? 'unsaved'}:${savedProfile.public_streak ?? 'hidden'}`}
         saved={!!previous}

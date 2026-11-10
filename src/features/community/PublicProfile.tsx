@@ -1,3 +1,5 @@
+import ActivityHeatmap from '../dashboard/ActivityHeatmap'
+import { publicRhythmEnabled, rhythmActivity } from './publicRhythm'
 import { ProfileImage, usePublicImages } from '../profile-images/ProfileImage'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { validateProfilePanel } from './profilePanel'
@@ -118,7 +120,11 @@ export default function PublicProfile() {
               />
               <p className="profile-bio">{profile.bio}</p>
             </div>
-            <PublicRhythm count={profile.public_streak} />
+            <PublicRhythm
+              count={profile.public_streak}
+              name={profile.display_name}
+              snapshot={profile.public_rhythm}
+            />
           </section>
           <div className="profile-writing-layout">
             <div>
@@ -176,13 +182,7 @@ function ProfileDetails({
     panel = null
   }
   const showCount = panel ? panel.show_count : true
-  if (
-    !showCount &&
-    !profile.joined_month &&
-    !panel?.interests.length &&
-    !panel?.link
-  )
-    return null
+  if (!showCount && !panel?.interests.length && !panel?.link) return null
   return (
     <aside className="profile-details" aria-label="Shared profile details">
       <dl>
@@ -190,17 +190,6 @@ function ProfileDetails({
           <>
             <dt>Published stories</dt>
             <dd>{count}</dd>
-          </>
-        )}
-        {profile.joined_month && (
-          <>
-            <dt>Public identity since</dt>
-            <dd>
-              {new Date(profile.joined_month + 'T12:00:00').toLocaleDateString(
-                undefined,
-                { month: 'long', year: 'numeric' },
-              )}
-            </dd>
           </>
         )}
       </dl>
@@ -222,7 +211,32 @@ function ProfileDetails({
   )
 }
 
-export function PublicRhythm({ count }: { count?: number | null }) {
+export function PublicRhythm({
+  count,
+  name = 'Writer',
+  snapshot,
+}: {
+  count?: number | null
+  name?: string
+  snapshot?: unknown
+}) {
+  const firstName = name.trim().split(/\s+/)[0] || 'Writer'
+  const title = `${firstName}’s writing rhythm`
+  const activity = publicRhythmEnabled ? rhythmActivity(snapshot) : null
+  if (activity)
+    return (
+      <aside
+        className="profile-rhythm profile-rhythm-calendar"
+        aria-label="Shared writing rhythm"
+      >
+        <ActivityHeatmap compact real title={title} activity={activity} />
+        {publicStreaksEnabled && Number.isInteger(count) && count! >= 0 && (
+          <small>
+            {count} {count === 1 ? 'day' : 'days'} · shared streak
+          </small>
+        )}
+      </aside>
+    )
   if (
     !publicStreaksEnabled ||
     typeof count !== 'number' ||
@@ -233,7 +247,7 @@ export function PublicRhythm({ count }: { count?: number | null }) {
   // The existing RPC shares a count snapshot only. Never infer calendar dates from it.
   return (
     <aside className="profile-rhythm" aria-label="Shared writing rhythm">
-      <span className="eyebrow">Writing rhythm</span>
+      <span className="eyebrow">{title}</span>
       <div className="profile-rhythm-count">
         <span aria-hidden="true">✓</span>
         <strong>{count}</strong>

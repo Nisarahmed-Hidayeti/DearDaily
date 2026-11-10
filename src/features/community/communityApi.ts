@@ -1,3 +1,4 @@
+import { publicRhythmEnabled, type RhythmSnapshot } from './publicRhythm'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { validateProfilePanel, type ProfilePanel } from './profilePanel'
 import { publicCategories } from '../journal/publicationPlan'
@@ -19,6 +20,7 @@ export const avatars: Record<string, string> = {
 export interface PublicProfile {
   public_panel?: ProfilePanel
 
+  public_rhythm?: RhythmSnapshot | null
   public_streak?: number | null
   cover_id?: string | null
   username: string
@@ -38,6 +40,7 @@ export const profileFields =
   'username,display_name,bio,avatar,visible,joined_month' +
   (appearanceEnabled ? ',cover_id' : '') +
   (publicStreaksEnabled ? ',public_streak' : '') +
+  (publicRhythmEnabled ? ',public_rhythm' : '') +
   (studioPolishEnabled ? ',public_panel' : '')
 export const storyFields: string =
   'id,title,body,published_at,public_username,public_category,public_tags' +
@@ -69,18 +72,27 @@ export async function myProfile(
 ): Promise<PublicProfile | null> {
   const { data, error } = await client.rpc('my_public_profile')
   if (error) throw new Error('Profile unavailable')
-  if (!data || (!publicStreaksEnabled && !studioPolishEnabled)) return data
+  if (
+    !data ||
+    (!publicStreaksEnabled && !studioPolishEnabled && !publicRhythmEnabled)
+  )
+    return data
   // Keep the legacy RPC response writable for already-deployed clients.
   const streak = await client
     .from('public_profiles')
     .select(
       [
         ...(publicStreaksEnabled ? ['public_streak'] : []),
+        ...(publicRhythmEnabled ? ['public_rhythm'] : []),
         ...(studioPolishEnabled ? ['public_panel'] : []),
       ].join(','),
     )
     .eq('username', data.username)
-    .single<{ public_streak?: number | null; public_panel?: ProfilePanel }>()
+    .single<{
+      public_streak?: number | null
+      public_panel?: ProfilePanel
+      public_rhythm?: RhythmSnapshot | null
+    }>()
   if (streak.error) throw new Error('Profile unavailable')
   return {
     ...data,
@@ -102,8 +114,13 @@ export async function saveProfile(
   const canonical = profile.public_panel
     ? { ...profile, public_panel: validateProfilePanel(profile.public_panel) }
     : profile
-  const { public_streak: readOnlyStreak, ...writable } = canonical
+  const {
+    public_streak: readOnlyStreak,
+    public_rhythm: readOnlyRhythm,
+    ...writable
+  } = canonical
   void readOnlyStreak
+  void readOnlyRhythm
   const query = previous
     ? client.from('public_profiles').update(writable).eq('username', previous)
     : client.from('public_profiles').insert(writable)
