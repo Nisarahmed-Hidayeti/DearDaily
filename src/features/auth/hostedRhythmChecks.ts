@@ -38,6 +38,8 @@ export async function hostedRhythmChecks(
     )
     const before = await b.rpc('my_public_profile')
     check(!before.error && before.data === null)
+    const source = await b.from('journal_entries').select('id').limit(1)
+    check(!source.error && source.data.length === 0)
     const made = await b
       .from('public_profiles')
       .insert({ username, display_name: marker, visible: true })
@@ -50,15 +52,13 @@ export async function hostedRhythmChecks(
       .single()
     check(!empty.error && empty.data.public_rhythm === null)
     for (const [i, client] of [a, b].entries()) {
-      const saved = await client
-        .from('journal_entries')
-        .insert({
-          id: ids[i],
-          title: marker,
-          body: 'Synthetic private source',
-          entry_date: localDay(new Date()),
-          status: 'saved',
-        })
+      const saved = await client.from('journal_entries').insert({
+        id: ids[i],
+        title: marker,
+        body: 'Synthetic private source',
+        entry_date: localDay(new Date()),
+        status: 'saved',
+      })
       check(!saved.error)
     }
     const shared = await b.rpc('set_public_rhythm', {

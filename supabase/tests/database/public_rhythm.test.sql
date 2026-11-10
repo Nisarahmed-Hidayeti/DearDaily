@@ -6,7 +6,7 @@ set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"84000000-0000-4000-8000-000000000001","role":"authenticated"}',true);
 insert into public.public_profiles(username,display_name,visible) values('rhythm_a','Synthetic A',true);
 select is((select public_rhythm from public.public_profiles where username='rhythm_a'),null::jsonb,'calendar private by default');
-insert into public.journal_entries(title,body,entry_date,status) values('One','PRIVATE',current_date,'saved'),('Duplicate','PRIVATE',current_date,'saved'),('Yesterday','PRIVATE',current_date-1,'saved'),('Draft','PRIVATE',current_date-2,'draft'),('Future','PRIVATE',current_date+1,'saved'),('Old','PRIVATE',current_date-90,'saved');
+insert into public.journal_entries(id,title,body,entry_date,status) values(gen_random_uuid(),'One','PRIVATE',current_date,'saved'),(gen_random_uuid(),'Duplicate','PRIVATE',current_date,'saved'),(gen_random_uuid(),'Yesterday','PRIVATE',current_date-1,'saved'),(gen_random_uuid(),'Draft','PRIVATE',current_date-2,'draft'),(gen_random_uuid(),'Future','PRIVATE',current_date+1,'saved'),(gen_random_uuid(),'Old','PRIVATE',current_date-90,'saved');
 select is(jsonb_array_length(public.set_public_rhythm(true)->'days'),2,'only distinct saved dates within range, excludes drafts and future');
 select is((select array_agg(k order by k) from jsonb_object_keys(public.set_public_rhythm(true)) k),array['days','start'],'only intended date fields');
 select throws_ok($$update public.public_profiles set public_rhythm='{"days":[]}'$$,'42501',null,'cannot forge dates directly');
@@ -24,7 +24,7 @@ select throws_ok($$select public.set_public_rhythm(true)$$,'42501',null,'anonymo
 select throws_ok($$select user_id from public.public_profiles$$,'42501',null,'owner ID hidden');
 set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"84000000-0000-4000-8000-000000000001","role":"authenticated"}',true);
-insert into public.journal_entries(title,body,entry_date,status) values('New private day','PRIVATE',current_date-3,'saved');
+insert into public.journal_entries(id,title,body,entry_date,status) values(gen_random_uuid(),'New private day','PRIVATE',current_date-3,'saved');
 select is((select jsonb_array_length(public_rhythm->'days') from public.public_profiles where username='rhythm_a'),2,'private edits do not refresh public calendar');
 select is(jsonb_array_length(public.set_public_rhythm(true)->'days'),3,'explicit refresh updates snapshot');
 select is(public.set_public_rhythm(false),null::jsonb,'hide removes public dates');
