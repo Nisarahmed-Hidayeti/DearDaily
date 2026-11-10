@@ -50,7 +50,10 @@ export default function PublicRhythmControl({
         <button
           className="button secondary"
           disabled={!saved || busy}
-          onClick={() => setConfirm(true)}
+          onClick={() => {
+            setMessage('')
+            setConfirm(true)
+          }}
         >
           {shared ? 'Refresh shared calendar' : 'Share writing calendar'}
         </button>
@@ -78,6 +81,7 @@ export default function PublicRhythmControl({
             sharing a streak count. You can hide the calendar later, but others
             may save a copy.
           </p>
+          {message && <p role="alert">{message}</p>}
           <div className="account-actions">
             <button
               className="button secondary"

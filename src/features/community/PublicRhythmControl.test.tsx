@@ -55,3 +55,18 @@ it('does not claim hiding succeeded on backend error', async () => {
     screen.getByRole('button', { name: 'Hide writing calendar' }),
   ).toBeVisible()
 })
+it('keeps a failed sharing request visible inside its confirmation', async () => {
+  rpc.mockResolvedValue({ data: null, error: new Error('offline') })
+  render(<PublicRhythmControl saved />)
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Share writing calendar' }),
+  )
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Share my writing dates' }),
+  )
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'Calendar choice could not be confirmed.',
+  )
+  expect(screen.getByRole('dialog')).toContainElement(screen.getByRole('alert'))
+  expect(screen.queryByText('Calendar snapshot shared.')).toBeNull()
+})
