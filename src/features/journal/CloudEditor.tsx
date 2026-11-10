@@ -776,6 +776,24 @@ function EntryForm({
                   <>
                     <dt>Public music</dt>
                     <dd>
+                      {draft.music && (
+                        <label className="row">
+                          <input
+                            type="checkbox"
+                            checked={draft.music.share}
+                            disabled={busy}
+                            onChange={(event) =>
+                              patch({
+                                music: {
+                                  ...draft.music!,
+                                  share: event.target.checked,
+                                },
+                              })
+                            }
+                          />
+                          Include this music
+                        </label>
+                      )}
                       {publicMusic(row?.music) ? (
                         <a
                           href={musicUrl(publicMusic(row?.music)!)}

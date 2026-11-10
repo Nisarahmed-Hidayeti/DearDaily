@@ -1,3 +1,8 @@
+vi.mock('./publicRhythm', async (original) => ({
+  ...(await original<typeof import('./publicRhythm')>()),
+  publicRhythmEnabled: false,
+}))
+vi.mock('./liveRhythm', () => ({ liveRhythmEnabled: false }))
 import { expect, it, vi } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { saveProfile } from './communityApi'
@@ -18,23 +23,21 @@ it('confirms new public details with canonical JSON and never writes a backend-o
     show_count: true,
   }
   const insert = vi.fn().mockResolvedValue({ error: null })
-  const select = vi
-    .fn()
-    .mockReturnValue({
-      eq: () => ({
-        single: async () => ({
-          data: {
-            public_panel: {
-              show_count: true,
-              link: panel.link,
-              interests: ['Books'],
-            },
-            public_streak: null,
+  const select = vi.fn().mockReturnValue({
+    eq: () => ({
+      single: async () => ({
+        data: {
+          public_panel: {
+            show_count: true,
+            link: panel.link,
+            interests: ['Books'],
           },
-          error: null,
-        }),
+          public_streak: null,
+        },
+        error: null,
       }),
-    })
+    }),
+  })
   const client = {
     from: () => ({ insert, select }),
     rpc: async () => ({ data: profile, error: null }),

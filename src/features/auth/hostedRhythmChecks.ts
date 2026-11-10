@@ -8,6 +8,7 @@ export async function hostedRhythmChecks(
   b: SupabaseClient,
   aId: string,
   bId: string,
+  automatic = false,
 ) {
   const anon = createClient(authConfig!.url, authConfig!.key, {
     auth: {
@@ -16,7 +17,7 @@ export async function hostedRhythmChecks(
       detectSessionInUrl: false,
     },
   })
-  const ids = [crypto.randomUUID(), crypto.randomUUID()],
+  const ids = [crypto.randomUUID(), crypto.randomUUID(), crypto.randomUUID()],
     username = 'rhythm_' + crypto.randomUUID().replaceAll('-', '').slice(0, 15),
     marker = 'Synthetic calendar ' + crypto.randomUUID()
   let checks = 0,
@@ -61,14 +62,21 @@ export async function hostedRhythmChecks(
       })
       check(!saved.error)
     }
-    const shared = await b.rpc('set_public_rhythm', {
-      enabled: true,
-      today: localDay(new Date()),
-    })
+    const shared = automatic
+      ? await b.rpc('set_public_writing_visibility', {
+          show_streak: true,
+          show_calendar: true,
+          zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        })
+      : await b.rpc('set_public_rhythm', {
+          enabled: true,
+          today: localDay(new Date()),
+        })
+    const sharedCalendar = automatic ? shared.data?.public_rhythm : shared.data
     check(
       !shared.error &&
-        !!rhythmActivity(shared.data) &&
-        shared.data.days.includes(localDay(new Date())),
+        !!rhythmActivity(sharedCalendar) &&
+        sharedCalendar.days.includes(localDay(new Date())),
     )
     const view = await anon
       .from('public_profiles')
@@ -77,7 +85,8 @@ export async function hostedRhythmChecks(
       .single()
     check(
       !view.error &&
-        JSON.stringify(view.data.public_rhythm) === JSON.stringify(shared.data),
+        JSON.stringify(view.data.public_rhythm) ===
+          JSON.stringify(sharedCalendar),
     )
     for (const [client, id] of [
       [a, ids[1]],
@@ -111,6 +120,53 @@ export async function hostedRhythmChecks(
           .eq('username', username)
       ).error,
     )
+    if (automatic) {
+      const initial = await anon.rpc('get_public_writing_activity', {
+        profile_username: username,
+      })
+      check(!initial.error && initial.data.public_streak === 1)
+      const yesterday = new Date()
+      yesterday.setDate(yesterday.getDate() - 1)
+      const added = await b.from('journal_entries').insert({
+        id: ids[2],
+        title: marker,
+        body: 'Synthetic automatic day',
+        entry_date: localDay(yesterday),
+        status: 'saved',
+      })
+      check(!added.error)
+      const updated = await anon.rpc('get_public_writing_activity', {
+        profile_username: username,
+      })
+      check(
+        !updated.error &&
+          updated.data.public_streak === 2 &&
+          updated.data.public_rhythm.days.length === 2,
+      )
+      const countOnly = await b.rpc('set_public_writing_visibility', {
+        show_streak: true,
+        show_calendar: false,
+        zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      })
+      check(!countOnly.error && countOnly.data.public_rhythm === null)
+      const countView = await anon.rpc('get_public_writing_activity', {
+        profile_username: username,
+      })
+      check(
+        !countView.error &&
+          countView.data.public_streak === 2 &&
+          countView.data.public_rhythm === null,
+      )
+      check(
+        !!(
+          await anon.rpc('set_public_writing_visibility', {
+            show_streak: true,
+            show_calendar: true,
+            zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          })
+        ).error,
+      )
+    }
     const hidden = await b
       .from('public_profiles')
       .update({ visible: false })
@@ -121,6 +177,12 @@ export async function hostedRhythmChecks(
       .select('public_rhythm')
       .eq('username', username)
     check(!unavailable.error && unavailable.data.length === 0)
+    if (automatic) {
+      const invisible = await anon.rpc('get_public_writing_activity', {
+        profile_username: username,
+      })
+      check(!invisible.error && invisible.data === null)
+    }
     const hide = await b.rpc('set_public_rhythm', {
       enabled: false,
       today: localDay(new Date()),
@@ -135,7 +197,7 @@ export async function hostedRhythmChecks(
   } catch (e) {
     error = e instanceof Error ? e.message : 'Verification failed'
   } finally {
-    for (const [i, client] of [a, b].entries()) {
+    for (const [i, client] of [a, b, b].entries()) {
       const result = await client
         .from('journal_entries')
         .delete()

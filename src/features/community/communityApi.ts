@@ -1,3 +1,4 @@
+import { liveRhythmEnabled } from './liveRhythm'
 import { publicRhythmEnabled, type RhythmSnapshot } from './publicRhythm'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { validateProfilePanel, type ProfilePanel } from './profilePanel'
@@ -20,6 +21,7 @@ export const avatars: Record<string, string> = {
 export interface PublicProfile {
   public_panel?: ProfilePanel
 
+  public_activity_live?: boolean
   public_rhythm?: RhythmSnapshot | null
   public_streak?: number | null
   cover_id?: string | null
@@ -41,6 +43,7 @@ export const profileFields =
   (appearanceEnabled ? ',cover_id' : '') +
   (publicStreaksEnabled ? ',public_streak' : '') +
   (publicRhythmEnabled ? ',public_rhythm' : '') +
+  (liveRhythmEnabled ? ',public_activity_live' : '') +
   (studioPolishEnabled ? ',public_panel' : '')
 export const storyFields: string =
   'id,title,body,published_at,public_username,public_category,public_tags' +
@@ -74,7 +77,10 @@ export async function myProfile(
   if (error) throw new Error('Profile unavailable')
   if (
     !data ||
-    (!publicStreaksEnabled && !studioPolishEnabled && !publicRhythmEnabled)
+    (!publicStreaksEnabled &&
+      !studioPolishEnabled &&
+      !publicRhythmEnabled &&
+      !liveRhythmEnabled)
   )
     return data
   // Keep the legacy RPC response writable for already-deployed clients.
@@ -84,6 +90,7 @@ export async function myProfile(
       [
         ...(publicStreaksEnabled ? ['public_streak'] : []),
         ...(publicRhythmEnabled ? ['public_rhythm'] : []),
+        ...(liveRhythmEnabled ? ['public_activity_live'] : []),
         ...(studioPolishEnabled ? ['public_panel'] : []),
       ].join(','),
     )
@@ -117,10 +124,12 @@ export async function saveProfile(
   const {
     public_streak: readOnlyStreak,
     public_rhythm: readOnlyRhythm,
+    public_activity_live: readOnlyLive,
     ...writable
   } = canonical
   void readOnlyStreak
   void readOnlyRhythm
+  void readOnlyLive
   const query = previous
     ? client.from('public_profiles').update(writable).eq('username', previous)
     : client.from('public_profiles').insert(writable)

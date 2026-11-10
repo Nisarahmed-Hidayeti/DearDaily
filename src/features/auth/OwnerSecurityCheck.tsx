@@ -231,6 +231,41 @@ export default function OwnerSecurityCheck() {
               b = captures.get('writer')
             if (!a || !b) return
             setBusy(true)
+            try {
+              setMessage(
+                JSON.stringify(
+                  await hostedRhythmChecks(
+                    a.client,
+                    b.client,
+                    a.id,
+                    b.id,
+                    true,
+                  ),
+                ),
+              )
+            } catch {
+              setMessage(
+                'Automatic rhythm checks interrupted; inspect cleanup.',
+              )
+            } finally {
+              setBusy(false)
+            }
+          }}
+        >
+          Run synthetic automatic rhythm tests
+        </button>
+        <button
+          className="button secondary"
+          disabled={
+            busy ||
+            !(captures.has('low') || captures.has('owner')) ||
+            !captures.has('writer')
+          }
+          onClick={async () => {
+            const a = captures.get('low') ?? captures.get('owner'),
+              b = captures.get('writer')
+            if (!a || !b) return
+            setBusy(true)
             setMessage(
               'Testing optional calendar privacy with synthetic fixtures…',
             )
