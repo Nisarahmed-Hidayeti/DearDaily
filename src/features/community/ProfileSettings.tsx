@@ -241,20 +241,6 @@ export default function ProfileSettings() {
           <label className="row">
             <input
               type="checkbox"
-              checked={form.joined_month !== null}
-              onChange={(e) =>
-                patch({
-                  joined_month: e.target.checked
-                    ? new Date().toISOString().slice(0, 7) + '-01'
-                    : null,
-                })
-              }
-            />
-            Show the month I created my public identity
-          </label>
-          <label className="row">
-            <input
-              type="checkbox"
               checked={form.visible}
               onChange={(e) => patch({ visible: e.target.checked })}
             />
