@@ -6,14 +6,18 @@ import './activity.css'
 export default function ActivityHeatmap({
   activity = sampleActivity,
   real = false,
+  title = 'Your writing rhythm',
+  compact = false,
 }: {
   activity?: ActivityDay[]
   real?: boolean
+  title?: string
+  compact?: boolean
 }) {
   if (!activity.length)
     return (
       <section className="panel activity">
-        <h2>Your writing rhythm</h2>
+        <h2>{title}</h2>
         <p>No writing activity yet.</p>
       </section>
     )
@@ -33,15 +37,20 @@ export default function ActivityHeatmap({
     year: 'numeric',
   })
   return (
-    <section className="panel activity" aria-labelledby="activity-title">
+    <section
+      className={`activity ${compact ? 'activity-compact' : 'panel'}`}
+      aria-label={title}
+    >
       <div className="row spread">
         <div>
-          <h2 id="activity-title">Your writing rhythm</h2>
-          <p className="muted">One checkmark for showing up.</p>
+          <h2>{title}</h2>
+          {!compact && <p className="muted">One checkmark for showing up.</p>}
         </div>
-        <span className="badge">
-          {real ? 'Saved entries · 12 weeks' : 'Sample activity · 12 weeks'}
-        </span>
+        {!compact && (
+          <span className="badge">
+            {real ? 'Saved entries · 12 weeks' : 'Sample activity · 12 weeks'}
+          </span>
+        )}
       </div>
       <p className="sr-only" id="activity-description">
         {real
@@ -80,7 +89,12 @@ export default function ActivityHeatmap({
               )
               const monthLabel =
                 weekIndex === 0
-                  ? monthFormatter.format(start)
+                  ? compact &&
+                    weeks[1]?.some(
+                      (day) => parseLocalDate(day.date).getDate() === 1,
+                    )
+                    ? ''
+                    : monthFormatter.format(start)
                   : monthDay
                     ? monthFormatter.format(parseLocalDate(monthDay.date))
                     : ''
@@ -97,7 +111,7 @@ export default function ActivityHeatmap({
                   <div className="heatmap">
                     {days.map((day) => {
                       const level = day.minutes > 0 ? 4 : 0
-                      const description = `${dayFormatter.format(parseLocalDate(day.date))}: ${day.minutes === 0 ? 'no writing' : `${day.minutes} ${real ? (day.minutes === 1 ? 'saved entry' : 'saved entries') : 'minutes written'}`}${real ? '' : ' (sample)'}`
+                      const description = `${dayFormatter.format(parseLocalDate(day.date))}: ${compact ? (day.minutes ? 'shared writing day' : 'no shared activity') : day.minutes === 0 ? 'no writing' : `${day.minutes} ${real ? (day.minutes === 1 ? 'saved entry' : 'saved entries') : 'minutes written'}`}${real ? '' : ' (sample)'}`
                       return (
                         <span
                           className="activity-cell"
@@ -126,7 +140,7 @@ export default function ActivityHeatmap({
       </div>
       <div className="activity-footer">
         <span>{rangeFormatter.formatRange(start, end)}</span>
-        <span className="activity-legend">✓ A day you wrote</span>
+        {!compact && <span className="activity-legend">✓ A day you wrote</span>}
       </div>
     </section>
   )

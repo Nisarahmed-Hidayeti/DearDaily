@@ -1,3 +1,4 @@
+import { hostedRhythmChecks } from './hostedRhythmChecks'
 import { useState } from 'react'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { authConfig } from '../../lib/supabase/client'
@@ -218,6 +219,40 @@ export default function OwnerSecurityCheck() {
         </select>
       </label>
       <div className="account-actions">
+        <button
+          className="button secondary"
+          disabled={
+            busy ||
+            !(captures.has('low') || captures.has('owner')) ||
+            !captures.has('writer')
+          }
+          onClick={async () => {
+            const a = captures.get('low') ?? captures.get('owner'),
+              b = captures.get('writer')
+            if (!a || !b) return
+            setBusy(true)
+            setMessage(
+              'Testing optional calendar privacy with synthetic fixtures…',
+            )
+            try {
+              const result = await hostedRhythmChecks(
+                a.client,
+                b.client,
+                a.id,
+                b.id,
+              )
+              setMessage(JSON.stringify(result))
+            } catch {
+              setMessage(
+                'Calendar verification interrupted. Inspect exact cleanup.',
+              )
+            } finally {
+              setBusy(false)
+            }
+          }}
+        >
+          Run synthetic calendar tests
+        </button>
         <button
           className="button secondary"
           disabled={

@@ -209,6 +209,15 @@ describe('profile writes preserve hidden ownership', () => {
     } as unknown as SupabaseClient
     expect(await saveProfile(client, profile, null)).toEqual(profile)
     expect(insert).toHaveBeenCalledWith(profile)
+    await saveProfile(
+      client,
+      {
+        ...profile,
+        public_rhythm: { start: '2026-11-02', days: ['2026-11-03'] },
+      },
+      null,
+    )
+    expect(insert).toHaveBeenLastCalledWith(profile)
     expect(rpc).toHaveBeenCalledWith('my_public_profile')
   })
   it('updates minimally and checks the server-confirmed safe fields', async () => {
