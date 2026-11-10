@@ -1174,3 +1174,9 @@
 .profile-settings .profile-banner-editor {
   height: 160px;
 }
+.profile-settings .account-form > fieldset {
+  align-items: start;
+}
+.profile-settings .account-form label {
+  margin: 0;
+}
