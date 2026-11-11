@@ -1,3 +1,4 @@
+import { liveRhythmEnabled } from './liveRhythm'
 import ActivityHeatmap from '../dashboard/ActivityHeatmap'
 import { publicRhythmEnabled, rhythmActivity } from './publicRhythm'
 import { ProfileImage, usePublicImages } from '../profile-images/ProfileImage'
@@ -26,7 +27,6 @@ export default function PublicProfile() {
   const [stories, setStories] = useState<CommunityStory[]>([])
   const [page, setPage] = useState(0)
   const [more, setMore] = useState(false)
-  const [count, setCount] = useState(0)
   const [status, setStatus] = useState('loading')
   useEffect(() => {
     let active = true
@@ -39,24 +39,42 @@ export default function PublicProfile() {
         .eq('visible', true)
         .maybeSingle()
       if (result.error) throw result.error
+      if (liveRhythmEnabled && result.data) {
+        const activity = await client.rpc('get_public_writing_activity', {
+          profile_username: username,
+        })
+        if (activity.error) throw activity.error
+        if (!activity.data) result.data = null
+        else Object.assign(result.data, activity.data)
+      }
       const list = await storyPage(client, { username, page })
-      const total = await client
-        .from('public_stories')
-        .select('id', { count: 'exact', head: true })
-        .eq('public_username', username)
-      if (total.error) throw total.error
       if (active) {
         setProfile(result.data as Profile | null)
         setStories(list.stories)
         setMore(list.more)
-        setCount(total.count ?? 0)
         setStatus('ready')
       }
     })().catch(() => {
       if (active) setStatus('error')
     })
+    const refresh = async () => {
+      if (!liveRhythmEnabled || document.visibilityState === 'hidden') return
+      const result = await client.rpc('get_public_writing_activity', {
+        profile_username: username,
+      })
+      if (active && !result.error)
+        setProfile((current) =>
+          result.data && current ? { ...current, ...result.data } : null,
+        )
+    }
+    const timer = liveRhythmEnabled
+      ? window.setInterval(() => void refresh().catch(() => {}), 60000)
+      : null
+    document.addEventListener('visibilitychange', refresh)
     return () => {
       active = false
+      if (timer) window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', refresh)
     }
   }, [client, username, page])
   if (!validUsername(username))
@@ -122,6 +140,7 @@ export default function PublicProfile() {
             </div>
             <PublicRhythm
               count={profile.public_streak}
+              live={!!profile.public_activity_live}
               name={profile.display_name}
               snapshot={profile.public_rhythm}
             />
@@ -156,7 +175,7 @@ export default function PublicProfile() {
                 </button>
               </div>
             </div>
-            <ProfileDetails profile={profile} count={count} />
+            <ProfileDetails profile={profile} />
           </div>
         </>
       ) : (
@@ -166,13 +185,7 @@ export default function PublicProfile() {
   )
 }
 
-function ProfileDetails({
-  profile,
-  count,
-}: {
-  profile: Profile
-  count: number
-}) {
+function ProfileDetails({ profile }: { profile: Profile }) {
   let panel
   try {
     panel = studioPolishEnabled
@@ -181,18 +194,9 @@ function ProfileDetails({
   } catch {
     panel = null
   }
-  const showCount = panel ? panel.show_count : true
-  if (!showCount && !panel?.interests.length && !panel?.link) return null
+  if (!panel?.interests.length && !panel?.link) return null
   return (
     <aside className="profile-details" aria-label="Shared profile details">
-      <dl>
-        {showCount && (
-          <>
-            <dt>Published stories</dt>
-            <dd>{count}</dd>
-          </>
-        )}
-      </dl>
       {!!panel?.interests.length && (
         <div className="profile-interests">
           {panel.interests.filter(Boolean).map((interest, i) => (
@@ -213,10 +217,12 @@ function ProfileDetails({
 
 export function PublicRhythm({
   count,
+  live = false,
   name = 'Writer',
   snapshot,
 }: {
   count?: number | null
+  live?: boolean
   name?: string
   snapshot?: unknown
 }) {
@@ -254,7 +260,9 @@ export function PublicRhythm({
         <strong>{count}</strong>
         <span>{count === 1 ? 'day' : 'days'}</span>
       </div>
-      <small>Shared streak snapshot</small>
+      <small>
+        {live ? 'Current writing streak' : 'Shared streak snapshot'}
+      </small>
     </aside>
   )
 }

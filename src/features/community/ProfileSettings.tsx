@@ -1,3 +1,5 @@
+import WritingVisibilityControl from './WritingVisibilityControl'
+import { liveRhythmEnabled } from './liveRhythm'
 import PublicRhythmControl from './PublicRhythmControl'
 import { OwnProfileAvatar } from '../profile-images/ProfileImage'
 import { ProfilePhotos } from '../profile-images/ProfilePhotos'
@@ -94,14 +96,9 @@ export default function ProfileSettings() {
   }
   return (
     <div className="page profile-settings">
-      <PageHeading
-        eyebrow="Public identity / Optional"
-        title="Share a name. Keep your privacy."
-      />
+      <PageHeading eyebrow="" title="Public profile" />
       <p className="muted">
-        Your private account profile stays private. Choose a pseudonym here.
-        This profile is hidden until you explicitly opt in. No email or account
-        ID is shown.
+        Choose what others see. Your journals stay private.
       </p>
       <ProfilePhotos
         key={session?.user.id}
@@ -117,21 +114,20 @@ export default function ProfileSettings() {
         }}
       >
         <fieldset disabled={!ready || busy}>
-          <label>
-            Username
-            <input
-              required
-              minLength={3}
-              maxLength={24}
-              pattern="[a-z][a-z0-9_]{2,23}"
-              value={form.username}
-              onChange={(e) => patch({ username: e.target.value })}
-            />
-          </label>
-          <small>
-            3–24 lowercase letters, numbers or underscores. Start with a letter.
-            Names are unique, not identity verification.
-          </small>
+          <div className="profile-username-field">
+            <label>
+              Username
+              <input
+                required
+                minLength={3}
+                maxLength={24}
+                pattern="[a-z][a-z0-9_]{2,23}"
+                value={form.username}
+                onChange={(e) => patch({ username: e.target.value })}
+              />
+            </label>
+            <small>3–24 lowercase letters, numbers or underscores.</small>
+          </div>
           <label>
             Public display name
             <input
@@ -184,59 +180,45 @@ export default function ProfileSettings() {
             </p>
           )}
           {studioPolishEnabled && (
-            <fieldset className="public-panel-options">
-              <legend>Optional public details</legend>
-              <label className="row">
-                <input
-                  type="checkbox"
-                  checked={form.public_panel?.show_count ?? false}
-                  onChange={(e) =>
-                    patch({
-                      public_panel: {
-                        ...emptyProfilePanel,
-                        ...form.public_panel,
-                        show_count: e.target.checked,
-                      },
-                    })
-                  }
-                />
-                Show public story count
-              </label>
-              <label>
-                Interests · comma separated
-                <input
-                  maxLength={245}
-                  value={form.public_panel?.interests.join(',') ?? ''}
-                  onChange={(e) =>
-                    patch({
-                      public_panel: {
-                        ...emptyProfilePanel,
-                        ...form.public_panel,
-                        interests: e.target.value.split(',').slice(0, 6),
-                      },
-                    })
-                  }
-                />
-              </label>
-              <label>
-                Personal link · optional
-                <input
-                  type="url"
-                  placeholder="https://"
-                  maxLength={300}
-                  value={form.public_panel?.link ?? ''}
-                  onChange={(e) =>
-                    patch({
-                      public_panel: {
-                        ...emptyProfilePanel,
-                        ...form.public_panel,
-                        link: e.target.value || null,
-                      },
-                    })
-                  }
-                />
-              </label>
-            </fieldset>
+            <details className="profile-settings-disclosure">
+              <summary>More about you</summary>
+              <fieldset className="public-panel-options">
+                <label>
+                  Interests · comma separated
+                  <input
+                    maxLength={245}
+                    value={form.public_panel?.interests.join(',') ?? ''}
+                    onChange={(e) =>
+                      patch({
+                        public_panel: {
+                          ...emptyProfilePanel,
+                          ...form.public_panel,
+                          interests: e.target.value.split(',').slice(0, 6),
+                        },
+                      })
+                    }
+                  />
+                </label>
+                <label>
+                  Personal link · optional
+                  <input
+                    type="url"
+                    placeholder="https://"
+                    maxLength={300}
+                    value={form.public_panel?.link ?? ''}
+                    onChange={(e) =>
+                      patch({
+                        public_panel: {
+                          ...emptyProfilePanel,
+                          ...form.public_panel,
+                          link: e.target.value || null,
+                        },
+                      })
+                    }
+                  />
+                </label>
+              </fieldset>
+            </details>
           )}
           <label className="row">
             <input
@@ -259,27 +241,43 @@ export default function ProfileSettings() {
         </fieldset>
       </form>
       <p role="status">{message}</p>
-      <PublicRhythmControl
-        key={`${previous}:calendar`}
-        saved={!!previous}
-        initial={savedProfile.public_rhythm}
-      />
-      <PublicStreakControl
-        key={`${previous ?? 'unsaved'}:${savedProfile.public_streak ?? 'hidden'}`}
-        saved={!!previous}
-        initial={savedProfile.public_streak}
-      />
-      <section className="panel profile-masthead">
-        <p className="eyebrow">
-          Preview · {form.visible ? 'Public after saving' : 'Hidden'}
-        </p>
-        <span className="profile-avatar">
-          <OwnProfileAvatar fallback={avatars[form.avatar]} />
-        </span>
-        <h2>{form.display_name || 'Your public name'}</h2>
-        <p>@{form.username || 'your_username'}</p>
-        <p className="profile-bio">{form.bio}</p>
+      <section className="profile-sharing-settings">
+        <h2>Writing rhythm</h2>
+        {liveRhythmEnabled ? (
+          <WritingVisibilityControl
+            key={`${previous}:visibility`}
+            saved={!!previous}
+            initial={savedProfile}
+          />
+        ) : (
+          <>
+            <PublicRhythmControl
+              key={`${previous}:calendar`}
+              saved={!!previous}
+              initial={savedProfile.public_rhythm}
+            />
+            <PublicStreakControl
+              key={`${previous}:count`}
+              saved={!!previous}
+              initial={savedProfile.public_streak}
+            />
+          </>
+        )}
       </section>
+      <details className="profile-settings-disclosure profile-preview">
+        <summary>Preview profile</summary>
+        <section className="panel profile-masthead">
+          <p className="eyebrow">
+            Preview · {form.visible ? 'Public after saving' : 'Hidden'}
+          </p>
+          <span className="profile-avatar">
+            <OwnProfileAvatar fallback={avatars[form.avatar]} />
+          </span>
+          <h2>{form.display_name || 'Your public name'}</h2>
+          <p>@{form.username || 'your_username'}</p>
+          <p className="profile-bio">{form.bio}</p>
+        </section>
+      </details>
       {previous && form.visible && (
         <Link className="text-link" to={`/u/${previous}`}>
           View saved public profile
@@ -324,7 +322,7 @@ export default function ProfileSettings() {
         >
           <p>
             {form.visible
-              ? 'Your chosen username, display name, biography, avatar and optional joined month will be publicly readable. Stories gain a byline only when you explicitly select it during publication.'
+              ? 'Your chosen username, display name, biography, avatar and selected public details will be publicly readable. Stories gain a byline only when you explicitly select it during publication.'
               : 'Your profile will be hidden. Existing public story bylines will be removed. Story text remains published until you unpublish it.'}
           </p>
           <button

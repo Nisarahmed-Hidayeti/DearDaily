@@ -1,9 +1,19 @@
+import { validateMusic } from '../music/music'
 import { entryIcon } from '../rich-editor/emojis'
 import { PublicAuthor } from './PublicAuthor'
 import { PageCover } from '../rich-editor/PageCover'
 import { Link } from 'react-router-dom'
 import type { CommunityStory } from './communityApi'
 export function StoryCard({ story: s }: { story: CommunityStory }) {
+  let hasMusic = false
+  try {
+    if (s.music) {
+      validateMusic(s.music)
+      hasMusic = true
+    }
+  } catch {
+    /* Unknown public format remains a normal story. */
+  }
   return (
     <article className="story-card">
       <Link
@@ -46,6 +56,15 @@ export function StoryCard({ story: s }: { story: CommunityStory }) {
             {new Date(s.published_at).toLocaleDateString()}
           </time>
         </div>
+        {hasMusic && (
+          <Link
+            className="story-listen"
+            to={`/explore/published/${s.id}`}
+            aria-label={`Listen with ${s.title}`}
+          >
+            ♫ Listen
+          </Link>
+        )}
       </div>
     </article>
   )

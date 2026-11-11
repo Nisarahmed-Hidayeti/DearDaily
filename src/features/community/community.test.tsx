@@ -1,3 +1,8 @@
+vi.mock('./publicRhythm', async (original) => ({
+  ...(await original<typeof import('./publicRhythm')>()),
+  publicRhythmEnabled: false,
+}))
+vi.mock('./liveRhythm', () => ({ liveRhythmEnabled: false }))
 import { documentFromText } from '../rich-editor/document'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -345,4 +350,26 @@ it('replaces a failed public cover with its page symbol instead of a broken plac
     document.querySelector('.story-art .story-icon-fallback'),
   ).toHaveTextContent('🌿')
   expect(screen.queryByText('Selected page cover')).toBeNull()
+})
+
+it('offers Listen only for validated public snapshot music', () => {
+  const view = render(
+    <MemoryRouter>
+      <StoryCard
+        story={{
+          ...story,
+          music: { provider: 'youtube', kind: 'video', id: 'M7lc1UVf-VE' },
+        }}
+      />
+    </MemoryRouter>,
+  )
+  expect(
+    screen.getByRole('link', { name: `Listen with ${story.title}` }),
+  ).toHaveAttribute('href', '/explore/published/synthetic')
+  view.rerender(
+    <MemoryRouter>
+      <StoryCard story={story} />
+    </MemoryRouter>,
+  )
+  expect(screen.queryByRole('link', { name: /Listen with/ })).toBeNull()
 })
