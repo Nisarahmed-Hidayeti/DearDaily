@@ -9,6 +9,7 @@
   VITE_ENABLE_PROFILE_IMAGES = "true"
 VITE_ENABLE_YOUTUBE_MUSIC = "true"
 VITE_ENABLE_PUBLIC_RHYTHM = "true"
+VITE_ENABLE_LIVE_RHYTHM = "true"
 
 # Preserve static assets; route all other paths through React Router.
 [[redirects]]
