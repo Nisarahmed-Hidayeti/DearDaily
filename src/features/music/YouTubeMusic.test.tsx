@@ -89,6 +89,8 @@ it('attaches a normalized selection without inheriting old sharing consent', asy
 })
 it('opens the public player outside the story and spins only during confirmed playback', async () => {
   const destroy = vi.fn()
+  const pauseVideo = vi.fn()
+  const playVideo = vi.fn()
   let reportState: (data: number) => void = () => {}
   vi.stubGlobal('YT', {
     Player: class {
@@ -97,10 +99,16 @@ it('opens the public player outside the story and spins only during confirmed pl
         {
           events,
         }: {
-          events: { onStateChange: (event: { data: number }) => void }
+          events: {
+            onStateChange: (event: { data: number }) => void
+            onReady: (event: { target: object }) => void
+          }
         },
       ) {
         reportState = (data) => events.onStateChange({ data })
+        events.onReady({
+          target: { getPlayerState: () => 0, pauseVideo, playVideo },
+        })
       }
       destroy = destroy
     },
@@ -116,18 +124,23 @@ it('opens the public player outside the story and spins only during confirmed pl
   await userEvent.click(disc)
   const dock = screen.getByRole('complementary', { name: 'YouTube playback' })
   expect(container).not.toContainElement(dock)
-  expect(within(dock).getByTitle('YouTube music player')).toHaveAttribute(
-    'src',
-    expect.stringContaining('controls=1'),
-  )
+  const iframe = within(dock).getByTitle('YouTube music player')
+  expect(iframe).toHaveAttribute('src', expect.stringContaining('controls=0'))
   expect(disc).toHaveAttribute('data-playing', 'false')
   act(() => reportState(1))
   expect(disc).toHaveAttribute('data-playing', 'true')
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Pause YouTube video' }),
+  )
+  expect(pauseVideo).toHaveBeenCalledOnce()
   act(() => reportState(2))
   expect(disc).toHaveAttribute('data-playing', 'false')
   await userEvent.click(
-    within(dock).getByRole('button', { name: 'Close video panel' }),
+    screen.getByRole('button', { name: 'Play YouTube video' }),
   )
+  expect(playVideo).toHaveBeenCalledOnce()
+  expect(screen.getByTitle('YouTube music player')).toBe(iframe)
+  await userEvent.keyboard('{Escape}')
   expect(screen.queryByTitle('YouTube music player')).toBeNull()
   expect(destroy).toHaveBeenCalledOnce()
 })
