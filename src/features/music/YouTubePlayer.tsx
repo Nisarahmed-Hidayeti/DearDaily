@@ -1,11 +1,6 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, useRef } from 'react'
 
-export type YouTubePlayback = {
-  playVideo(): void
-  pauseVideo(): void
-}
-
-type Player = YouTubePlayback & {
+type Player = {
   getPlayerState(): number
   destroy(): void
 }
@@ -53,12 +48,10 @@ export function YouTubePlayer({
   id,
   playerId,
   onPlaying,
-  playback,
 }: {
   id: string
   playerId: string
   onPlaying: (playing: boolean) => void
-  playback: RefObject<YouTubePlayback | null>
 }) {
   const host = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -78,9 +71,7 @@ export function YouTubePlayer({
       player = new Player(iframe, {
         events: {
           onReady: ({ target }) => {
-            if (!active) return
-            playback.current = target
-            onPlaying(target.getPlayerState() === 1)
+            if (active) onPlaying(target.getPlayerState() === 1)
           },
           onStateChange: ({ data }) => {
             if (active) onPlaying(data === 1)
@@ -90,10 +81,9 @@ export function YouTubePlayer({
     })
     return () => {
       active = false
-      playback.current = null
       player?.destroy()
       iframe.remove()
     }
-  }, [id, onPlaying, playback])
+  }, [id, onPlaying])
   return <div className="youtube-player" id={playerId} ref={host} />
 }

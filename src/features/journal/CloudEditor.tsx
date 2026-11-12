@@ -418,20 +418,14 @@ function EntryForm({
               )}
             </>
           )}
-          {
-            <WritingMusic
-              value={persistentMusicEnabled ? draft.music : undefined}
-              disabled={!ready || preview}
-              onChange={
-                persistentMusicEnabled && !preview
-                  ? (music) => patch({ music })
-                  : undefined
-              }
-            />
-          }
           {preview && (
             <article className="entry-preview">
-              <h2>{draft.title || 'Untitled entry'}</h2>
+              <div className="editor-title-row">
+                <h2>{draft.title || 'Untitled entry'}</h2>
+                <WritingMusic
+                  value={persistentMusicEnabled ? draft.music : undefined}
+                />
+              </div>
               <RichRead
                 privateMedia
                 document={draft.writing_document}
@@ -440,20 +434,31 @@ function EntryForm({
             </article>
           )}
           <div className="editor-canvas" hidden={preview}>
-            <label className="sr-only" htmlFor="entry-title">
-              Entry title
-            </label>
-            <input
-              id="entry-title"
-              className="title-input"
-              placeholder={
-                richEditorEnabled ? 'Untitled' : 'A new day, a new page…'
-              }
-              value={draft.title}
-              maxLength={200}
-              disabled={!ready}
-              onChange={(e) => patch({ title: e.target.value })}
-            />
+            <div className="editor-title-row">
+              <label className="sr-only" htmlFor="entry-title">
+                Entry title
+              </label>
+              <input
+                id="entry-title"
+                className="title-input"
+                placeholder={
+                  richEditorEnabled ? 'Untitled' : 'A new day, a new page…'
+                }
+                value={draft.title}
+                maxLength={200}
+                disabled={!ready}
+                onChange={(e) => patch({ title: e.target.value })}
+              />
+              <WritingMusic
+                value={persistentMusicEnabled ? draft.music : undefined}
+                disabled={!ready || preview}
+                onChange={
+                  persistentMusicEnabled && !preview
+                    ? (music) => patch({ music })
+                    : undefined
+                }
+              />
+            </div>
             <label className="sr-only" htmlFor="entry-body">
               Journal body
             </label>

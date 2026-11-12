@@ -1227,14 +1227,36 @@
   margin-inline-start: auto;
 }
 
-.editor-youtube {
-  margin: 12px 0;
+.editor-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
 }
 
-.editor-youtube .story-youtube-toggle {
-  display: inline-grid;
-  vertical-align: middle;
-  width: 48px;
+.editor-title-row > .title-input {
+  grid-column: 1;
+  min-width: 0;
+}
+
+.editor-title-row > .editor-youtube {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  position: relative;
+  text-align: end;
+}
+
+.editor-title-row .writing-music-options {
+  position: absolute;
+  inset-inline-end: 0;
+  z-index: 5;
+  width: min(300px, 75vw);
+  padding: 12px;
+  text-align: start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
 .story-player-dock {
@@ -1250,6 +1272,14 @@
   width: 100%;
   background: #000;
   border-radius: 8px;
+}
+
+.story-player-close {
+  display: block;
+  margin: 0 0 4px auto;
+  min-width: 36px;
+  min-height: 36px;
+  background: var(--surface);
 }
 
 @media (prefers-reduced-motion: no-preference) {
