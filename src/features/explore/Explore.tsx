@@ -198,7 +198,6 @@ export function PublishedStory() {
   const [story, setStory] = useState<CommunityStory | null>(null)
   const [status, setStatus] = useState('loading')
   const [related, setRelated] = useState<CommunityStory[]>([])
-  const [musicFooter, setMusicFooter] = useState<HTMLDivElement | null>(null)
   useEffect(() => {
     if (!client || !id) return
     let active = true
@@ -260,12 +259,14 @@ export function PublishedStory() {
         </p>
       ) : story ? (
         <>
-          <p className="eyebrow">
-            {story.public_category ?? 'Published story'} ·{' '}
-            {readingTime(story.body)} min read ·{' '}
-            {new Date(story.published_at).toLocaleDateString()}
-          </p>
-          <PublicAuthor username={story.public_username} />
+          <div className="story-cover-byline">
+            <p className="eyebrow">
+              {story.public_category ?? 'Published story'} ·{' '}
+              {readingTime(story.body)} min read ·{' '}
+              {new Date(story.published_at).toLocaleDateString()}
+            </p>
+            <PublicAuthor username={story.public_username} />
+          </div>
           <PageCover
             document={story.writing_document}
             preset={story.cover_preset}
@@ -282,7 +283,6 @@ export function PublishedStory() {
                 key={`${story.id}:${story.music.id}`}
                 value={story.music}
                 publicCopy
-                playerTarget={musicFooter}
               />
             )}
           </div>
@@ -299,9 +299,6 @@ export function PublishedStory() {
               </span>
             ))}
           </div>
-          {persistentMusicEnabled && story.music?.provider === 'youtube' && (
-            <div className="story-music-footer" ref={setMusicFooter} />
-          )}
           {communityEnabled && <ReportStory id={story.id} />}
           {!!related.length && (
             <section className="more-by-author">
