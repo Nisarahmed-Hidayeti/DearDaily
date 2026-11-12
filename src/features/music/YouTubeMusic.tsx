@@ -1,150 +1,123 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { PrivateMusic, StoryMusic } from './music'
-import { musicUrl } from './music'
-import { spotifyEntity } from './spotify'
+import { YouTubePlayer } from './YouTubePlayer'
 import { youtubeVideoId } from './youtube'
 
-type Metadata = { id: string; title: string; author: string }
 export function YouTubeMusic({
   value,
   onChange,
   disabled,
+  publicCopy,
 }: {
   value: StoryMusic | PrivateMusic
   onChange?: (value: PrivateMusic | null) => void
   disabled: boolean
+  publicCopy: boolean
 }) {
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [options, setOptions] = useState(false)
   const [url, setUrl] = useState('')
   const [error, setError] = useState('')
-  const [metadata, setMetadata] = useState<Metadata | null>(null)
   const [failedArtwork, setFailedArtwork] = useState<string | null>(null)
+  const [playing, setPlaying] = useState(false)
   const id = value.id
+  const playerId = useId()
+  const playerOpen = playingId === id
   useEffect(() => {
-    const controller = new AbortController()
-    // Only the canonical video ID goes to YouTube; never journal text or account credentials.
-    void fetch(
-      `https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${id}`)}&format=json`,
-      {
-        signal: controller.signal,
-        credentials: 'omit',
-        referrerPolicy: 'no-referrer',
-      },
+    if (!playerOpen) return
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape' && !event.defaultPrevented) {
+        setPlayingId(null)
+        setPlaying(false)
+      }
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [playerOpen])
+  function togglePlayer() {
+    setPlaying(false)
+    setPlayingId(playerOpen ? null : id)
+  }
+  const artwork =
+    failedArtwork === id ? (
+      <span className="music-artwork-fallback" aria-hidden="true">
+        ♫
+      </span>
+    ) : (
+      <img
+        onError={() => setFailedArtwork(id)}
+        src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+        alt=""
+        width="72"
+        height="56"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
     )
-      .then(async (response) => {
-        if (!response.ok) return
-        const data = await response.json()
-        if (
-          !controller.signal.aborted &&
-          typeof data.title === 'string' &&
-          typeof data.author_name === 'string'
-        )
-          setMetadata({
-            id,
-            title: data.title.slice(0, 250),
-            author: data.author_name.slice(0, 150),
-          })
-      })
-      .catch(() => {
-        /* Unavailable metadata does not prevent official playback. */
-      })
-    return () => controller.abort()
-  }, [id])
-  const details = metadata?.id === id ? metadata : null
   return (
-    <section className="writing-music youtube-music" aria-label="Writing music">
-      <div className="music-attachment">
-        {failedArtwork === id ? (
-          <span className="music-artwork-fallback" aria-hidden="true">
-            ♫
-          </span>
-        ) : (
-          <img
-            onError={() => setFailedArtwork(id)}
-            src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
-            alt=""
-            width="72"
-            height="56"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-          />
+    <section
+      className={publicCopy ? 'story-youtube' : 'story-youtube editor-youtube'}
+      aria-label="Story music"
+    >
+      <button
+        type="button"
+        className="story-youtube-toggle"
+        data-playing={playerOpen && playing}
+        aria-label={playerOpen ? 'Close YouTube player' : 'Play YouTube video'}
+        aria-expanded={playerOpen}
+        aria-controls={playerOpen ? playerId : undefined}
+        onClick={togglePlayer}
+      >
+        {failedArtwork !== id && artwork}
+        <span className="story-youtube-icon" aria-hidden="true">
+          {playerOpen ? '×' : '▶'}
+        </span>
+      </button>
+      {playerOpen &&
+        createPortal(
+          <aside className="story-player-dock" aria-label="YouTube playback">
+            <button
+              type="button"
+              className="quiet story-player-close"
+              aria-label="Close video panel"
+              onClick={togglePlayer}
+            >
+              ×
+            </button>
+            <YouTubePlayer id={id} playerId={playerId} onPlaying={setPlaying} />
+          </aside>,
+          document.body,
         )}
-        <div className="music-attachment-label">
-          <a href={musicUrl(value)} target="_blank" rel="noopener noreferrer">
-            {details?.title ?? 'YouTube music'}
-          </a>
-          <small>{details?.author ?? 'YouTube'}</small>
-        </div>
+      {onChange && (
         <button
           type="button"
-          className="quiet music-play"
-          aria-label="Play YouTube video"
-          onClick={() => setPlayingId(id)}
+          className="quiet"
+          aria-label="Music options"
+          aria-expanded={options}
+          onClick={() => setOptions(!options)}
         >
-          ▶
+          ⋯
         </button>
-        {onChange && (
-          <button
-            type="button"
-            className="quiet"
-            aria-label="Music options"
-            aria-expanded={options}
-            onClick={() => setOptions(!options)}
-          >
-            ⋯
-          </button>
-        )}
-      </div>
-      {playingId === id && (
-        <div className="youtube-player">
-          <iframe
-            key={id}
-            title="YouTube music player"
-            src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=0&playsinline=1`}
-            width="100%"
-            height="240"
-            allow="encrypted-media; picture-in-picture; fullscreen"
-            allowFullScreen
-            referrerPolicy="strict-origin-when-cross-origin"
-          />
-          <a
-            className="tiny"
-            href={musicUrl(value)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Unavailable here? Watch on YouTube ↗
-          </a>
-        </div>
       )}
       {options && onChange && (
         <div className="writing-music-options">
           <form
             onSubmit={(event) => {
               event.preventDefault()
-              const next = youtubeVideoId(url),
-                spotify = spotifyEntity(url)
-              if (next)
-                onChange({
-                  provider: 'youtube',
-                  kind: 'video',
-                  id: next,
-                  share: false,
-                })
-              else if (spotify) {
-                const [, kind, trackId] = spotify.split(':')
-                onChange({
-                  provider: 'spotify',
-                  kind: kind as StoryMusic['kind'],
-                  id: trackId,
-                  share: false,
-                })
-              } else {
-                setError('Paste a YouTube video or Spotify link.')
+              const next = youtubeVideoId(url)
+              if (!next) {
+                setError('Paste a YouTube video link.')
                 return
               }
+              onChange({
+                provider: 'youtube',
+                kind: 'video',
+                id: next,
+                share: false,
+              })
               setPlayingId(null)
+              setPlaying(false)
               setOptions(false)
               setError('')
             }}

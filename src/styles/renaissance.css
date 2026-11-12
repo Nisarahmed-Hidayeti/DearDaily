@@ -255,19 +255,23 @@
   max-width: 1080px;
   padding-top: 36px;
 }
-.detail > h1 {
+.detail > .story-title-row > h1 {
   max-width: 760px;
   font-family: var(--serif);
   font-size: clamp(36px, 5vw, 64px);
   line-height: 1.12;
   font-weight: 400;
-  margin-block: 20px 28px;
+  margin-block: 20px 8px;
 }
 .detail > article {
   max-width: var(--reading-width);
-  margin: 32px auto;
+  margin: 16px auto 32px;
   font-size: 18px;
   line-height: 1.8;
+}
+.detail > article > :first-child,
+.detail .rich-read .tiptap > :first-child {
+  margin-block-start: 0;
 }
 .detail .rich-read .tiptap {
   font-family: var(--serif);
@@ -934,48 +938,16 @@
   color: var(--muted);
   font-size: 11px;
 }
-.music-attachment {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-block: 8px;
-}
-.music-attachment > img {
-  flex: 0 0 72px;
-  border-radius: 6px;
-  object-fit: cover;
-}
-.music-attachment-label {
-  min-width: 0;
-  flex: 1;
-  display: grid;
-  gap: 4px;
-}
-.music-attachment-label a {
-  font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.music-attachment-label small {
-  font-size: 11px;
-  color: var(--muted);
-}
 .youtube-player {
-  margin-top: 12px;
+  flex: 0 0 auto;
+  width: min(100%, 356px);
 }
 .youtube-player iframe {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  min-height: 200px;
+  height: 200px;
   border: 0;
   border-radius: 8px;
-}
-.music-play {
-  min-width: 36px;
-  min-height: 36px;
 }
 @media (max-width: 700px) {
   .public-profile .profile-masthead {
@@ -1179,4 +1151,172 @@
 }
 .profile-settings .account-form label {
   margin: 0;
+}
+
+.story-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 20px;
+}
+
+.story-title-row > h1 {
+  flex: 1 1 min(100%, 260px);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.story-youtube {
+  margin: 0 20px 0 auto;
+}
+
+.story-youtube-toggle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(52px, 8vw, 96px);
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.story-youtube-toggle img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-youtube-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 75%);
+  color: white;
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .story-title-row > h1 {
+    flex-basis: 0;
+  }
+
+  .story-youtube {
+    margin: 20px 0 0 auto;
+  }
+}
+
+.story-cover-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin-block-end: 8px;
+}
+
+.story-cover-byline .eyebrow {
+  margin: 0;
+}
+
+.story-cover-byline > :last-child {
+  margin-inline-start: auto;
+}
+
+.editor-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+}
+
+.editor-title-row > .title-input {
+  grid-column: 1;
+  min-width: 0;
+}
+
+.editor-title-row > .editor-youtube {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  position: relative;
+  text-align: end;
+}
+
+.editor-title-row .writing-music-options {
+  position: absolute;
+  inset-inline-end: 0;
+  z-index: 5;
+  width: min(300px, 75vw);
+  padding: 12px;
+  text-align: start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.story-player-dock {
+  position: fixed;
+  inset-inline-end: max(12px, env(safe-area-inset-right));
+  inset-block-end: max(12px, env(safe-area-inset-bottom));
+  z-index: 50;
+  width: 200px;
+  color: var(--text);
+}
+
+.story-player-dock .youtube-player {
+  width: 100%;
+  background: #000;
+  border-radius: 8px;
+}
+
+@media (hover: hover) {
+  .story-player-dock .story-player-close {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .story-player-dock:hover .story-player-close,
+  .story-player-dock .story-player-close:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .story-player-dock .story-player-close {
+    transition: opacity 90ms ease-out;
+  }
+}
+
+.story-player-close {
+  display: block;
+  margin: 0 0 4px auto;
+  min-width: 36px;
+  min-height: 36px;
+  background: var(--surface);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .story-youtube-toggle img {
+    animation: music-disc-spin 12s linear infinite paused;
+  }
+
+  .story-youtube-toggle[data-playing='true'] img {
+    animation-play-state: running;
+  }
+
+  @keyframes music-disc-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
 }

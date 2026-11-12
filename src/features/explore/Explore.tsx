@@ -259,12 +259,14 @@ export function PublishedStory() {
         </p>
       ) : story ? (
         <>
-          <p className="eyebrow">
-            {story.public_category ?? 'Published story'} ·{' '}
-            {readingTime(story.body)} min read ·{' '}
-            {new Date(story.published_at).toLocaleDateString()}
-          </p>
-          <PublicAuthor username={story.public_username} />
+          <div className="story-cover-byline">
+            <p className="eyebrow">
+              {story.public_category ?? 'Published story'} ·{' '}
+              {readingTime(story.body)} min read ·{' '}
+              {new Date(story.published_at).toLocaleDateString()}
+            </p>
+            <PublicAuthor username={story.public_username} />
+          </div>
           <PageCover
             document={story.writing_document}
             preset={story.cover_preset}
@@ -274,14 +276,16 @@ export function PublishedStory() {
               {entryIcon(story.writing_document, story.page_icon)}
             </div>
           )}
-          {persistentMusicEnabled && story.music && (
-            <WritingMusic
-              key={`${story.id}:${story.music.id}`}
-              value={story.music}
-              publicCopy
-            />
-          )}
-          <h1>{story.title}</h1>
+          <div className="story-title-row">
+            <h1>{story.title}</h1>
+            {persistentMusicEnabled && story.music?.provider === 'youtube' && (
+              <WritingMusic
+                key={`${story.id}:${story.music.id}`}
+                value={story.music}
+                publicCopy
+              />
+            )}
+          </div>
           <article>
             <RichRead document={story.writing_document} fallback={story.body} />
           </article>
