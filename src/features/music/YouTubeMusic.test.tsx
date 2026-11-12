@@ -87,7 +87,7 @@ it('attaches a normalized selection without inheriting old sharing consent', asy
   await userEvent.click(screen.getByRole('button', { name: 'Attach music' }))
   expect(onChange).toHaveBeenCalledWith(selection)
 })
-it('opens the public player outside the story and spins only during confirmed playback', async () => {
+it('opens the editor player outside the page and spins only during confirmed playback', async () => {
   const destroy = vi.fn()
   let reportState: (data: number) => void = () => {}
   vi.stubGlobal('YT', {
@@ -105,13 +105,7 @@ it('opens the public player outside the story and spins only during confirmed pl
       destroy = destroy
     },
   })
-  const { container } = render(
-    <WritingMusic
-      publicCopy
-      value={publicMusic({ ...selection, share: true })}
-    />,
-  )
-  expect(screen.queryByRole('button', { name: 'Music options' })).toBeNull()
+  const { container } = render(<WritingMusic value={selection} />)
   const disc = screen.getByRole('button', { name: 'Play YouTube video' })
   await userEvent.click(disc)
   const dock = screen.getByRole('complementary', { name: 'YouTube playback' })
@@ -130,4 +124,21 @@ it('opens the public player outside the story and spins only during confirmed pl
   )
   expect(screen.queryByTitle('YouTube music player')).toBeNull()
   expect(destroy).toHaveBeenCalledOnce()
+})
+
+it('shows only a linked thumbnail on published stories', () => {
+  const value = publicMusic({ ...selection, share: true })
+  const { container } = render(<WritingMusic publicCopy value={value} />)
+  const link = screen.getByRole('link', {
+    name: 'Open video on YouTube (opens in a new tab)',
+  })
+  expect(link).toHaveAttribute('href', musicUrl(selection))
+  expect(link).toHaveAttribute('target', '_blank')
+  expect(link.querySelector('img')).toHaveAttribute(
+    'src',
+    `https://i.ytimg.com/vi/${selection.id}/hqdefault.jpg`,
+  )
+  expect(container.textContent).toBe('')
+  expect(screen.queryByRole('button')).toBeNull()
+  expect(screen.queryByTitle('YouTube music player')).toBeNull()
 })

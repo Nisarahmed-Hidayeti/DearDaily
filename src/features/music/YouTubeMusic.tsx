@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { PrivateMusic, StoryMusic } from './music'
+import { musicUrl, type PrivateMusic, type StoryMusic } from './music'
 import { YouTubePlayer } from './YouTubePlayer'
 import { youtubeVideoId } from './youtube'
 
@@ -55,11 +55,24 @@ export function YouTubeMusic({
         referrerPolicy="no-referrer"
       />
     )
+  if (publicCopy) {
+    return (
+      <div className="story-youtube">
+        <a
+          className="story-youtube-toggle"
+          href={musicUrl(value)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open video on YouTube (opens in a new tab)"
+        >
+          {artwork}
+        </a>
+      </div>
+    )
+  }
+
   return (
-    <section
-      className={publicCopy ? 'story-youtube' : 'story-youtube editor-youtube'}
-      aria-label="Story music"
-    >
+    <section className="story-youtube editor-youtube" aria-label="Story music">
       <button
         type="button"
         className="story-youtube-toggle"
