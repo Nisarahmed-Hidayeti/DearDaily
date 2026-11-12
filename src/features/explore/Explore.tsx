@@ -198,6 +198,7 @@ export function PublishedStory() {
   const [story, setStory] = useState<CommunityStory | null>(null)
   const [status, setStatus] = useState('loading')
   const [related, setRelated] = useState<CommunityStory[]>([])
+  const [musicFooter, setMusicFooter] = useState<HTMLDivElement | null>(null)
   useEffect(() => {
     if (!client || !id) return
     let active = true
@@ -290,6 +291,7 @@ export function PublishedStory() {
                 key={`${story.id}:${story.music.id}`}
                 value={story.music}
                 publicCopy
+                playerTarget={musicFooter}
               />
             )}
           </div>
@@ -306,6 +308,9 @@ export function PublishedStory() {
               </span>
             ))}
           </div>
+          {persistentMusicEnabled && story.music?.provider === 'youtube' && (
+            <div className="story-music-footer" ref={setMusicFooter} />
+          )}
           {communityEnabled && <ReportStory id={story.id} />}
           {!!related.length && (
             <section className="more-by-author">

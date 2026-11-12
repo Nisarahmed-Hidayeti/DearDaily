@@ -15,11 +15,13 @@ export function WritingMusic({
   value: rawValue,
   onChange,
   publicCopy = false,
+  playerTarget,
   disabled = false,
 }: {
   value?: PrivateMusic | StoryMusic | null
   onChange?: (value: PrivateMusic | null) => void
   publicCopy?: boolean
+  playerTarget?: HTMLDivElement | null
   disabled?: boolean
 }) {
   let value: PrivateMusic | StoryMusic | null = null
@@ -57,6 +59,7 @@ export function WritingMusic({
         onChange={onChange}
         disabled={disabled}
         publicCopy={publicCopy}
+        playerTarget={playerTarget}
       />
     )
   return (

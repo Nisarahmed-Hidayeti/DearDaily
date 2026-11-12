@@ -1,4 +1,11 @@
-import { render, screen, waitFor, cleanup } from '@testing-library/react'
+import {
+  render,
+  screen,
+  waitFor,
+  cleanup,
+  act,
+  within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, expect, it, vi } from 'vitest'
 import { WritingMusic } from './WritingMusic'
@@ -132,4 +139,45 @@ it('public readers have playback but no mutation or sharing controls when metada
     screen.getByRole('button', { name: 'Close YouTube player' }),
   )
   expect(screen.queryByTitle('YouTube music player')).toBeNull()
+})
+
+it('places the player in the story footer and waits for visibility before starting', async () => {
+  let reportVisibility: (ratio: number) => void = () => {}
+  vi.stubGlobal(
+    'IntersectionObserver',
+    class {
+      constructor(callback: IntersectionObserverCallback) {
+        reportVisibility = (intersectionRatio) =>
+          callback(
+            [{ intersectionRatio } as IntersectionObserverEntry],
+            this as unknown as IntersectionObserver,
+          )
+      }
+      observe() {}
+      disconnect() {}
+    },
+  )
+  const footer = document.createElement('div')
+  const { container } = render(
+    <WritingMusic
+      publicCopy
+      playerTarget={footer}
+      value={{ provider: 'youtube', kind: 'video', id: selection.id }}
+    />,
+  )
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Play YouTube video' }),
+  )
+  act(() => reportVisibility(0.5))
+  expect(within(footer).queryByTitle('YouTube music player')).toBeNull()
+  act(() => reportVisibility(0.9))
+  expect(within(footer).getByTitle('YouTube music player')).toHaveAttribute(
+    'src',
+    expect.stringContaining('autoplay=1'),
+  )
+  expect(within(container).queryByTitle('YouTube music player')).toBeNull()
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Close YouTube player' }),
+  )
+  expect(footer).toBeEmptyDOMElement()
 })
