@@ -52,7 +52,12 @@ export function WritingMusic({
   }, [entity, loaded])
   if (value?.provider === 'youtube')
     return (
-      <YouTubeMusic value={value} onChange={onChange} disabled={disabled} />
+      <YouTubeMusic
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        publicCopy={publicCopy}
+      />
     )
   return (
     <section className="writing-music" aria-label="Writing music">

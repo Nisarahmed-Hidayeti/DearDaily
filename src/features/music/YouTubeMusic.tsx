@@ -9,10 +9,12 @@ export function YouTubeMusic({
   value,
   onChange,
   disabled,
+  publicCopy,
 }: {
   value: StoryMusic | PrivateMusic
   onChange?: (value: PrivateMusic | null) => void
   disabled: boolean
+  publicCopy: boolean
 }) {
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [options, setOptions] = useState(false)
@@ -24,6 +26,7 @@ export function YouTubeMusic({
   const playerId = useId()
   const playerOpen = playingId === id
   useEffect(() => {
+    if (publicCopy) return
     const controller = new AbortController()
     // Only the canonical video ID goes to YouTube; never journal text or account credentials.
     void fetch(
@@ -52,49 +55,66 @@ export function YouTubeMusic({
         /* Unavailable metadata does not prevent official playback. */
       })
     return () => controller.abort()
-  }, [id])
+  }, [id, publicCopy])
   const details = metadata?.id === id ? metadata : null
+  const player = (
+    <div className="youtube-player" id={playerId}>
+      <iframe
+        key={id}
+        title="YouTube music player"
+        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=0&playsinline=1`}
+        width="100%"
+        height="200"
+        allow="encrypted-media; picture-in-picture; fullscreen"
+        allowFullScreen
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+    </div>
+  )
+  const artwork =
+    failedArtwork === id ? (
+      <span className="music-artwork-fallback" aria-hidden="true">
+        ♫
+      </span>
+    ) : (
+      <img
+        onError={() => setFailedArtwork(id)}
+        src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+        alt=""
+        width="72"
+        height="56"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    )
+  if (publicCopy) {
+    return (
+      <section className="story-youtube" aria-label="Story music">
+        <button
+          type="button"
+          className="story-youtube-toggle"
+          aria-label={
+            playerOpen ? 'Close YouTube player' : 'Play YouTube video'
+          }
+          aria-expanded={playerOpen}
+          aria-controls={playerOpen ? playerId : undefined}
+          onClick={() => setPlayingId(playerOpen ? null : id)}
+        >
+          {failedArtwork !== id && artwork}
+          <span className="story-youtube-icon" aria-hidden="true">
+            {playerOpen ? '×' : '▶'}
+          </span>
+        </button>
+        {playerOpen && player}
+      </section>
+    )
+  }
   return (
     <section className="writing-music youtube-music" aria-label="Writing music">
       <div
         className={`music-attachment${playerOpen ? ' music-attachment-open' : ''}`}
       >
-        {playerOpen ? (
-          <div className="youtube-player" id={playerId}>
-            <iframe
-              key={id}
-              title="YouTube music player"
-              src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=0&playsinline=1`}
-              width="100%"
-              height="200"
-              allow="encrypted-media; picture-in-picture; fullscreen"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
-            <a
-              className="tiny"
-              href={musicUrl(value)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Unavailable here? Watch on YouTube ↗
-            </a>
-          </div>
-        ) : failedArtwork === id ? (
-          <span className="music-artwork-fallback" aria-hidden="true">
-            ♫
-          </span>
-        ) : (
-          <img
-            onError={() => setFailedArtwork(id)}
-            src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
-            alt=""
-            width="72"
-            height="56"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-          />
-        )}
+        {playerOpen ? player : artwork}
         <div className="music-attachment-label">
           <a href={musicUrl(value)} target="_blank" rel="noopener noreferrer">
             {details?.title ?? 'YouTube music'}
