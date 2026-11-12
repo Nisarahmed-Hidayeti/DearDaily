@@ -119,18 +119,20 @@ export default function EditorPreview() {
             setIcon(style.icon ?? '')
           }}
         />
-        <WritingMusic value={music} onChange={setMusic} />
         <div className="writer-sheet">
-          <label className="sr-only" htmlFor="workshop-title">
-            Entry title
-          </label>
-          <input
-            id="workshop-title"
-            className="title-input"
-            value={title}
-            maxLength={200}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+          <div className="editor-title-row">
+            <label className="sr-only" htmlFor="workshop-title">
+              Entry title
+            </label>
+            <input
+              id="workshop-title"
+              className="title-input"
+              value={title}
+              maxLength={200}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <WritingMusic value={music} onChange={setMusic} />
+          </div>
           <RichWriter value={document} onChange={setDocument} />
           <VoiceNotes
             notes={notes}
