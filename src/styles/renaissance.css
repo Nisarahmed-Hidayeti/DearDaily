@@ -961,15 +961,20 @@
   font-size: 11px;
   color: var(--muted);
 }
+.music-attachment-open {
+  flex-wrap: wrap;
+}
+.music-attachment-open .music-attachment-label {
+  min-width: min(120px, 100%);
+}
 .youtube-player {
-  margin-top: 12px;
+  flex: 0 0 auto;
+  width: min(100%, 356px);
 }
 .youtube-player iframe {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  min-height: 200px;
+  height: 200px;
   border: 0;
   border-radius: 8px;
 }

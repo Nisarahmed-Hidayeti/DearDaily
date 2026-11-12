@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import type { PrivateMusic, StoryMusic } from './music'
 import { musicUrl } from './music'
 import { spotifyEntity } from './spotify'
@@ -21,6 +21,8 @@ export function YouTubeMusic({
   const [metadata, setMetadata] = useState<Metadata | null>(null)
   const [failedArtwork, setFailedArtwork] = useState<string | null>(null)
   const id = value.id
+  const playerId = useId()
+  const playerOpen = playingId === id
   useEffect(() => {
     const controller = new AbortController()
     // Only the canonical video ID goes to YouTube; never journal text or account credentials.
@@ -54,8 +56,31 @@ export function YouTubeMusic({
   const details = metadata?.id === id ? metadata : null
   return (
     <section className="writing-music youtube-music" aria-label="Writing music">
-      <div className="music-attachment">
-        {failedArtwork === id ? (
+      <div
+        className={`music-attachment${playerOpen ? ' music-attachment-open' : ''}`}
+      >
+        {playerOpen ? (
+          <div className="youtube-player" id={playerId}>
+            <iframe
+              key={id}
+              title="YouTube music player"
+              src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=0&playsinline=1`}
+              width="100%"
+              height="200"
+              allow="encrypted-media; picture-in-picture; fullscreen"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+            <a
+              className="tiny"
+              href={musicUrl(value)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Unavailable here? Watch on YouTube ↗
+            </a>
+          </div>
+        ) : failedArtwork === id ? (
           <span className="music-artwork-fallback" aria-hidden="true">
             ♫
           </span>
@@ -79,10 +104,14 @@ export function YouTubeMusic({
         <button
           type="button"
           className="quiet music-play"
-          aria-label="Play YouTube video"
-          onClick={() => setPlayingId(id)}
+          aria-label={
+            playerOpen ? 'Close YouTube player' : 'Play YouTube video'
+          }
+          aria-expanded={playerOpen}
+          aria-controls={playerOpen ? playerId : undefined}
+          onClick={() => setPlayingId(playerOpen ? null : id)}
         >
-          ▶
+          {playerOpen ? '×' : '▶'}
         </button>
         {onChange && (
           <button
@@ -96,28 +125,6 @@ export function YouTubeMusic({
           </button>
         )}
       </div>
-      {playingId === id && (
-        <div className="youtube-player">
-          <iframe
-            key={id}
-            title="YouTube music player"
-            src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=0&playsinline=1`}
-            width="100%"
-            height="240"
-            allow="encrypted-media; picture-in-picture; fullscreen"
-            allowFullScreen
-            referrerPolicy="strict-origin-when-cross-origin"
-          />
-          <a
-            className="tiny"
-            href={musicUrl(value)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Unavailable here? Watch on YouTube ↗
-          </a>
-        </div>
-      )}
       {options && onChange && (
         <div className="writing-music-options">
           <form
