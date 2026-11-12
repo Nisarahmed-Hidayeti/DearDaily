@@ -1,4 +1,5 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { PrivateMusic, StoryMusic } from './music'
 import { musicUrl } from './music'
 import { spotifyEntity } from './spotify'
@@ -10,11 +11,13 @@ export function YouTubeMusic({
   onChange,
   disabled,
   publicCopy,
+  playerTarget,
 }: {
   value: StoryMusic | PrivateMusic
   onChange?: (value: PrivateMusic | null) => void
   disabled: boolean
   publicCopy: boolean
+  playerTarget?: HTMLDivElement | null
 }) {
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [options, setOptions] = useState(false)
@@ -25,6 +28,29 @@ export function YouTubeMusic({
   const id = value.id
   const playerId = useId()
   const playerOpen = playingId === id
+  const footerPlayer = useRef<HTMLDivElement>(null)
+  const [visiblePlayerId, setVisiblePlayerId] = useState<string | null>(null)
+  useEffect(() => {
+    const slot = footerPlayer.current
+    if (!playerOpen || !playerTarget || !slot) return
+    slot.scrollIntoView?.({ block: 'center' })
+    if (typeof IntersectionObserver === 'undefined') return
+
+    // YouTube requires more than half of the player to be visible before autoplay.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.intersectionRatio <= 0.5) return
+        setVisiblePlayerId(id)
+        observer.disconnect()
+      },
+      { threshold: 0.51 },
+    )
+    observer.observe(slot)
+    return () => observer.disconnect()
+  }, [id, playerOpen, playerTarget])
+  const autoplay =
+    publicCopy &&
+    (playerTarget ? visiblePlayerId === id : playerTarget === undefined)
   useEffect(() => {
     if (publicCopy) return
     const controller = new AbortController()
@@ -62,10 +88,10 @@ export function YouTubeMusic({
       <iframe
         key={id}
         title="YouTube music player"
-        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=${publicCopy ? 1 : 0}&playsinline=1`}
+        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=${autoplay ? 1 : 0}&playsinline=1`}
         width="100%"
         height="200"
-        allow={`${publicCopy ? 'autoplay; ' : ''}encrypted-media; picture-in-picture; fullscreen`}
+        allow={`${autoplay ? 'autoplay; ' : ''}encrypted-media; picture-in-picture; fullscreen`}
         allowFullScreen
         referrerPolicy="strict-origin-when-cross-origin"
       />
@@ -98,14 +124,27 @@ export function YouTubeMusic({
           }
           aria-expanded={playerOpen}
           aria-controls={playerOpen ? playerId : undefined}
-          onClick={() => setPlayingId(playerOpen ? null : id)}
+          onClick={() => {
+            setVisiblePlayerId(null)
+            setPlayingId(playerOpen ? null : id)
+          }}
         >
           {failedArtwork !== id && artwork}
           <span className="story-youtube-icon" aria-hidden="true">
             {playerOpen ? '×' : '▶'}
           </span>
         </button>
-        {playerOpen && player}
+        {playerOpen &&
+          (playerTarget
+            ? createPortal(
+                <div ref={footerPlayer} className="story-footer-player">
+                  {(visiblePlayerId === id ||
+                    typeof IntersectionObserver === 'undefined') &&
+                    player}
+                </div>,
+                playerTarget,
+              )
+            : playerTarget === undefined && player)}
       </section>
     )
   }
