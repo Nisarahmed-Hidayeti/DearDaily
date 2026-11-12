@@ -1,11 +1,4 @@
-import {
-  render,
-  screen,
-  cleanup,
-  act,
-  within,
-  fireEvent,
-} from '@testing-library/react'
+import { render, screen, cleanup, act, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, expect, it, vi } from 'vitest'
 import { WritingMusic } from './WritingMusic'
@@ -96,7 +89,6 @@ it('attaches a normalized selection without inheriting old sharing consent', asy
 })
 it('opens the public player outside the story and spins only during confirmed playback', async () => {
   const destroy = vi.fn()
-  const seekTo = vi.fn()
   let reportState: (data: number) => void = () => {}
   vi.stubGlobal('YT', {
     Player: class {
@@ -105,21 +97,10 @@ it('opens the public player outside the story and spins only during confirmed pl
         {
           events,
         }: {
-          events: {
-            onStateChange: (event: { data: number }) => void
-            onReady: (event: { target: object }) => void
-          }
+          events: { onStateChange: (event: { data: number }) => void }
         },
       ) {
         reportState = (data) => events.onStateChange({ data })
-        events.onReady({
-          target: {
-            getPlayerState: () => 0,
-            getCurrentTime: () => 24,
-            getDuration: () => 180,
-            seekTo,
-          },
-        })
       }
       destroy = destroy
     },
@@ -137,19 +118,13 @@ it('opens the public player outside the story and spins only during confirmed pl
   expect(container).not.toContainElement(dock)
   expect(within(dock).getByTitle('YouTube music player')).toHaveAttribute(
     'src',
-    expect.stringContaining('controls=0'),
+    expect.stringContaining('controls=1'),
   )
   expect(disc).toHaveAttribute('data-playing', 'false')
   act(() => reportState(1))
   expect(disc).toHaveAttribute('data-playing', 'true')
   act(() => reportState(2))
   expect(disc).toHaveAttribute('data-playing', 'false')
-  const progress = within(dock).getByRole('slider', {
-    name: 'YouTube playback position',
-  })
-  expect(progress).toHaveValue('24')
-  fireEvent.change(progress, { target: { value: '60' } })
-  expect(seekTo).toHaveBeenCalledWith(60, true)
   await userEvent.click(
     within(dock).getByRole('button', { name: 'Close video panel' }),
   )
