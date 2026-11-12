@@ -1278,33 +1278,21 @@
   border-radius: 8px;
 }
 
-.youtube-progress {
-  display: block;
-  width: 100%;
-  height: 16px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  accent-color: #ff315d;
-  cursor: pointer;
-}
-
 @media (hover: hover) {
-  .story-player-dock :is(.youtube-progress, .story-player-close) {
+  .story-player-dock .story-player-close {
     opacity: 0;
     pointer-events: none;
   }
 
-  .story-player-dock:hover :is(.youtube-progress, .story-player-close),
-  .story-player-dock :is(.youtube-progress, .story-player-close):focus-visible {
+  .story-player-dock:hover .story-player-close,
+  .story-player-dock .story-player-close:focus-visible {
     opacity: 1;
     pointer-events: auto;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .story-player-dock :is(.youtube-progress, .story-player-close) {
+  .story-player-dock .story-player-close {
     transition: opacity 90ms ease-out;
   }
 }
