@@ -107,7 +107,7 @@ it('attaches a normalized selection without inheriting old sharing consent', asy
   render(<WritingMusic onChange={onChange} />)
   await userEvent.click(screen.getByRole('button', { name: '♫ Music' }))
   await userEvent.type(
-    screen.getByLabelText('YouTube or Spotify link'),
+    screen.getByLabelText('YouTube link'),
     'https://music.youtube.com/watch?v=M7lc1UVf-VE&list=ignored',
   )
   await userEvent.click(screen.getByRole('button', { name: 'Attach music' }))

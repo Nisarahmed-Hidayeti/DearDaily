@@ -776,7 +776,7 @@ function EntryForm({
                   <>
                     <dt>Public music</dt>
                     <dd>
-                      {draft.music && (
+                      {draft.music?.provider === 'youtube' && (
                         <label className="row">
                           <input
                             type="checkbox"
@@ -794,26 +794,17 @@ function EntryForm({
                           Include this music
                         </label>
                       )}
-                      {publicMusic(row?.music) ? (
+                      {row?.music?.provider === 'youtube' &&
+                      publicMusic(row.music) ? (
                         <a
                           href={musicUrl(publicMusic(row?.music)!)}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Approved{' '}
-                          {row?.music?.provider === 'youtube'
-                            ? 'YouTube video'
-                            : `Spotify ${row?.music?.kind}`}
+                          Approved YouTube video
                         </a>
                       ) : (
-                        'None — your music stays private'
-                      )}
-                      {publicMusic(row?.music)?.excerpt && (
-                        <small className="music-moment">
-                          {row!.music!.excerpt!.start}–
-                          {row!.music!.excerpt!.end}s · intended moment,
-                          reference only
-                        </small>
+                        'None'
                       )}
                     </dd>
                   </>

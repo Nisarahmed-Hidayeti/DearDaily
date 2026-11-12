@@ -2,7 +2,6 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { PrivateMusic, StoryMusic } from './music'
 import { musicUrl } from './music'
-import { spotifyEntity } from './spotify'
 import { youtubeVideoId } from './youtube'
 
 type Metadata = { id: string; title: string; author: string }
@@ -33,7 +32,6 @@ export function YouTubeMusic({
   useEffect(() => {
     const slot = footerPlayer.current
     if (!playerOpen || !playerTarget || !slot) return
-    slot.scrollIntoView?.({ block: 'center' })
     if (typeof IntersectionObserver === 'undefined') return
 
     // YouTube requires more than half of the player to be visible before autoplay.
@@ -189,27 +187,17 @@ export function YouTubeMusic({
           <form
             onSubmit={(event) => {
               event.preventDefault()
-              const next = youtubeVideoId(url),
-                spotify = spotifyEntity(url)
-              if (next)
-                onChange({
-                  provider: 'youtube',
-                  kind: 'video',
-                  id: next,
-                  share: false,
-                })
-              else if (spotify) {
-                const [, kind, trackId] = spotify.split(':')
-                onChange({
-                  provider: 'spotify',
-                  kind: kind as StoryMusic['kind'],
-                  id: trackId,
-                  share: false,
-                })
-              } else {
-                setError('Paste a YouTube video or Spotify link.')
+              const next = youtubeVideoId(url)
+              if (!next) {
+                setError('Paste a YouTube video link.')
                 return
               }
+              onChange({
+                provider: 'youtube',
+                kind: 'video',
+                id: next,
+                share: false,
+              })
               setPlayingId(null)
               setOptions(false)
               setError('')
