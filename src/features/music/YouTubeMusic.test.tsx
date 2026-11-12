@@ -55,16 +55,14 @@ it('validates saved snapshots and retains explicit sharing without private prefe
     expect(() => validateMusic(bad, true)).toThrow()
 })
 it('loads permitted metadata safely and reveals a visible official non-autoplay player only on interaction', async () => {
-  const fetcher = vi
-    .fn()
-    .mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        title: 'A synthetic song',
-        author_name: 'Test channel',
-        html: '<script>unsafe</script>',
-      }),
-    })
+  const fetcher = vi.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      title: 'A synthetic song',
+      author_name: 'Test channel',
+      html: '<script>unsafe</script>',
+    }),
+  })
   vi.stubGlobal('fetch', fetcher)
   const { rerender } = render(
     <WritingMusic value={selection} onChange={() => {}} />,
@@ -122,7 +120,10 @@ it('public readers have playback but no mutation or sharing controls when metada
     screen.getByRole('button', { name: 'Play YouTube video' }),
   )
   expect(screen.getByTitle('YouTube music player')).toBeVisible()
-  expect(
-    screen.getByRole('link', { name: /Unavailable here/ }),
-  ).toHaveAttribute('href', musicUrl(selection))
+  expect(screen.queryByRole('link')).toBeNull()
+  expect(screen.queryByText('YouTube music')).toBeNull()
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Close YouTube player' }),
+  )
+  expect(screen.queryByTitle('YouTube music player')).toBeNull()
 })

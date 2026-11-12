@@ -274,14 +274,25 @@ export function PublishedStory() {
               {entryIcon(story.writing_document, story.page_icon)}
             </div>
           )}
-          {persistentMusicEnabled && story.music && (
-            <WritingMusic
-              key={`${story.id}:${story.music.id}`}
-              value={story.music}
-              publicCopy
-            />
-          )}
-          <h1>{story.title}</h1>
+          {persistentMusicEnabled &&
+            story.music &&
+            story.music.provider !== 'youtube' && (
+              <WritingMusic
+                key={`${story.id}:${story.music.id}`}
+                value={story.music}
+                publicCopy
+              />
+            )}
+          <div className="story-title-row">
+            <h1>{story.title}</h1>
+            {persistentMusicEnabled && story.music?.provider === 'youtube' && (
+              <WritingMusic
+                key={`${story.id}:${story.music.id}`}
+                value={story.music}
+                publicCopy
+              />
+            )}
+          </div>
           <article>
             <RichRead document={story.writing_document} fallback={story.body} />
           </article>
