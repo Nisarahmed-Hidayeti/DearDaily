@@ -261,13 +261,17 @@
   font-size: clamp(36px, 5vw, 64px);
   line-height: 1.12;
   font-weight: 400;
-  margin-block: 20px 28px;
+  margin-block: 20px 8px;
 }
 .detail > article {
   max-width: var(--reading-width);
-  margin: 32px auto;
+  margin: 16px auto 32px;
   font-size: 18px;
   line-height: 1.8;
+}
+.detail > article > :first-child,
+.detail .rich-read .tiptap > :first-child {
+  margin-block-start: 0;
 }
 .detail .rich-read .tiptap {
   font-family: var(--serif);
@@ -1170,7 +1174,7 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: clamp(60px, 13vw, 168px);
+  width: clamp(52px, 8vw, 96px);
   aspect-ratio: 1;
   padding: 0;
   overflow: hidden;
@@ -1287,20 +1291,20 @@
 }
 
 @media (hover: hover) {
-  .youtube-progress {
+  .story-player-dock :is(.youtube-progress, .story-player-close) {
     opacity: 0;
     pointer-events: none;
   }
 
-  .story-player-dock:hover .youtube-progress,
-  .youtube-progress:focus-visible {
+  .story-player-dock:hover :is(.youtube-progress, .story-player-close),
+  .story-player-dock :is(.youtube-progress, .story-player-close):focus-visible {
     opacity: 1;
     pointer-events: auto;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .youtube-progress {
+  .story-player-dock :is(.youtube-progress, .story-player-close) {
     transition: opacity 90ms ease-out;
   }
 }
