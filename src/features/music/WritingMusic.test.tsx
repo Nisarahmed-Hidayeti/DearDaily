@@ -27,7 +27,7 @@ it('rejects Spotify links and lets the writer remove a legacy attachment', async
       onChange={onChange}
     />,
   )
-  await userEvent.click(screen.getByRole('button', { name: '♫ Music' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Add music' }))
   await userEvent.type(
     screen.getByLabelText('YouTube link'),
     'https://open.spotify.com/track/' + oldSelection.id,

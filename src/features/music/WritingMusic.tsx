@@ -7,13 +7,11 @@ export function WritingMusic({
   value: rawValue,
   onChange,
   publicCopy = false,
-  playerTarget,
   disabled = false,
 }: {
   value?: PrivateMusic | StoryMusic | null
   onChange?: (value: PrivateMusic | null) => void
   publicCopy?: boolean
-  playerTarget?: HTMLDivElement | null
   disabled?: boolean
 }) {
   let value: PrivateMusic | StoryMusic | null = null
@@ -33,22 +31,25 @@ export function WritingMusic({
         onChange={onChange}
         disabled={disabled}
         publicCopy={publicCopy}
-        playerTarget={playerTarget}
       />
     )
   }
   if (publicCopy || !onChange || !youtubeMusicEnabled) return null
 
   return (
-    <section className="writing-music" aria-label="Writing music">
+    <section
+      className="story-youtube editor-youtube"
+      aria-label="Writing music"
+    >
       <button
         type="button"
-        className="text-button"
+        className="story-youtube-toggle"
+        aria-label="Add music"
         aria-expanded={open}
         disabled={disabled}
         onClick={() => setOpen(!open)}
       >
-        ♫ Music
+        <span aria-hidden="true">♫</span>
       </button>
       {open && (
         <div className="writing-music-options">
