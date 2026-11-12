@@ -1274,6 +1274,37 @@
   border-radius: 8px;
 }
 
+.youtube-progress {
+  display: block;
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  accent-color: #ff315d;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .youtube-progress {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .story-player-dock:hover .youtube-progress,
+  .youtube-progress:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .youtube-progress {
+    transition: opacity 90ms ease-out;
+  }
+}
+
 .story-player-close {
   display: block;
   margin: 0 0 4px auto;
