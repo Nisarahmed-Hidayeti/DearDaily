@@ -119,7 +119,13 @@ it('public readers have playback but no mutation or sharing controls when metada
   await userEvent.click(
     screen.getByRole('button', { name: 'Play YouTube video' }),
   )
-  expect(screen.getByTitle('YouTube music player')).toBeVisible()
+  const player = screen.getByTitle('YouTube music player')
+  expect(player).toBeVisible()
+  expect(player).toHaveAttribute(
+    'src',
+    `https://www.youtube-nocookie.com/embed/${selection.id}?autoplay=1&playsinline=1`,
+  )
+  expect(player.getAttribute('allow')).toContain('autoplay')
   expect(screen.queryByRole('link')).toBeNull()
   expect(screen.queryByText('YouTube music')).toBeNull()
   await userEvent.click(

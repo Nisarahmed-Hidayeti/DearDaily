@@ -1200,10 +1200,7 @@
 }
 
 .story-youtube {
-  display: grid;
-  justify-items: end;
-  gap: 8px;
-  max-width: 100%;
+  position: relative;
   margin: 20px 0 16px auto;
 }
 
@@ -1242,7 +1239,13 @@
 }
 
 .story-youtube .youtube-player {
+  position: absolute;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  z-index: 2;
   width: 200px;
+  background: #000;
+  border-radius: 12px;
 }
 
 .story-youtube iframe {

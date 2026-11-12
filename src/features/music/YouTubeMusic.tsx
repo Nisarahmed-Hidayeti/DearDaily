@@ -62,10 +62,10 @@ export function YouTubeMusic({
       <iframe
         key={id}
         title="YouTube music player"
-        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=0&playsinline=1`}
+        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=${publicCopy ? 1 : 0}&playsinline=1`}
         width="100%"
         height="200"
-        allow="encrypted-media; picture-in-picture; fullscreen"
+        allow={`${publicCopy ? 'autoplay; ' : ''}encrypted-media; picture-in-picture; fullscreen`}
         allowFullScreen
         referrerPolicy="strict-origin-when-cross-origin"
       />
