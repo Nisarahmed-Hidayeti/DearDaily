@@ -1252,14 +1252,6 @@
   border-radius: 8px;
 }
 
-.story-player-close {
-  display: block;
-  margin: 0 0 4px auto;
-  min-width: 36px;
-  min-height: 36px;
-  background: var(--surface);
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .story-youtube-toggle img {
     animation: music-disc-spin 12s linear infinite paused;

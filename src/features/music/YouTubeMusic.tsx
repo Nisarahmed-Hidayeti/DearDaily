@@ -1,7 +1,7 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { PrivateMusic, StoryMusic } from './music'
-import { YouTubePlayer } from './YouTubePlayer'
+import { YouTubePlayer, type YouTubePlayback } from './YouTubePlayer'
 import { youtubeVideoId } from './youtube'
 
 export function YouTubeMusic({
@@ -23,6 +23,7 @@ export function YouTubeMusic({
   const [playing, setPlaying] = useState(false)
   const id = value.id
   const playerId = useId()
+  const playback = useRef<YouTubePlayback>(null)
   const playerOpen = playingId === id
   useEffect(() => {
     if (!playerOpen) return
@@ -36,8 +37,14 @@ export function YouTubeMusic({
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [playerOpen])
   function togglePlayer() {
-    setPlaying(false)
-    setPlayingId(playerOpen ? null : id)
+    if (!playerOpen) {
+      setPlaying(false)
+      setPlayingId(id)
+    } else if (playing) {
+      playback.current?.pauseVideo()
+    } else {
+      playback.current?.playVideo()
+    }
   }
   const artwork =
     failedArtwork === id ? (
@@ -64,28 +71,26 @@ export function YouTubeMusic({
         type="button"
         className="story-youtube-toggle"
         data-playing={playerOpen && playing}
-        aria-label={playerOpen ? 'Close YouTube player' : 'Play YouTube video'}
-        aria-expanded={playerOpen}
+        aria-label={
+          playerOpen && playing ? 'Pause YouTube video' : 'Play YouTube video'
+        }
         aria-controls={playerOpen ? playerId : undefined}
         onClick={togglePlayer}
       >
         {failedArtwork !== id && artwork}
         <span className="story-youtube-icon" aria-hidden="true">
-          {playerOpen ? '×' : '▶'}
+          {playerOpen && playing ? '❚❚' : '▶'}
         </span>
       </button>
       {playerOpen &&
         createPortal(
           <aside className="story-player-dock" aria-label="YouTube playback">
-            <button
-              type="button"
-              className="quiet story-player-close"
-              aria-label="Close video panel"
-              onClick={togglePlayer}
-            >
-              ×
-            </button>
-            <YouTubePlayer id={id} playerId={playerId} onPlaying={setPlaying} />
+            <YouTubePlayer
+              id={id}
+              playerId={playerId}
+              onPlaying={setPlaying}
+              playback={playback}
+            />
           </aside>,
           document.body,
         )}
