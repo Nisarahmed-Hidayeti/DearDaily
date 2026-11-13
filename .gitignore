@@ -43,5 +43,7 @@ coverage/
 # Android signing material and local release outputs
 *.jks
 *.keystore
+*.p12
+*.pfx
 *.apk
 *.aab

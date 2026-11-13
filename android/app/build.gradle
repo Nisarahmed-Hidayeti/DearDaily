@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+def signingVariables = ['DEARDAILY_KEYSTORE', 'DEARDAILY_KEY_ALIAS',
+                        'DEARDAILY_STORE_PASSWORD', 'DEARDAILY_KEY_PASSWORD']
+def releaseCredentials = signingVariables.collectEntries { [(it): providers.environmentVariable(it).orNull] }
+def signingConfigured = releaseCredentials.values().every { it }
+if (!signingConfigured && releaseCredentials.values().any { it }) {
+    throw new GradleException('Supply all four DearDaily release signing variables or leave all unset.')
+}
+
 android {
     namespace = "app.deardaily.mobile"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +24,19 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (signingConfigured) {
+            ownerRelease {
+                storeFile = rootProject.file(releaseCredentials.DEARDAILY_KEYSTORE)
+                storePassword = releaseCredentials.DEARDAILY_STORE_PASSWORD
+                keyAlias = releaseCredentials.DEARDAILY_KEY_ALIAS
+                keyPassword = releaseCredentials.DEARDAILY_KEY_PASSWORD
+            }
+        }
+    }
     buildTypes {
         release {
+            if (signingConfigured) signingConfig = signingConfigs.ownerRelease
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
