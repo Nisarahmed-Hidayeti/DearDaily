@@ -15,9 +15,16 @@
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
-    "db:stop": "supabase stop"
+    "db:stop": "supabase stop",
+    "android:sync": "npm run build -- --mode android && cap sync android",
+    "android:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
+    "android:bundle": "npm run android:sync && cd android && ./gradlew bundleRelease"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
+    "@capacitor/core": "^8.6.2",
     "@supabase/supabase-js": "^2.118.0",
     "@tiptap/extension-placeholder": "^3.32.0",
     "@tiptap/extension-task-item": "^3.32.0",
@@ -32,6 +39,7 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "@cf-wasm/photon": "^0.4.0",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.3",

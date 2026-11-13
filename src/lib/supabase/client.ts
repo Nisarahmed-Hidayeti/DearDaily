@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { persistentAuthStorage } from './sessionStorage'
 import { readAuthConfig } from './config'
+import { isAndroidApp, nativeAuthStorage } from './nativeStorage'
 
 export const authConfig = readAuthConfig(import.meta.env)
 // Supabase owns session storage, refresh, PKCE, and callback verification.
@@ -13,8 +14,8 @@ function configuredClient() {
         flowType: 'pkce',
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: persistentAuthStorage,
+        detectSessionInUrl: !isAndroidApp,
+        storage: isAndroidApp ? nativeAuthStorage : persistentAuthStorage,
       },
     })
   } catch {

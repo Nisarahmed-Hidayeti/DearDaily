@@ -2,7 +2,7 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import hooks from 'eslint-plugin-react-hooks'
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules'] },
+  { ignores: ['dist', 'node_modules', 'android'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

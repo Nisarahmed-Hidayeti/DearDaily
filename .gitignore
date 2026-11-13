@@ -39,3 +39,9 @@ node_modules/
 dist/
 coverage/
 *.log
+
+# Android signing material and local release outputs
+*.jks
+*.keystore
+*.apk
+*.aab

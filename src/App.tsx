@@ -1,3 +1,4 @@
+import { AndroidAuthLinks } from './features/auth/AndroidAuthLinks'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { AppearanceProvider } from './features/appearance/AppearanceProvider'
 import { LoadingState } from './components/Shared'
@@ -53,6 +54,7 @@ import { ThemeProvider } from './features/theme/ThemeProvider'
 export function AppRoutes({ client }: { client?: SupabaseClient } = {}) {
   return (
     <AuthProvider client={client}>
+      <AndroidAuthLinks />
       <ThemedRoutes />
     </AuthProvider>
   )

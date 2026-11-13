@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import type { ReactNode } from 'react'
 import type { Session, SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase/client'
@@ -130,16 +137,17 @@ export function AuthProvider({
       return false
     }
   }
+  const beginSignIn = useCallback(() => {
+    signedOutLocally.current = false
+    intentVersion.current++
+  }, [])
   return (
     <AuthContext.Provider
       value={{
         ...state,
         client,
         signOut,
-        beginSignIn: () => {
-          signedOutLocally.current = false
-          intentVersion.current++
-        },
+        beginSignIn,
         finishRecovery: () =>
           setState((previous) => ({ ...previous, recovery: false })),
       }}
