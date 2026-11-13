@@ -44,7 +44,7 @@ public class SessionVault extends Plugin {
 
     private String key(PluginCall call) {
         String key = call.getString("key", "");
-        if (!key.matches("sb-[a-z0-9-]+-auth-token(?:-[a-z0-9-]+)?")) {
+        if (!key.matches("sb-[a-z0-9-]+-auth-token(?:-user|-code-verifier|-flows-code-verifier|-flow-[a-zA-Z0-9_-]{8,64}-code-verifier)?")) {
             throw new IllegalArgumentException();
         }
         return key;
