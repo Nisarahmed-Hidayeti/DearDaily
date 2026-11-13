@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
@@ -21,3 +22,13 @@ if (
       <App />
     </StrictMode>,
   )
+
+if (
+  import.meta.env.PROD &&
+  !Capacitor.isNativePlatform() &&
+  'serviceWorker' in navigator
+) {
+  void navigator.serviceWorker.register('/sw.js').catch(() => {
+    // The website remains usable if service workers are disabled.
+  })
+}

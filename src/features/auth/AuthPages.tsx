@@ -1,3 +1,6 @@
+import { Browser } from '@capacitor/browser'
+import { androidAuthEnabled, androidAuthRedirect } from './AndroidAuthLinks'
+import { isAndroidApp } from '../../lib/supabase/nativeStorage'
 import { journalEnabled } from '../journal/journalApi'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
@@ -35,6 +38,15 @@ export function AuthPage({ mode }: { mode: Mode }) {
   const [error, setError] = useState('')
   const [captchaToken, setCaptchaToken] = useState('')
   const [challenge, setChallenge] = useState(0)
+  const googleAvailable =
+    authConfig?.googleEnabled && (!isAndroidApp || androidAuthEnabled)
+  const callback = (recovery = false) =>
+    androidAuthEnabled
+      ? androidAuthRedirect(recovery)
+      : authRedirect(
+          recovery ? '/auth/reset-password' : '/auth/callback',
+          isAndroidApp ? 'https://deardailyy.netlify.app' : undefined,
+        )
   const captchaSiteKey = authConfig?.captchaSiteKey
   const needsBotCheck = !!captchaSiteKey && mode !== 'reset-password'
   useEffect(() => {
@@ -81,7 +93,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
           email: email.trim(),
           password,
           options: {
-            emailRedirectTo: authRedirect('/auth/callback'),
+            emailRedirectTo: callback(),
             captchaToken,
           },
         })
@@ -94,7 +106,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         )
       } else if (mode === 'forgot-password') {
         const result = await client.auth.resetPasswordForEmail(email.trim(), {
-          redirectTo: authRedirect('/auth/reset-password'),
+          redirectTo: callback(true),
           ...(needsBotCheck ? { captchaToken } : {}),
         })
         if (result.error) throw result.error
@@ -156,29 +168,33 @@ export function AuthPage({ mode }: { mode: Mode }) {
     }
   }
   async function google() {
-    if (
-      !client ||
-      busy ||
-      loading ||
-      signupClosed ||
-      !authConfig?.googleEnabled
-    )
-      return
+    if (!client || busy || loading || signupClosed || !googleAvailable) return
     setBusy(true)
     setError('')
     try {
       beginSignIn()
-      const { error } = await client.auth.signInWithOAuth({
+      const { data, error } = await client.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: authRedirect('/auth/callback'),
+          redirectTo: callback(),
           scopes: 'openid email profile',
+          ...(androidAuthEnabled ? { skipBrowserRedirect: true } : {}),
           ...(mode === 'sign-up'
             ? { queryParams: { prompt: 'select_account' } }
             : {}),
         },
       })
       if (error) throw error
+      if (androidAuthEnabled) {
+        if (
+          !data.url ||
+          !authConfig ||
+          new URL(data.url).origin !== authConfig.url
+        )
+          throw new Error()
+        await Browser.open({ url: data.url })
+        setBusy(false)
+      }
     } catch {
       setError(
         'Google sign-in is unavailable. Try again later or use your original sign-in method.',
@@ -348,27 +364,22 @@ export function AuthPage({ mode }: { mode: Mode }) {
           <button
             className="button secondary"
             disabled={
-              !client ||
-              busy ||
-              loading ||
-              signupClosed ||
-              !authConfig?.googleEnabled
+              !client || busy || loading || signupClosed || !googleAvailable
             }
             aria-describedby={
-              !authConfig?.googleEnabled ? 'google-availability' : undefined
+              !googleAvailable ? 'google-availability' : undefined
             }
             onClick={google}
           >
             Continue with Google
           </button>
         )}
-        {(mode === 'sign-in' || mode === 'sign-up') &&
-          !authConfig?.googleEnabled && (
-            <p id="google-availability" className="tiny muted">
-              Google sign-in is being prepared. Existing testers can use email
-              and password.
-            </p>
-          )}
+        {(mode === 'sign-in' || mode === 'sign-up') && !googleAvailable && (
+          <p id="google-availability" className="tiny muted">
+            Google sign-in is being prepared. Existing testers can use email and
+            password.
+          </p>
+        )}
         <nav className="auth-links" aria-label="Account help">
           {mode !== 'sign-in' && <Link to="/auth/sign-in">Sign in</Link>}
           {mode === 'sign-in' && (

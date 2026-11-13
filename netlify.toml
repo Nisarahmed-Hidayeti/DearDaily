@@ -28,3 +28,8 @@ VITE_ENABLE_LIVE_RHYTHM = "true"
   for = "/auth/*"
   [headers.values]
     Cache-Control = "no-store"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"

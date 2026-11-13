@@ -1,3 +1,5 @@
+import { SystemBars, SystemBarsStyle } from '@capacitor/core'
+import { isAndroidApp } from '../../lib/supabase/nativeStorage'
 import { flushSync } from 'react-dom'
 import {
   createContext,
@@ -87,6 +89,11 @@ export function ThemeProvider({
     const color = getComputedStyle(document.documentElement)
       .getPropertyValue('--bg')
       .trim()
+    if (isAndroidApp) {
+      void SystemBars.setStyle({
+        style: SystemBarsStyle.Dark,
+      }).catch(() => {})
+    }
     if (color)
       document
         .querySelector('meta[name="theme-color"]')
