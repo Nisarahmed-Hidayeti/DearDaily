@@ -34,3 +34,41 @@ Production export and restore require privileged database and Storage access. Th
 The native callback passes Supabase's per-flow PKCE identifier to the SDK. The encrypted Android store accepts the SDK's per-flow verifier and index keys. The production host currently serves the app HTML at the Digital Asset Links path, and Android has no verified association. A release certificate controlled by the owner is needed to publish the association. The two hosted media gateways currently reject `https://localhost` with HTTP 403 and require authentication from the website origin. Do not add an origin wildcard or change JWT or Storage policies. Run `supabase/manual/media_maintenance_inventory.sql` to obtain read-only bucket and queue counts before evaluating a cleanup schedule.
 
 For the phone acceptance check, install the build over the same-signed preview. Verify Android opens both exact callback paths after domain association. Complete password login and signup with Turnstile, Google login, email verification and recovery using synthetic accounts. Relaunch, save and reopen a private entry, upload an image and a voice clip, and publish a synthetic snapshot. Check it from the website and confirm a separate account cannot read its private source or assets. Unpublish, log out, relaunch, and verify the journal is inaccessible. Check the file picker, microphone prompt, rotation and system Back on the phone.
+
+### Owner signing and recovery handoff
+
+In a private Bash terminal, create or reuse a release key on an encrypted volume. Keep an independent encrypted copy of the keystore and store its password in your password manager. For a new key, use:
+
+```bash
+umask 077
+keytool -genkeypair -storetype PKCS12 -keystore /path/on/encrypted-volume/deardaily-release.p12 -alias deardaily -keyalg RSA -keysize 3072 -validity 10000
+export DEARDAILY_KEYSTORE=/path/on/encrypted-volume/deardaily-release.p12
+export DEARDAILY_KEY_ALIAS=deardaily
+read -rs -p 'Keystore password: ' DEARDAILY_STORE_PASSWORD
+printf '\n'
+export DEARDAILY_STORE_PASSWORD
+export DEARDAILY_KEY_PASSWORD="$DEARDAILY_STORE_PASSWORD"
+npm run android:sync
+(cd android && ./gradlew assembleRelease)
+unset DEARDAILY_STORE_PASSWORD DEARDAILY_KEY_PASSWORD
+sdk="$HOME/.local/share/deardaily-android-sdk/build-tools/36.0.0"
+node scripts/generate-android-assetlinks.mjs android/app/build/outputs/apk/release/app-release.apk "$sdk/apksigner" "$sdk/aapt"
+```
+
+The generator uses the public fingerprint from the signed APK. Deploy the generated file with the site, check that it returns JSON over HTTPS, then run `adb shell pm verify-app-links --re-verify app.deardaily.mobile` and confirm `adb shell pm get-app-links app.deardaily.mobile` shows `verified`. A device with the debug preview must remove that preview before installing a release signed with a different key. Use a test device and confirm cloud saves before uninstalling.
+
+In [Supabase URL Configuration](https://supabase.com/dashboard/project/tauqionxprutoahymjgu/auth/url-configuration), retain the existing entries and add the two exact mobile callback URLs above. In [Cloudflare Turnstile](https://dash.cloudflare.com/), inspect the DearDaily widget's hostnames and test a real challenge in the WebView before release. In [Supabase Edge Function Secrets](https://supabase.com/dashboard/project/tauqionxprutoahymjgu/functions/secrets), preserve the exact existing `MEDIA_ALLOWED_ORIGINS` value privately for rollback and append `https://localhost` only after the authenticated native upload test is ready. Verify both gateways deny anonymous writes and unapproved origins and still allow the website. Restore the previous value if a check fails.
+
+For an owner-run backup, put PostgreSQL connection parameters in a private libpq service file and the password in a separate mode-0600 password file on the encrypted volume. Export with the Supabase CLI from the encrypted destination, using the service as the connection string:
+
+```bash
+umask 077
+export PGSERVICEFILE=/path/on/encrypted-volume/pg_service.conf
+export PGPASSFILE=/path/on/encrypted-volume/pgpass
+supabase db dump --db-url 'postgresql:///?service=deardaily-backup' --role-only -f roles.sql
+supabase db dump --db-url 'postgresql:///?service=deardaily-backup' -f schema.sql
+supabase db dump --db-url 'postgresql:///?service=deardaily-backup' --data-only --use-copy -f data.sql
+sha256sum roles.sql schema.sql data.sql > database.sha256
+```
+
+If the CLI cannot pass through libpq service parameters, use the explicit session-pooler URI without its password and supply the password via the private password file. Follow the Storage export and isolated restore procedure above. No production export or rehearsal was performed in this increment.
