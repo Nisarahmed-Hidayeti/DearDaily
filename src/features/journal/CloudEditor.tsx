@@ -248,17 +248,6 @@ function EntryForm({
               {busy ? 'Saving…' : 'Save now'}
             </button>
             <button
-              className="quiet focus-toggle"
-              aria-pressed={focus}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                setDetailsOpen(false)
-                setFocus(true)
-              }}
-            >
-              Focus mode
-            </button>
-            <button
               className="quiet"
               aria-pressed={preview}
               onMouseDown={(e) => e.preventDefault()}

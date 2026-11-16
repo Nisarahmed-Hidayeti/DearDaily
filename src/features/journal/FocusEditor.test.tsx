@@ -58,7 +58,6 @@ it(
     await user.paste('Synthetic focus words')
     expect(body).toHaveTextContent('Synthetic focus words')
     const before = document.getSelection()?.anchorOffset
-    await userEvent.click(screen.getByRole('button', { name: 'Focus mode' }))
     expect(document.querySelector('.writer-focus')).not.toBeNull()
     expect(screen.getByRole('textbox', { name: 'Journal body' })).toBe(body)
     expect(body).toHaveFocus()
@@ -92,7 +91,6 @@ it('dismisses the slash menu before Escape exits immersive focus', async () => {
     { timeout: 4000 },
   )
   await userEvent.click(body)
-  await userEvent.click(screen.getByRole('button', { name: 'Focus mode' }))
   await userEvent.keyboard('/')
   expect(
     screen.getByRole('listbox', { name: 'Block commands' }),
