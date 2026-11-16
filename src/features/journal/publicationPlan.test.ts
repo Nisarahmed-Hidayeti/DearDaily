@@ -49,6 +49,7 @@ it('proposes bounded shared metadata without changing the private values or opti
     category: 'Study',
     tags: 'tag0,tag1,tag2,tag3,tag4',
     byline: false,
+    voiceNotes: false,
   })
   expect(draft.tags).toHaveLength(10)
   expect(validatePublicationPlan(proposal)).toEqual(proposal)

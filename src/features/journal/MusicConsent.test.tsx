@@ -12,6 +12,11 @@ vi.mock('../music/music', async (original) => ({
   ...(await original<typeof import('../music/music')>()),
   persistentMusicEnabled: true,
 }))
+vi.mock('../community/communityApi', async (original) => ({
+  ...(await original<typeof import('../community/communityApi')>()),
+  communityEnabled: true,
+  myProfile: vi.fn(async () => null),
+}))
 vi.mock('./useJournalEntry', () => ({
   useJournalEntry: () => {
     const row = {
@@ -43,13 +48,12 @@ vi.mock('./useJournalEntry', () => ({
     }
   },
 }))
-it('exposes music consent in the final publish review without publishing automatically', async () => {
+it('exposes music consent in Share & details without publishing automatically', async () => {
   render(
     <MemoryRouter>
       <CloudEditor />
     </MemoryRouter>,
   )
-  await userEvent.click(screen.getByRole('button', { name: 'Publish story' }))
   const choice = screen.getByRole('checkbox', { name: 'Include this music' })
   expect(choice).not.toBeChecked()
   await userEvent.click(choice)

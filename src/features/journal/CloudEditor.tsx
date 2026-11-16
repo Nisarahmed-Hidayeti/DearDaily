@@ -7,7 +7,7 @@ import { MoodPicker } from './MoodPicker'
 import { journalCategories } from './entryMetadata'
 import { uploadEntryPhoto } from './entryPhotoUpload'
 import { WritingMusic } from '../music/WritingMusic'
-import { persistentMusicEnabled, musicUrl } from '../music/music'
+import { persistentMusicEnabled } from '../music/music'
 import { entryIcon } from '../rich-editor/emojis'
 import { EntryDetails } from './EntryDetails'
 import {
@@ -193,6 +193,7 @@ function EntryForm({
           category: state.publicMetadata.public_category ?? 'Uncategorized',
           tags: state.publicMetadata.public_tags?.join(', ') ?? '',
           byline: !!state.publicMetadata.public_username,
+          voiceNotes: false,
         }
       : communityEnabled
         ? {
@@ -201,6 +202,7 @@ function EntryForm({
           }
         : defaultPublicationPlan)
   const { category: publicCategory, tags: publicTags, byline } = plan
+  const shareVoiceNotes = plan.voiceNotes ?? false
   const patchPlan = (values: Partial<PublicationPlan>) =>
     setDraft((current) => ({
       ...current,
@@ -567,6 +569,71 @@ function EntryForm({
             </button>
           )}
           <section className="panel">
+            {communityEnabled && (
+              <section aria-label="Public story settings" className="public-story-settings">
+                <h2>Public story</h2>
+                <label htmlFor="public-category">Public category</label>
+                <select
+                  id="public-category"
+                  value={publicCategory}
+                  disabled={!ready || busy}
+                  onChange={(event) => patchPlan({ category: event.target.value })}
+                >
+                  {journalCategories.map((category) => (
+                    <option key={category}>{category}</option>
+                  ))}
+                  <option value="Uncategorized">Exclude category</option>
+                </select>
+                <label htmlFor="public-tags">Public tags</label>
+                <input
+                  id="public-tags"
+                  placeholder="No public tags"
+                  maxLength={154}
+                  disabled={!ready || busy}
+                  value={publicTags}
+                  onChange={(event) => patchPlan({ tags: event.target.value })}
+                />
+                {profile?.visible && (
+                  <label className="publication-check">
+                    <input
+                      type="checkbox"
+                      checked={byline}
+                      disabled={!ready || busy}
+                      onChange={(event) => {
+                        patchPlan({ byline: event.target.checked })
+                        rememberDefault('byline', event.target.checked)
+                      }}
+                    />
+                    Attribute this story to @{profile.username}
+                  </label>
+                )}
+                {persistentMusicEnabled && draft.music?.provider === 'youtube' && (
+                  <label className="publication-check">
+                    <input
+                      type="checkbox"
+                      checked={draft.music.share}
+                      disabled={!ready || busy}
+                      onChange={(event) => {
+                        rememberDefault('music', event.target.checked)
+                        patch({ music: { ...draft.music!, share: event.target.checked } })
+                      }}
+                    />
+                    Include this music
+                  </label>
+                )}
+                {voiceNotesEnabled && approvedVoice(draft.voice_notes).length > 0 && (
+                  <label className="publication-check">
+                    <input
+                      type="checkbox"
+                      checked={shareVoiceNotes}
+                      disabled={!ready || busy}
+                      onChange={(event) => patchPlan({ voiceNotes: event.target.checked })}
+                    />
+                    Include copy of voice notes in public story
+                  </label>
+                )}
+              </section>
+            )}
             <MoodPicker
               value={draft.mood}
               onChange={(mood) => patch({ mood })}
@@ -744,108 +811,6 @@ function EntryForm({
           </p>
           {confirmation === 'publish' && (
             <div>
-              <dl className="publication-receipt">
-                {voiceNotesEnabled && (
-                  <>
-                    <dt>Public voice notes</dt>
-                    <dd>
-                      {approvedVoice(row?.voice_notes)
-                        .map(
-                          (n) =>
-                            `${n.title} (${n.start.toFixed(1)}–${n.end.toFixed(1)}s)`,
-                        )
-                        .join(', ') || 'None — recordings stay private'}
-                    </dd>
-                  </>
-                )}
-                <dt>Public category</dt>
-                <dd>
-                  <select
-                    aria-label="Category to share"
-                    value={publicCategory}
-                    disabled={busy}
-                    onChange={(e) => patchPlan({ category: e.target.value })}
-                  >
-                    <option value="Uncategorized">Exclude category</option>
-                    {journalCategories.map((category) => (
-                      <option key={category}>{category}</option>
-                    ))}
-                  </select>
-                </dd>
-                <dt>Public tags</dt>
-                <dd>
-                  <input
-                    aria-label="Tags to share"
-                    placeholder="No public tags"
-                    maxLength={154}
-                    disabled={busy}
-                    value={publicTags}
-                    onChange={(e) => patchPlan({ tags: e.target.value })}
-                  />
-                </dd>
-                <dt>Public identity</dt>
-                <dd>
-                  {profile?.visible ? (
-                    <label className="publication-check">
-                      <input
-                        type="checkbox"
-                        checked={byline}
-                        disabled={busy}
-                        onChange={(e) => {
-                          patchPlan({ byline: e.target.checked })
-                          rememberDefault('byline', e.target.checked)
-                        }}
-                      />
-                      Attribute this story to @{profile.username}
-                    </label>
-                  ) : (
-                    'Anonymous'
-                  )}
-                </dd>
-                {persistentMusicEnabled && (
-                  <>
-                    <dt>Public music</dt>
-                    <dd>
-                      {draft.music?.provider === 'youtube' && (
-                        <label className="publication-check">
-                          <input
-                            type="checkbox"
-                            checked={draft.music.share}
-                            disabled={busy}
-                            onChange={(event) => {
-                              rememberDefault('music', event.target.checked)
-                              patch({
-                                music: {
-                                  ...draft.music!,
-                                  share: event.target.checked,
-                                },
-                              })
-                            }}
-                          />
-                          Include this music
-                        </label>
-                      )}
-                      {draft.music?.provider === 'youtube' &&
-                        draft.music.share && (
-                          <a
-                            href={musicUrl(draft.music)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Approved YouTube video
-                          </a>
-                        )}
-                      {draft.music?.provider !== 'youtube' && 'None'}
-                    </dd>
-                  </>
-                )}
-              </dl>
-              {(profile?.visible || draft.music?.provider === 'youtube') && (
-                <p className="muted tiny">
-                  Identity and music choices are remembered on this device.
-                </p>
-              )}
-
               {documentAssetIds(row?.writing_document).length > 0 && (
                 <label className="publication-check">
                   <input
@@ -904,6 +869,7 @@ function EntryForm({
                           byline && profile?.visible ? profile.username : null,
                         public_category: publicCategory,
                         public_tags: publicationTags(publicTags),
+                        share_voice_notes: shareVoiceNotes,
                       }
                     : undefined,
                 )

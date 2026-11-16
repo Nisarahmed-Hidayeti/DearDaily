@@ -8,25 +8,28 @@ export interface PublicationPlan {
   category: string
   tags: string
   byline: boolean
+  voiceNotes?: boolean
 }
 export const defaultPublicationPlan: PublicationPlan = {
   category: 'Uncategorized',
   tags: '',
   byline: false,
+  voiceNotes: false,
 }
 export function validatePublicationPlan(input: unknown): PublicationPlan {
   if (!input || typeof input !== 'object' || Array.isArray(input))
     throw Error('Invalid public-copy preferences')
   const p = input as PublicationPlan
   if (
-    Object.keys(p).some((k) => !['category', 'tags', 'byline'].includes(k)) ||
+    Object.keys(p).some((k) => !['category', 'tags', 'byline', 'voiceNotes'].includes(k)) ||
     !['Uncategorized', ...allJournalCategories].some((c) => c === p.category) ||
     typeof p.tags !== 'string' ||
     p.tags.length > 154 ||
-    typeof p.byline !== 'boolean'
+    typeof p.byline !== 'boolean' ||
+    (p.voiceNotes !== undefined && typeof p.voiceNotes !== 'boolean')
   )
     throw Error('Invalid public-copy preferences')
-  return { category: p.category, tags: p.tags, byline: p.byline }
+  return { category: p.category, tags: p.tags, byline: p.byline, voiceNotes: p.voiceNotes ?? false }
 }
 export function publicationTags(value: string) {
   const tags = [
@@ -55,5 +58,6 @@ export function proposedPublicationPlan(draft: {
       : 'Uncategorized',
     tags: draft.tags.slice(0, 5).join(','),
     byline: false,
+    voiceNotes: false,
   }
 }
