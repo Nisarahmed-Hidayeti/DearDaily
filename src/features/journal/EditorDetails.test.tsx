@@ -84,19 +84,13 @@ it('reviews editable public choices once without changing private metadata or hi
   )
   await userEvent.click(screen.getByRole('button', { name: /Share & details/ }))
   expect(screen.queryByLabelText('Journal date')).toBeNull()
-  expect(screen.queryByLabelText('Public category')).toBeNull()
+  expect(screen.getByLabelText('Public category')).toHaveValue('Travel')
+  expect(screen.getByLabelText('Public tags')).toHaveValue('public, beta')
+  await userEvent.selectOptions(screen.getByLabelText('Public category'), 'Gratitude')
+  await userEvent.click(screen.getByRole('button', { name: 'Save details' }))
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Publish story' })).toBeEnabled())
   await userEvent.click(screen.getByRole('button', { name: 'Publish story' }))
   const dialog = screen.getByRole('dialog', { name: 'Ready to publish?' })
-  expect(within(dialog).getByLabelText('Category to share')).toHaveValue(
-    'Travel',
-  )
-  expect(within(dialog).getByLabelText('Tags to share')).toHaveValue(
-    'public, beta',
-  )
-  await userEvent.selectOptions(
-    within(dialog).getByLabelText('Category to share'),
-    'Gratitude',
-  )
   await waitFor(
     () =>
       expect(saveEntry).toHaveBeenCalledWith(
@@ -139,6 +133,7 @@ it('reviews editable public choices once without changing private metadata or hi
         public_username: 'quiet_writer',
         public_category: 'Gratitude',
         public_tags: ['public', 'beta'],
+        share_voice_notes: false,
       },
     ),
   )
@@ -153,20 +148,15 @@ it('proposes private category/tags but permits excluding them before explicit pu
   show()
   await screen.findByText('Saved to your private account')
   await userEvent.click(screen.getByRole('button', { name: /Share & details/ }))
+  expect(screen.getByLabelText('Public category')).toHaveValue('Personal')
+  expect(screen.getByLabelText('Public tags')).toHaveValue('private-tag')
+  await userEvent.selectOptions(screen.getByLabelText('Public category'), 'Uncategorized')
+  await userEvent.clear(screen.getByLabelText('Public tags'))
+  await userEvent.click(screen.getByRole('button', { name: 'Save details' }))
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Publish story' })).toBeEnabled())
   await userEvent.click(screen.getByRole('button', { name: 'Publish story' }))
   const dialog = screen.getByRole('dialog', { name: 'Ready to publish?' })
-  expect(within(dialog).getByLabelText('Category to share')).toHaveValue(
-    'Personal',
-  )
-  expect(within(dialog).getByLabelText('Tags to share')).toHaveValue(
-    'private-tag',
-  )
   expect(publishStory).not.toHaveBeenCalled()
-  await userEvent.selectOptions(
-    within(dialog).getByLabelText('Category to share'),
-    'Uncategorized',
-  )
-  await userEvent.clear(within(dialog).getByLabelText('Tags to share'))
   await waitFor(
     () =>
       expect(
@@ -187,6 +177,7 @@ it('proposes private category/tags but permits excluding them before explicit pu
         public_username: null,
         public_category: 'Uncategorized',
         public_tags: [],
+        share_voice_notes: false,
       },
     ),
   )
@@ -261,6 +252,7 @@ it('retains legacy explicit public choices privately without copying private tag
             category: 'Travel',
             tags: 'previous-public',
             byline: false,
+            voiceNotes: false,
           },
         }),
       }),
@@ -270,11 +262,9 @@ it('retains legacy explicit public choices privately without copying private tag
   await userEvent.click(
     screen.getByRole('button', { name: 'Update public story' }),
   )
-  expect(screen.getByLabelText('Category to share')).toHaveValue('Travel')
-  expect(screen.getByLabelText('Tags to share')).toHaveValue('previous-public')
-  expect(
-    screen.getByRole('checkbox', { name: /Attribute this story/ }),
-  ).not.toBeChecked()
+  expect(screen.getByLabelText('Public category')).toHaveValue('Travel')
+  expect(screen.getByLabelText('Public tags')).toHaveValue('previous-public')
+  expect(screen.queryByRole('checkbox', { name: /Attribute this story/ })).toBeNull()
 })
 it('preserves legacy plaintext when adding and removing a page icon', async () => {
   vi.mocked(loadEntry).mockResolvedValue({ ...fixture, writing_document: null })
