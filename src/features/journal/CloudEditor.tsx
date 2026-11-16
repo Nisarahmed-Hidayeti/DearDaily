@@ -7,7 +7,7 @@ import { MoodPicker } from './MoodPicker'
 import { journalCategories } from './entryMetadata'
 import { uploadEntryPhoto } from './entryPhotoUpload'
 import { WritingMusic } from '../music/WritingMusic'
-import { persistentMusicEnabled, publicMusic, musicUrl } from '../music/music'
+import { persistentMusicEnabled, musicUrl } from '../music/music'
 import { entryIcon } from '../rich-editor/emojis'
 import { EntryDetails } from './EntryDetails'
 import {
@@ -136,7 +136,32 @@ function EntryForm({
     'publish' | 'unpublish' | 'delete' | null
   >(null)
   const navigate = useNavigate()
-  const { client } = useAuth()
+  const { client, session } = useAuth()
+  const preferenceKey = session?.user.id
+    ? `deardaily.publish-defaults.${session.user.id}`
+    : null
+  const [defaults, setDefaults] = useState<
+    Partial<Record<'byline' | 'music', boolean>>
+  >(() => {
+    try {
+      const saved = preferenceKey
+        ? JSON.parse(localStorage.getItem(preferenceKey) ?? '{}')
+        : {}
+      return { byline: saved?.byline === true, music: saved?.music === true }
+    } catch {
+      return {}
+    }
+  })
+  function rememberDefault(name: 'byline' | 'music', checked: boolean) {
+    const next = { ...defaults, [name]: checked }
+    setDefaults(next)
+    try {
+      if (preferenceKey)
+        localStorage.setItem(preferenceKey, JSON.stringify(next))
+    } catch {
+      // The preference can still be used in the current editor.
+    }
+  }
   const [profile, setProfile] = useState<PublicProfile | null>(null)
   const photoApprovalKey = documentAssetIds(row?.writing_document)
     .sort()
@@ -170,7 +195,10 @@ function EntryForm({
           byline: !!state.publicMetadata.public_username,
         }
       : communityEnabled
-        ? proposedPublicationPlan(draft)
+        ? {
+            ...proposedPublicationPlan(draft),
+            byline: defaults.byline ?? false,
+          }
         : defaultPublicationPlan)
   const { category: publicCategory, tags: publicTags, byline } = plan
   const patchPlan = (values: Partial<PublicationPlan>) =>
@@ -454,7 +482,14 @@ function EntryForm({
                 disabled={!ready || preview}
                 onChange={
                   persistentMusicEnabled && !preview
-                    ? (music) => patch({ music })
+                    ? (music) =>
+                        patch({
+                          music:
+                            music?.provider === 'youtube' &&
+                            music.id !== draft.music?.id
+                              ? { ...music, share: defaults.music ?? false }
+                              : music,
+                        })
                     : undefined
                 }
               />
@@ -719,7 +754,7 @@ function EntryForm({
                 : 'Permanently delete your entry and its public copy, if any. Export a copy first if you need it.'}
           </p>
           {confirmation === 'publish' && (
-            <article className="entry-preview">
+            <article className="entry-preview publication-preview">
               <dl className="publication-receipt">
                 {voiceNotesEnabled && (
                   <>
@@ -762,14 +797,15 @@ function EntryForm({
                 <dt>Public identity</dt>
                 <dd>
                   {profile?.visible ? (
-                    <label className="row">
+                    <label className="publication-check">
                       <input
                         type="checkbox"
                         checked={byline}
                         disabled={busy}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           patchPlan({ byline: e.target.checked })
-                        }
+                          rememberDefault('byline', e.target.checked)
+                        }}
                       />
                       Attribute this story to @{profile.username}
                     </label>
@@ -782,39 +818,44 @@ function EntryForm({
                     <dt>Public music</dt>
                     <dd>
                       {draft.music?.provider === 'youtube' && (
-                        <label className="row">
+                        <label className="publication-check">
                           <input
                             type="checkbox"
                             checked={draft.music.share}
                             disabled={busy}
-                            onChange={(event) =>
+                            onChange={(event) => {
+                              rememberDefault('music', event.target.checked)
                               patch({
                                 music: {
                                   ...draft.music!,
                                   share: event.target.checked,
                                 },
                               })
-                            }
+                            }}
                           />
                           Include this music
                         </label>
                       )}
-                      {row?.music?.provider === 'youtube' &&
-                      publicMusic(row.music) ? (
-                        <a
-                          href={musicUrl(publicMusic(row?.music)!)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Approved YouTube video
-                        </a>
-                      ) : (
-                        'None'
-                      )}
+                      {draft.music?.provider === 'youtube' &&
+                        draft.music.share && (
+                          <a
+                            href={musicUrl(draft.music)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Approved YouTube video
+                          </a>
+                        )}
+                      {draft.music?.provider !== 'youtube' && 'None'}
                     </dd>
                   </>
                 )}
               </dl>
+              {(profile?.visible || draft.music?.provider === 'youtube') && (
+                <p className="muted tiny">
+                  Identity and music choices are remembered on this device.
+                </p>
+              )}
 
               <h3>{row?.title}</h3>
               <PageCover
@@ -823,7 +864,7 @@ function EntryForm({
                 preset={row?.cover_preset}
               />
               {documentAssetIds(row?.writing_document).length > 0 && (
-                <label className="row">
+                <label className="publication-check">
                   <input
                     type="checkbox"
                     checked={approvePhotos}

@@ -1901,3 +1901,50 @@
     }
   }
 }
+
+.modal .publication-receipt {
+  gap: 12px 16px;
+  align-items: start;
+}
+
+.publication-receipt dt {
+  padding-block: 4px;
+}
+
+.publication-receipt :is(select, input:not([type='checkbox'])) {
+  width: 100%;
+}
+
+.modal label.publication-check {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.modal .publication-receipt label.publication-check {
+  margin: 4px 0;
+}
+
+.modal .publication-check input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+.modal .publication-preview h3 {
+  margin-block: 20px 8px;
+}
+
+@media (max-width: 480px) {
+  .modal .publication-receipt {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 4px;
+  }
+
+  .publication-receipt dd + dt {
+    margin-top: 8px;
+  }
+}
