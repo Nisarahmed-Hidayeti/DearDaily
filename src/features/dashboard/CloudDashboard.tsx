@@ -84,21 +84,6 @@ export default function CloudDashboard({
           New Entry
         </Link>
       </PageHeading>
-      {!library && (
-        <section className="daily-invitation">
-          <span className="eyebrow">
-            {new Intl.DateTimeFormat(undefined, {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-            }).format(new Date())}
-          </span>
-          <h2>Keep a little of today.</h2>
-          <Link className="text-link" to="/app/write">
-            Open a fresh page <span aria-hidden="true">↗</span>
-          </Link>
-        </section>
-      )}
       {status === 'loading' && (
         <LoadingState>Loading your private entries…</LoadingState>
       )}
