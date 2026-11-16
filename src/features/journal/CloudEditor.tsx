@@ -754,7 +754,7 @@ function EntryForm({
                 : 'Permanently delete your entry and its public copy, if any. Export a copy first if you need it.'}
           </p>
           {confirmation === 'publish' && (
-            <article className="entry-preview publication-preview">
+            <div>
               <dl className="publication-receipt">
                 {voiceNotesEnabled && (
                   <>
@@ -857,12 +857,6 @@ function EntryForm({
                 </p>
               )}
 
-              <h3>{row?.title}</h3>
-              <PageCover
-                privateMedia
-                document={row?.writing_document}
-                preset={row?.cover_preset}
-              />
               {documentAssetIds(row?.writing_document).length > 0 && (
                 <label className="publication-check">
                   <input
@@ -874,51 +868,12 @@ function EntryForm({
                       )
                     }
                   />
-                  I approve publishing these photos and their alt text. Public
-                  links may remain valid for up to 60 seconds after
+                  I approve publishing this entry’s photos and their alt text.
+                  Public links may remain valid for up to 60 seconds after
                   unpublishing; downloaded copies cannot be recalled.
                 </label>
               )}
-              {richEditorEnabled && (
-                <>
-                  <p>
-                    Page icon:{' '}
-                    {entryIcon(row?.writing_document, row?.page_icon) ?? 'None'}
-                    {' · '}
-                    {row?.writing_document?.page
-                      ? row.writing_document.page.cover === 'upload'
-                        ? 'Custom photo cover'
-                        : 'Gallery cover'
-                      : row?.cover_preset && row.cover_preset !== 'none'
-                        ? 'Color cover'
-                        : 'No cover'}
-                  </p>
-                  <p>
-                    {row?.body.slice(0, 180)}
-                    {(row?.body.length ?? 0) > 180 ? '…' : ''}
-                  </p>
-                  <details>
-                    <summary>Review complete writing and inline photos</summary>
-                    <RichRead
-                      privateMedia
-                      document={row?.writing_document}
-                      fallback={row?.body ?? ''}
-                    />
-                  </details>
-                </>
-              )}
-              {!richEditorEnabled && (
-                <p
-                  style={{
-                    whiteSpace: 'pre-wrap',
-                    maxHeight: '40vh',
-                    overflow: 'auto',
-                  }}
-                >
-                  {row?.body}
-                </p>
-              )}
-            </article>
+            </div>
           )}
           {invalidPublicTags && confirmation === 'publish' && (
             <p role="alert">

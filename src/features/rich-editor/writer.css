@@ -1011,9 +1011,6 @@
   margin: 0;
   overflow-wrap: anywhere;
 }
-.modal .entry-preview > .writer-cover {
-  height: 120px;
-}
 .confirmation-actions {
   justify-content: flex-end;
   margin-top: 18px;
@@ -1932,10 +1929,6 @@
   margin: 2px 0 0;
   padding: 0;
   accent-color: var(--accent);
-}
-
-.modal .publication-preview h3 {
-  margin-block: 20px 8px;
 }
 
 @media (max-width: 480px) {
