@@ -209,11 +209,10 @@ export async function publishStory(
   const fields = {
     ...(voiceNotesEnabled
       ? {
-          voice_notes: await preparePublicVoice(
-            client,
-            entry.id,
-            entry.version,
-          ),
+          voice_notes:
+            metadata?.share_voice_notes === false
+              ? []
+              : await preparePublicVoice(client, entry.id, entry.version),
         }
       : {}),
     ...(persistentMusicEnabled ? { music: publicMusic(entry.music) } : {}),
@@ -228,7 +227,11 @@ export async function publishStory(
           cover_preset: entry.cover_preset ?? null,
         }
       : {}),
-    ...(communityEnabled && metadata ? metadata : {}),
+    ...(communityEnabled && metadata
+      ? Object.fromEntries(
+          Object.entries(metadata).filter(([key]) => key !== 'share_voice_notes'),
+        )
+      : {}),
   }
   const query = exists
     ? client.from('public_stories').update(fields).eq('id', entry.id)

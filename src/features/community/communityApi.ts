@@ -36,6 +36,7 @@ export interface StoryMetadata {
   public_username: string | null
   public_category: string
   public_tags: string[]
+  share_voice_notes?: boolean
 }
 export type CommunityStory = PublicStory & Partial<StoryMetadata>
 export const profileFields =
