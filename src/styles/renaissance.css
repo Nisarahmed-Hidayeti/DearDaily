@@ -119,18 +119,6 @@
   border-radius: 0;
   box-shadow: none;
 }
-.daily-invitation {
-  margin: 28px 0 32px;
-  padding-block: 28px;
-  border-block: 1px solid var(--border);
-  display: grid;
-  gap: 12px;
-}
-.daily-invitation h2 {
-  font-family: var(--serif);
-  font-size: clamp(30px, 4vw, 44px);
-  font-weight: 400;
-}
 .studio-main .dashboard .stats {
   gap: 0;
   border-bottom: 1px solid var(--border);
