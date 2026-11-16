@@ -201,7 +201,7 @@ function EntryForm({
             byline: defaults.byline ?? false,
           }
         : defaultPublicationPlan)
-  const { category: publicCategory, tags: publicTags, byline } = plan
+  const { byline } = plan
   const shareVoiceNotes = plan.voiceNotes ?? false
   const patchPlan = (values: Partial<PublicationPlan>) =>
     setDraft((current) => ({
@@ -225,7 +225,7 @@ function EntryForm({
   }
   let invalidPublicTags = false
   try {
-    publicationTags(publicTags)
+    publicationTags(draft.tags.join(','))
   } catch {
     invalidPublicTags = true
   }
@@ -572,27 +572,6 @@ function EntryForm({
             {communityEnabled && (
               <section aria-label="Public story settings" className="public-story-settings">
                 <h2>Public story</h2>
-                <label htmlFor="public-category">Public category</label>
-                <select
-                  id="public-category"
-                  value={publicCategory}
-                  disabled={!ready || busy}
-                  onChange={(event) => patchPlan({ category: event.target.value })}
-                >
-                  {journalCategories.map((category) => (
-                    <option key={category}>{category}</option>
-                  ))}
-                  <option value="Uncategorized">Exclude category</option>
-                </select>
-                <label htmlFor="public-tags">Public tags</label>
-                <input
-                  id="public-tags"
-                  placeholder="No public tags"
-                  maxLength={154}
-                  disabled={!ready || busy}
-                  value={publicTags}
-                  onChange={(event) => patchPlan({ tags: event.target.value })}
-                />
                 {profile?.visible && (
                   <label className="publication-check">
                     <input
@@ -867,8 +846,8 @@ function EntryForm({
                     ? {
                         public_username:
                           byline && profile?.visible ? profile.username : null,
-                        public_category: publicCategory,
-                        public_tags: publicationTags(publicTags),
+                        public_category: draft.category,
+                        public_tags: publicationTags(draft.tags.join(',')),
                         share_voice_notes: shareVoiceNotes,
                       }
                     : undefined,

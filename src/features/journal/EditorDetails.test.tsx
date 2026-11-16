@@ -84,35 +84,10 @@ it('reviews editable public choices once without changing private metadata or hi
   )
   await userEvent.click(screen.getByRole('button', { name: /Share & details/ }))
   expect(screen.queryByLabelText('Journal date')).toBeNull()
-  expect(screen.getByLabelText('Public category')).toHaveValue('Travel')
-  expect(screen.getByLabelText('Public tags')).toHaveValue('public, beta')
-  await userEvent.selectOptions(screen.getByLabelText('Public category'), 'Gratitude')
-  await userEvent.click(screen.getByRole('button', { name: 'Save details' }))
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Publish story' })).toBeEnabled())
+  expect(screen.queryByLabelText('Public category')).toBeNull()
+  expect(screen.queryByLabelText('Public tags')).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: 'Publish story' }))
   const dialog = screen.getByRole('dialog', { name: 'Ready to publish?' })
-  await waitFor(
-    () =>
-      expect(saveEntry).toHaveBeenCalledWith(
-        expect.anything(),
-        'A',
-        fixture.id,
-        expect.objectContaining({
-          category: 'Personal',
-          tags: ['private-tag'],
-          entry_date: fixture.entry_date,
-          writing_document: expect.objectContaining({
-            publication: {
-              category: 'Gratitude',
-              tags: 'public, beta',
-              byline: true,
-            },
-          }),
-        }),
-        1,
-      ),
-    { timeout: 4000 },
-  )
   expect(publishStory).not.toHaveBeenCalled()
   expect(dialog).not.toHaveTextContent('private-tag')
   await waitFor(() =>
@@ -131,8 +106,8 @@ it('reviews editable public choices once without changing private metadata or hi
       false,
       {
         public_username: 'quiet_writer',
-        public_category: 'Gratitude',
-        public_tags: ['public', 'beta'],
+        public_category: 'Personal',
+        public_tags: ['private-tag'],
         share_voice_notes: false,
       },
     ),
@@ -140,7 +115,7 @@ it('reviews editable public choices once without changing private metadata or hi
   expect(screen.getByRole('textbox', { name: 'Journal body' })).toBe(editor)
 }, 15000)
 
-it('proposes private category/tags but permits excluding them before explicit publication', async () => {
+it('uses the journal category and tags directly in the public copy', async () => {
   vi.mocked(loadEntry).mockResolvedValue({
     ...fixture,
     writing_document: documentFromText(fixture.body),
@@ -148,12 +123,8 @@ it('proposes private category/tags but permits excluding them before explicit pu
   show()
   await screen.findByText('Saved to your private account')
   await userEvent.click(screen.getByRole('button', { name: /Share & details/ }))
-  expect(screen.getByLabelText('Public category')).toHaveValue('Personal')
-  expect(screen.getByLabelText('Public tags')).toHaveValue('private-tag')
-  await userEvent.selectOptions(screen.getByLabelText('Public category'), 'Uncategorized')
-  await userEvent.clear(screen.getByLabelText('Public tags'))
-  await userEvent.click(screen.getByRole('button', { name: 'Save details' }))
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Publish story' })).toBeEnabled())
+  expect(screen.queryByLabelText('Public category')).toBeNull()
+  expect(screen.queryByLabelText('Public tags')).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: 'Publish story' }))
   const dialog = screen.getByRole('dialog', { name: 'Ready to publish?' })
   expect(publishStory).not.toHaveBeenCalled()
@@ -175,8 +146,8 @@ it('proposes private category/tags but permits excluding them before explicit pu
       false,
       {
         public_username: null,
-        public_category: 'Uncategorized',
-        public_tags: [],
+        public_category: 'Personal',
+        public_tags: ['private-tag'],
         share_voice_notes: false,
       },
     ),
@@ -262,8 +233,8 @@ it('retains legacy explicit public choices privately without copying private tag
   await userEvent.click(
     screen.getByRole('button', { name: 'Update public story' }),
   )
-  expect(screen.getByLabelText('Public category')).toHaveValue('Travel')
-  expect(screen.getByLabelText('Public tags')).toHaveValue('previous-public')
+  expect(screen.queryByLabelText('Public category')).toBeNull()
+  expect(screen.queryByLabelText('Public tags')).toBeNull()
   expect(screen.queryByRole('checkbox', { name: /Attribute this story/ })).toBeNull()
 })
 it('preserves legacy plaintext when adding and removing a page icon', async () => {
