@@ -868,7 +868,7 @@ function EntryForm({
                       )
                     }
                   />
-                  I approve publishing this entry’s photos and their alt text.
+                  I approve publishing these photos and their alt text.
                   Public links may remain valid for up to 60 seconds after
                   unpublishing; downloaded copies cannot be recalled.
                 </label>
