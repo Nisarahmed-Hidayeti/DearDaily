@@ -29,7 +29,6 @@ import type { PublicProfile } from '../community/communityApi'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Eye, LockKeyhole, X } from 'lucide-react'
 import { Modal, PageHeading } from '../../components/Shared'
-import { exportMarkdown } from './journalApi'
 import { useJournalEntry } from './useJournalEntry'
 import { richEditorEnabled } from '../rich-editor/config'
 const RichWriter = lazy(() =>
@@ -569,56 +568,6 @@ function EntryForm({
             </button>
           )}
           <section className="panel">
-            {communityEnabled && (
-              <section aria-label="Public story settings" className="public-story-settings">
-                <h2>Public story</h2>
-                {profile?.visible && (
-                  <label className="publication-check">
-                    <input
-                      type="checkbox"
-                      checked={byline}
-                      disabled={!ready || busy}
-                      onChange={(event) => {
-                        patchPlan({ byline: event.target.checked })
-                        rememberDefault('byline', event.target.checked)
-                      }}
-                    />
-                    Attribute this story to @{profile.username}
-                  </label>
-                )}
-                {persistentMusicEnabled && draft.music?.provider === 'youtube' && (
-                  <label className="publication-check">
-                    <input
-                      type="checkbox"
-                      checked={draft.music.share}
-                      disabled={!ready || busy}
-                      onChange={(event) => {
-                        rememberDefault('music', event.target.checked)
-                        patch({ music: { ...draft.music!, share: event.target.checked } })
-                      }}
-                    />
-                    Include this music
-                  </label>
-                )}
-                {voiceNotesEnabled && approvedVoice(draft.voice_notes).length > 0 && (
-                  <label className="publication-check">
-                    <input
-                      type="checkbox"
-                      checked={shareVoiceNotes}
-                      disabled={!ready || busy}
-                      onChange={(event) => patchPlan({ voiceNotes: event.target.checked })}
-                    />
-                    Include copy of voice notes in public story
-                  </label>
-                )}
-              </section>
-            )}
-            <MoodPicker
-              value={draft.mood}
-              onChange={(mood) => patch({ mood })}
-              disabled={!ready}
-            />
-
             <label htmlFor="tags">Tags</label>
             <form
               className="tag-form"
@@ -672,6 +621,55 @@ function EntryForm({
                 <option key={c}>{c}</option>
               ))}
             </select>
+            <MoodPicker
+              value={draft.mood}
+              onChange={(mood) => patch({ mood })}
+              disabled={!ready}
+            />
+            {communityEnabled && (
+              <section aria-label="Public story settings" className="public-story-settings">
+                <h2>Public story</h2>
+                {profile?.visible && (
+                  <label className="publication-check">
+                    <input
+                      type="checkbox"
+                      checked={byline}
+                      disabled={!ready || busy}
+                      onChange={(event) => {
+                        patchPlan({ byline: event.target.checked })
+                        rememberDefault('byline', event.target.checked)
+                      }}
+                    />
+                    Attribute this story to @{profile.username}
+                  </label>
+                )}
+                {persistentMusicEnabled && draft.music?.provider === 'youtube' && (
+                  <label className="publication-check">
+                    <input
+                      type="checkbox"
+                      checked={draft.music.share}
+                      disabled={!ready || busy}
+                      onChange={(event) => {
+                        rememberDefault('music', event.target.checked)
+                        patch({ music: { ...draft.music!, share: event.target.checked } })
+                      }}
+                    />
+                    Include this music
+                  </label>
+                )}
+                {voiceNotesEnabled && approvedVoice(draft.voice_notes).length > 0 && (
+                  <label className="publication-check">
+                    <input
+                      type="checkbox"
+                      checked={shareVoiceNotes}
+                      disabled={!ready || busy}
+                      onChange={(event) => patchPlan({ voiceNotes: event.target.checked })}
+                    />
+                    Include a copy of voice notes in public
+                  </label>
+                )}
+              </section>
+            )}
           </section>
           {invalidPublicTags && (
             <p role="alert">
@@ -686,12 +684,6 @@ function EntryForm({
               onClick={() => void state.save(true)}
             >
               Save entry
-            </button>
-            <button
-              className="button secondary"
-              onClick={() => exportMarkdown(draft)}
-            >
-              Export private copy
             </button>
             <button
               className="button secondary"
