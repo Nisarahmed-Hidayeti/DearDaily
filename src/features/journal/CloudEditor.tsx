@@ -2,7 +2,7 @@ import type { Appearance } from '../appearance/appearance'
 import { studioPolishEnabled, writingFonts } from '../rich-editor/studioPolish'
 import { VoiceNotes } from '../audio/VoiceNotes'
 import { voiceNotesEnabled } from '../audio/audio'
-import { uploadVoice, approvedVoice } from '../audio/audioApi'
+import { uploadVoice } from '../audio/audioApi'
 import { MoodPicker } from './MoodPicker'
 import { journalCategories } from './entryMetadata'
 import { uploadEntryPhoto } from './entryPhotoUpload'
@@ -657,7 +657,7 @@ function EntryForm({
                     Include this music
                   </label>
                 )}
-                {voiceNotesEnabled && approvedVoice(draft.voice_notes).length > 0 && (
+                {voiceNotesEnabled && (draft.voice_notes?.length ?? 0) > 0 && (
                   <label className="publication-check">
                     <input
                       type="checkbox"
