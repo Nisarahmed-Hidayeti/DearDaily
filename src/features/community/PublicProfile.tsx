@@ -28,6 +28,7 @@ export default function PublicProfile() {
   const { client } = useAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [stories, setStories] = useState<CommunityStory[]>([])
+  const [storyCount, setStoryCount] = useState(0)
   const [page, setPage] = useState(0)
   const [more, setMore] = useState(false)
   const [status, setStatus] = useState('loading')
@@ -54,6 +55,7 @@ export default function PublicProfile() {
       if (active) {
         setProfile(result.data as Profile | null)
         setStories(list.stories)
+        setStoryCount(list.count)
         setMore(list.more)
         setStatus('ready')
       }
@@ -103,6 +105,7 @@ export default function PublicProfile() {
           profile={profile}
           stories={stories}
           photos={photos}
+          storyCount={storyCount}
           page={page}
           more={more}
           onPageChange={setPage}
@@ -118,6 +121,7 @@ export function PublicProfileSurface({
   profile,
   stories,
   photos,
+  storyCount = stories.length,
   page,
   more,
   onPageChange,
@@ -126,6 +130,7 @@ export function PublicProfileSurface({
   profile: Profile
   stories: CommunityStory[]
   photos: PublicImages | null | undefined
+  storyCount?: number
   page: number
   more: boolean
   onPageChange: (page: number | ((current: number) => number)) => void
@@ -149,33 +154,37 @@ export function PublicProfileSurface({
           Back to Explore
         </Link>
       )}
-      {photos?.banner || cover || preview ? (
-        <div className="public-profile-banner">
-          {photos?.banner ? (
-            <ProfileImage
-              publicId={photos.banner}
-              position={photos.banner_position}
-              fallback={null}
-              alt="Author-selected public banner"
-            />
-          ) : cover ? (
-            <img src={cover.src} alt="Author-selected public banner" loading="lazy" />
-          ) : (
-            <span className="profile-preview-empty-banner" aria-hidden="true" />
-          )}
-          {preview && profileImagesEnabled && (
-            <button
-              type="button"
-              className="profile-preview-edit profile-preview-edit-banner"
-              aria-label="Change public banner"
-              onClick={() => requestPhotoChange('banner')}
-            >
-              <ImagePlus size={16} />
-              <span>{photos?.banner || cover ? 'Change banner' : 'Add banner'}</span>
-            </button>
-          )}
-        </div>
-      ) : null}
+      <div className="public-profile-banner">
+        {photos?.banner ? (
+          <ProfileImage
+            publicId={photos.banner}
+            position={photos.banner_position}
+            fallback={null}
+            alt="Author-selected public banner"
+          />
+        ) : cover ? (
+          <img src={cover.src} alt="Author-selected public banner" loading="lazy" />
+        ) : (
+          <span className="public-profile-empty-banner" aria-hidden="true" />
+        )}
+        <span
+          className="public-profile-story-count"
+          aria-label={`${storyCount} published ${storyCount === 1 ? 'story' : 'stories'}`}
+        >
+          {storyCount} {storyCount === 1 ? 'story' : 'stories'}
+        </span>
+        {preview && profileImagesEnabled && (
+          <button
+            type="button"
+            className="profile-preview-edit profile-preview-edit-banner"
+            aria-label="Change public banner"
+            onClick={() => requestPhotoChange('banner')}
+          >
+            <ImagePlus size={16} />
+            <span>{photos?.banner || cover ? 'Change banner' : 'Add banner'}</span>
+          </button>
+        )}
+      </div>
       <section className="profile-masthead panel">
         <div className="profile-identity">
           <span className={`profile-avatar${preview ? ' profile-preview-avatar' : ''}`}>

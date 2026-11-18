@@ -845,6 +845,8 @@ function EntryForm({
                     : undefined,
                 )
                 if (done) setConfirmation(null)
+                if (done && (kind === 'publish' || kind === 'unpublish'))
+                  window.dispatchEvent(new Event('deardaily:public-stories'))
                 if (done && kind === 'delete')
                   navigate('/app', { replace: true })
               }}
