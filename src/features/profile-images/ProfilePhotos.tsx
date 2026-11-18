@@ -17,10 +17,12 @@ export function ProfilePhotos({
   fallback,
   preset,
   publicVisible,
+  compact = false,
 }: {
   fallback: React.ReactNode
   preset?: string
   publicVisible: boolean
+  compact?: boolean
 }) {
   const { client, session } = useAuth(),
     who = session?.user.id
@@ -33,6 +35,16 @@ export function ProfilePhotos({
     [file, setFile] = useState<{ file: File; slot: ImageSlot } | null>(null)
   const avatar = useRef<HTMLInputElement>(null),
     banner = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    const openPicker = (event: Event) => {
+      const slot = (event as CustomEvent<{ slot?: ImageSlot }>).detail?.slot
+      if (slot === 'avatar') avatar.current?.click()
+      if (slot === 'banner') banner.current?.click()
+    }
+    window.addEventListener('deardaily:edit-profile-photo', openPicker)
+    return () =>
+      window.removeEventListener('deardaily:edit-profile-photo', openPicker)
+  }, [])
   useEffect(() => {
     let active = true
     if (!profileImagesEnabled || !client || !who) return
@@ -85,7 +97,10 @@ export function ProfilePhotos({
     }
   }
   return (
-    <section className="profile-photo-editor" aria-label="Profile photos">
+    <section
+      className={`profile-photo-editor${compact ? ' compact' : ''}`}
+      aria-label="Profile photos"
+    >
       <div
         className="profile-banner-editor"
         onDragOver={(e) => {
@@ -204,6 +219,12 @@ export function ProfilePhotos({
             {preset ? 'Restore preset' : 'Remove banner'}
           </button>
         </div>
+      )}
+      {compact && (
+        <p className="tiny muted">
+          Choose a photo from your preview, then save it here. Photos stay
+          private until you choose to share them.
+        </p>
       )}
       <fieldset disabled={busy || !ready} className="profile-photo-consent">
         {draft.avatar_asset && (

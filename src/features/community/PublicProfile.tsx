@@ -7,6 +7,8 @@ import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { validateProfilePanel } from './profilePanel'
 import { publicStreaksEnabled } from './publicStreakConfig'
 import { photographicCovers } from '../rich-editor/covers'
+import { Camera, ImagePlus } from 'lucide-react'
+import { profileImagesEnabled } from '../profile-images/api'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
@@ -130,41 +132,68 @@ export function PublicProfileSurface({
   preview?: boolean
 }) {
   const cover = photographicCovers.find((item) => item.id === profile.cover_id)
+  const requestPhotoChange = (slot: 'avatar' | 'banner') =>
+    window.dispatchEvent(
+      new CustomEvent('deardaily:edit-profile-photo', { detail: { slot } }),
+    )
   return (
     <div
       className={`public-profile${preview ? ' profile-surface-preview' : ''}`}
     >
-      <Link to="/explore" className="text-link">
-        Back to Explore
-      </Link>
-      {photos?.banner ? (
-        <div className="public-profile-banner">
-          <ProfileImage
-            publicId={photos.banner}
-            position={photos.banner_position}
-            fallback={null}
-            alt="Author-selected public banner"
-          />
-        </div>
+      {preview ? (
+        <span className="text-link" aria-hidden="true">
+          Back to Explore
+        </span>
       ) : (
-        cover && (
-          <div className="public-profile-banner">
-            <img
-              src={cover.src}
-              alt="Author-selected public banner"
-              loading="lazy"
-            />
-          </div>
-        )
+        <Link to="/explore" className="text-link">
+          Back to Explore
+        </Link>
       )}
+      {photos?.banner || cover || preview ? (
+        <div className="public-profile-banner">
+          {photos?.banner ? (
+            <ProfileImage
+              publicId={photos.banner}
+              position={photos.banner_position}
+              fallback={null}
+              alt="Author-selected public banner"
+            />
+          ) : cover ? (
+            <img src={cover.src} alt="Author-selected public banner" loading="lazy" />
+          ) : (
+            <span className="profile-preview-empty-banner" aria-hidden="true" />
+          )}
+          {preview && profileImagesEnabled && (
+            <button
+              type="button"
+              className="profile-preview-edit profile-preview-edit-banner"
+              aria-label="Change public banner"
+              onClick={() => requestPhotoChange('banner')}
+            >
+              <ImagePlus size={16} />
+              <span>{photos?.banner || cover ? 'Change banner' : 'Add banner'}</span>
+            </button>
+          )}
+        </div>
+      ) : null}
       <section className="profile-masthead panel">
         <div className="profile-identity">
-          <span className="profile-avatar" aria-hidden="true">
+          <span className={`profile-avatar${preview ? ' profile-preview-avatar' : ''}`}>
             <ProfileImage
               publicId={photos?.avatar}
               fallback={avatars[profile.avatar]}
               alt=""
             />
+            {preview && profileImagesEnabled && (
+              <button
+                type="button"
+                className="profile-preview-edit profile-preview-edit-avatar"
+                aria-label="Change profile photo"
+                onClick={() => requestPhotoChange('avatar')}
+              >
+                <Camera size={15} />
+              </button>
+            )}
           </span>
           <PageHeading
             eyebrow={`@${profile.username}`}
