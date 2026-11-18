@@ -39,7 +39,6 @@ export default function ProfileSettings() {
   const [message, setMessage] = useState('')
   const [confirm, setConfirm] = useState(false)
   const [removing, setRemoving] = useState(false)
-  const [previewOpen, setPreviewOpen] = useState(true)
   useEffect(() => {
     let active = true
     if (!client) return
@@ -99,19 +98,7 @@ export default function ProfileSettings() {
   return (
     <div className="page profile-settings">
       <PageHeading eyebrow="" title="Public profile" />
-      <p className="muted">
-        Choose what others see. Your journals stay private.
-      </p>
-      <details
-        className="profile-settings-disclosure profile-preview"
-        open={previewOpen}
-        onToggle={(event) => setPreviewOpen(event.currentTarget.open)}
-      >
-        <summary>Preview your public page</summary>
-        {previewOpen && (
-          <PublicProfilePreview profile={form} savedUsername={previous} />
-        )}
-      </details>
+      <PublicProfilePreview profile={form} savedUsername={previous} />
       <form
         className="panel account-form"
         onSubmit={(e) => {
