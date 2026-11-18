@@ -2,8 +2,8 @@ import WritingVisibilityControl from './WritingVisibilityControl'
 import Account from '../auth/Account'
 import { liveRhythmEnabled } from './liveRhythm'
 import PublicRhythmControl from './PublicRhythmControl'
-import { OwnProfileAvatar } from '../profile-images/ProfileImage'
 import { ProfilePhotos } from '../profile-images/ProfilePhotos'
+import PublicProfilePreview from './PublicProfilePreview'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { emptyProfilePanel } from './profilePanel'
 import PublicStreakControl from './PublicStreakControl'
@@ -39,6 +39,7 @@ export default function ProfileSettings() {
   const [message, setMessage] = useState('')
   const [confirm, setConfirm] = useState(false)
   const [removing, setRemoving] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
   useEffect(() => {
     let active = true
     if (!client) return
@@ -265,19 +266,14 @@ export default function ProfileSettings() {
           </>
         )}
       </section>
-      <details className="profile-settings-disclosure profile-preview">
-        <summary>Preview profile</summary>
-        <section className="panel profile-masthead">
-          <p className="eyebrow">
-            Preview · {form.visible ? 'Public after saving' : 'Hidden'}
-          </p>
-          <span className="profile-avatar">
-            <OwnProfileAvatar fallback={avatars[form.avatar]} />
-          </span>
-          <h2>{form.display_name || 'Your public name'}</h2>
-          <p>@{form.username || 'your_username'}</p>
-          <p className="profile-bio">{form.bio}</p>
-        </section>
+      <details
+        className="profile-settings-disclosure profile-preview"
+        onToggle={(event) => setPreviewOpen(event.currentTarget.open)}
+      >
+        <summary>Preview your public page</summary>
+        {previewOpen && (
+          <PublicProfilePreview profile={form} savedUsername={previous} />
+        )}
       </details>
       {session && (
         <details className="profile-settings-disclosure account-settings-disclosure">

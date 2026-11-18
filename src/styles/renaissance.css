@@ -1092,10 +1092,8 @@
 .profile-sharing-settings [role='status']:empty {
   display: none;
 }
-.profile-preview .profile-masthead {
-  margin: 0;
-  border: 0;
-  padding: 12px 0;
+.profile-preview-surface {
+  margin-top: 18px;
 }
 @media (max-width: 600px) {
   .profile-settings .account-form > fieldset {
