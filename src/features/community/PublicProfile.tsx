@@ -215,33 +215,39 @@ export function PublicProfileSurface({
       </section>
       <div className="profile-writing-layout">
         <div>
-          <div className="story-grid">
-            {stories.map((story) => (
-              <StoryCard key={story.id} story={story} />
-            ))}
-          </div>
-          {!stories.length && (
-            <p className="panel">
-              A quiet beginning. No attributed stories here yet.
-            </p>
-          )}
-          <div className="row">
-            <button
-              className="button secondary"
-              disabled={!page}
-              onClick={() => onPageChange((current) => current - 1)}
-            >
-              Previous
-            </button>
-            <span>Page {page + 1}</span>
-            <button
-              className="button secondary"
-              disabled={!more}
-              onClick={() => onPageChange((current) => current + 1)}
-            >
-              Next
-            </button>
-          </div>
+          <details
+            className="profile-stories-disclosure"
+            open={!profile.stories_collapsed}
+          >
+            <summary>Published stories · {storyCount}</summary>
+            <div className="story-grid">
+              {stories.map((story) => (
+                <StoryCard key={story.id} story={story} />
+              ))}
+            </div>
+            {!stories.length && (
+              <p className="panel">
+                A quiet beginning. No attributed stories here yet.
+              </p>
+            )}
+            <div className="row">
+              <button
+                className="button secondary"
+                disabled={!page}
+                onClick={() => onPageChange((current) => current - 1)}
+              >
+                Previous
+              </button>
+              <span>Page {page + 1}</span>
+              <button
+                className="button secondary"
+                disabled={!more}
+                onClick={() => onPageChange((current) => current + 1)}
+              >
+                Next
+              </button>
+            </div>
+          </details>
         </div>
         <ProfileDetails profile={profile} />
       </div>

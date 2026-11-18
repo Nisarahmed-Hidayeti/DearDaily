@@ -765,6 +765,15 @@
   gap: 36px;
   align-items: start;
 }
+.profile-stories-disclosure > summary {
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+.profile-stories-disclosure:not([open]) > summary {
+  margin-bottom: 0;
+}
 .profile-details {
   padding-block: 10px;
   font-size: 13px;

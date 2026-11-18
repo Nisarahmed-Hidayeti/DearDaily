@@ -27,6 +27,7 @@ const empty: PublicProfile = {
   bio: '',
   avatar: 'leaf',
   visible: false,
+  stories_collapsed: false,
   joined_month: null,
 }
 export default function ProfileSettings() {
@@ -220,6 +221,14 @@ export default function ProfileSettings() {
               onChange={(e) => patch({ visible: e.target.checked })}
             />
             Make this public profile visible
+          </label>
+          <label className="row">
+            <input
+              type="checkbox"
+              checked={!!form.stories_collapsed}
+              onChange={(e) => patch({ stories_collapsed: e.target.checked })}
+            />
+            Collapse stories on my profile by default
           </label>
           <div className="row">
             <button className="button">Review profile changes</button>
