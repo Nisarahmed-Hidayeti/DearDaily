@@ -105,7 +105,7 @@ export default function Shell() {
         <OwnProfileAvatar fallback={<UserRound size={17} />} />
         {session
           ? communityEnabled
-            ? 'Public profile'
+            ? 'Your account'
             : 'Account information'
           : 'Sign in'}
       </Link>
