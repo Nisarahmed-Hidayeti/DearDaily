@@ -145,11 +145,7 @@ export function PublicProfileSurface({
     <div
       className={`public-profile${preview ? ' profile-surface-preview' : ''}`}
     >
-      {preview ? (
-        <span className="text-link" aria-hidden="true">
-          Back to Explore
-        </span>
-      ) : (
+      {!preview && (
         <Link to="/explore" className="text-link">
           Back to Explore
         </Link>
