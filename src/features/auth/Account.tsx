@@ -8,7 +8,7 @@ import { PageHeading } from '../../components/Shared'
 import { OwnerControlsLink } from '../admin/OwnerAdmin'
 import ModerationNotices from '../admin/ModerationNotices'
 
-export default function Account() {
+export default function Account({ embedded = false }: { embedded?: boolean }) {
   const { client, session, signOut } = useAuth()
   const navigate = useNavigate()
   const userId = session!.user.id
@@ -75,16 +75,26 @@ export default function Account() {
     }
   }
   return (
-    <div className="page account-center">
-      <PageHeading
-        eyebrow="Your account / Security & privacy"
-        title="Your account."
-      />
-      <p className="muted">
-        {journalEnabled
-          ? 'Account details and source entries are private. Public stories are separate copies you choose to publish.'
-          : 'Account details are private. The dashboard and stories are still fictional samples.'}
-      </p>
+    <div
+      className={
+        embedded ? 'account-center account-embedded' : 'page account-center'
+      }
+    >
+      {embedded ? (
+        <h2 className="account-embedded-title">Account &amp; security</h2>
+      ) : (
+        <PageHeading
+          eyebrow="Your account / Security & privacy"
+          title="Your account."
+        />
+      )}
+      {!embedded && (
+        <p className="muted">
+          {journalEnabled
+            ? 'Account details and source entries are private. Public stories are separate copies you choose to publish.'
+            : 'Account details are private. The dashboard and stories are still fictional samples.'}
+        </p>
+      )}
       <div className="account-overview-grid">
         <section className="panel account-identity">
           <p className="eyebrow">Your identity</p>
@@ -152,9 +162,6 @@ export default function Account() {
       )}
       {communityEnabled && (
         <div className="account-actions">
-          <Link className="button secondary" to="/account/public-profile">
-            Public identity
-          </Link>
           <Link className="button secondary" to="/app/published">
             My published stories
           </Link>
@@ -185,12 +192,14 @@ export default function Account() {
           Sign out
         </button>
       </div>
-      <p className="auth-footnote">
-        Sign-out ends this browser session. Other devices remain signed in.{' '}
-        {journalEnabled
-          ? 'Your saved entries remain in your account after signing out.'
-          : 'Journal persistence is planned for Phase 3.'}
-      </p>
+      {!embedded && (
+        <p className="auth-footnote">
+          Sign-out ends this browser session. Other devices remain signed in.{' '}
+          {journalEnabled
+            ? 'Your saved entries remain in your account after signing out.'
+            : 'Journal persistence is planned for Phase 3.'}
+        </p>
+      )}
     </div>
   )
 }

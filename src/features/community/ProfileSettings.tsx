@@ -1,4 +1,5 @@
 import WritingVisibilityControl from './WritingVisibilityControl'
+import Account from '../auth/Account'
 import { liveRhythmEnabled } from './liveRhythm'
 import PublicRhythmControl from './PublicRhythmControl'
 import { OwnProfileAvatar } from '../profile-images/ProfileImage'
@@ -278,6 +279,12 @@ export default function ProfileSettings() {
           <p className="profile-bio">{form.bio}</p>
         </section>
       </details>
+      {session && (
+        <details className="profile-settings-disclosure account-settings-disclosure">
+          <summary>Your account &amp; security</summary>
+          <Account embedded />
+        </details>
+      )}
       {previous && form.visible && (
         <Link className="text-link" to={`/u/${previous}`}>
           View saved public profile
