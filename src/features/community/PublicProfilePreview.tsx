@@ -14,36 +14,37 @@ export default function PublicProfilePreview({
   profile: PublicProfile
   savedUsername: string | null
 }) {
-  const { client } = useAuth()
+  const { client, session } = useAuth()
   const { username, visible, public_activity_live } = profile
   const isSavedUsername = username === savedUsername
   const photos = usePublicImages(isSavedUsername ? username : null)
-  const [stories, setStories] = useState<CommunityStory[]>([])
-  const [page, setPage] = useState(0)
-  const [more, setMore] = useState(false)
-  const [liveActivity, setLiveActivity] = useState<{
-    username: string
-    values: Partial<PublicProfile>
+  const [pagination, setPagination] = useState({ username, page: 0 })
+  const page = pagination.username === username ? pagination.page : 0
+  const requestKey = JSON.stringify([
+    session?.user.id,
+    username,
+    page,
+    visible,
+    isSavedUsername,
+    public_activity_live,
+  ])
+  const [result, setResult] = useState<{
+    key: string
+    status: 'ready' | 'error'
+    stories: CommunityStory[]
+    more: boolean
+    liveActivity: Partial<PublicProfile>
   } | null>(null)
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
 
   useEffect(() => {
     let active = true
-    setStatus('loading')
-    if (!client || !validUsername(username)) {
-      setStories([])
-      setMore(false)
-      setLiveActivity(null)
-      setStatus('ready')
+    if (!client || !validUsername(username))
       return () => {
         active = false
       }
-    }
     void (async () => {
-      const result = await storyPage(client, {
-        username,
-        page,
-      })
+      const storyResult = await storyPage(client, { username, page })
+      let liveActivity: Partial<PublicProfile> = {}
       if (
         liveRhythmEnabled &&
         isSavedUsername &&
@@ -54,40 +55,65 @@ export default function PublicProfilePreview({
           profile_username: username,
         })
         if (activity.error) throw activity.error
-        if (activity.data && active)
-          setLiveActivity({ username, values: activity.data })
+        liveActivity = activity.data ?? {}
       }
-      if (active) {
-        setStories(result.stories)
-        setMore(result.more)
-        setStatus('ready')
-      }
+      if (active)
+        setResult({
+          key: requestKey,
+          status: 'ready',
+          stories: storyResult.stories,
+          more: storyResult.more,
+          liveActivity,
+        })
     })().catch(() => {
-      if (active) setStatus('error')
+      if (active)
+        setResult({
+          key: requestKey,
+          status: 'error',
+          stories: [],
+          more: false,
+          liveActivity: {},
+        })
     })
     return () => {
       active = false
     }
-  }, [client, isSavedUsername, page, username, visible, public_activity_live])
+  }, [
+    client,
+    isSavedUsername,
+    page,
+    requestKey,
+    username,
+    visible,
+    public_activity_live,
+  ])
 
-  useEffect(() => {
-    setPage(0)
-  }, [username])
-
-  if (!validUsername(profile.username))
+  if (!validUsername(username))
     return (
       <p className="tiny muted">
         Choose a valid username to preview your public page.
       </p>
     )
-  if (status === 'loading') return <LoadingState>Loading preview…</LoadingState>
-  if (status === 'error')
+
+  const current = result?.key === requestKey ? result : null
+  if (client && !current) return <LoadingState>Loading preview…</LoadingState>
+  if (current?.status === 'error')
     return <p role="alert">Preview unavailable. Try again in a moment.</p>
 
   const previewProfile = {
     ...profile,
-    ...(liveActivity?.username === username ? liveActivity.values : {}),
+    ...(current?.liveActivity ?? {}),
   }
+  const changePage = (next: number | ((current: number) => number)) =>
+    setPagination((currentPagination) => {
+      const currentPage =
+        currentPagination.username === username ? currentPagination.page : 0
+      return {
+        username,
+        page: typeof next === 'function' ? next(currentPage) : next,
+      }
+    })
+
   return (
     <div className="profile-preview-surface">
       {!visible && (
@@ -98,11 +124,11 @@ export default function PublicProfilePreview({
       )}
       <PublicProfileSurface
         profile={previewProfile}
-        stories={stories}
+        stories={current?.stories ?? []}
         photos={photos}
         page={page}
-        more={more}
-        onPageChange={setPage}
+        more={current?.more ?? false}
+        onPageChange={changePage}
         preview
       />
     </div>
