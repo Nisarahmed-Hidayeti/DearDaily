@@ -657,12 +657,12 @@ function EntryForm({
                     Include this music
                   </label>
                 )}
-                {voiceNotesEnabled && (draft.voice_notes?.length ?? 0) > 0 && (
+                {voiceNotesEnabled && (
                   <label className="publication-check">
                     <input
                       type="checkbox"
                       checked={shareVoiceNotes}
-                      disabled={!ready || busy}
+                      disabled={!ready || busy || (draft.voice_notes?.length ?? 0) === 0}
                       onChange={(event) => patchPlan({ voiceNotes: event.target.checked })}
                     />
                     Include a copy of voice notes in public
