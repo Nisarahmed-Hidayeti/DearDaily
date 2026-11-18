@@ -252,7 +252,11 @@ function ThemedRoutes() {
               path="/account"
               element={
                 <RequireAccount>
-                  <Account key={session?.user.id} />
+                  {communityEnabled ? (
+                    <ProfileSettings key={session?.user.id} />
+                  ) : (
+                    <Account key={session?.user.id} />
+                  )}
                 </RequireAccount>
               }
             />

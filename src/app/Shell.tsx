@@ -103,20 +103,11 @@ export default function Shell() {
     <nav aria-label="Account controls">
       <Link to={session ? '/account' : '/auth/sign-in'} onClick={closeMenus}>
         <OwnProfileAvatar fallback={<UserRound size={17} />} />
-        {session ? 'Account information' : 'Sign in'}
-      </Link>
-      <Link
-        to={
-          session && communityEnabled
-            ? '/account/public-profile'
-            : session
-              ? '/account'
-              : '/auth/sign-in'
-        }
-        onClick={closeMenus}
-      >
-        <PenLine size={17} />
-        Edit Profile
+        {session
+          ? communityEnabled
+            ? 'Public profile'
+            : 'Account information'
+          : 'Sign in'}
       </Link>
       <Link to="/app/settings" onClick={closeMenus}>
         <Settings size={17} />
