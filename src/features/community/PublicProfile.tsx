@@ -145,11 +145,9 @@ export function PublicProfileSurface({
     <div
       className={`public-profile${preview ? ' profile-surface-preview' : ''}`}
     >
-      {!preview && (
-        <Link to="/explore" className="text-link">
-          Back to Explore
-        </Link>
-      )}
+      <Link to="/explore" className="text-link">
+        Back to Explore
+      </Link>
       <div className="public-profile-banner">
         {photos?.banner ? (
           <ProfileImage
