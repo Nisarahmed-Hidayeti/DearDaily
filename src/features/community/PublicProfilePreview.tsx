@@ -33,6 +33,7 @@ export default function PublicProfilePreview({
     status: 'ready' | 'error'
     stories: CommunityStory[]
     more: boolean
+    storyCount: number
     liveActivity: Partial<PublicProfile>
   } | null>(null)
 
@@ -42,41 +43,55 @@ export default function PublicProfilePreview({
       return () => {
         active = false
       }
-    void (async () => {
-      const storyResult = await storyPage(client, { username, page })
-      let liveActivity: Partial<PublicProfile> = {}
-      if (
-        liveRhythmEnabled &&
-        isSavedUsername &&
-        visible &&
-        public_activity_live
-      ) {
-        const activity = await client.rpc('get_public_writing_activity', {
-          profile_username: username,
-        })
-        if (activity.error) throw activity.error
-        liveActivity = activity.data ?? {}
+    const load = async () => {
+      try {
+        const storyResult = await storyPage(client, { username, page })
+        let liveActivity: Partial<PublicProfile> = {}
+        if (
+          liveRhythmEnabled &&
+          isSavedUsername &&
+          visible &&
+          public_activity_live
+        ) {
+          const activity = await client.rpc('get_public_writing_activity', {
+            profile_username: username,
+          })
+          if (activity.error) throw activity.error
+          liveActivity = activity.data ?? {}
+        }
+        if (active)
+          setResult({
+            key: requestKey,
+            status: 'ready',
+            stories: storyResult.stories,
+            more: storyResult.more,
+            storyCount: storyResult.count,
+            liveActivity,
+          })
+      } catch {
+        if (active)
+          setResult({
+            key: requestKey,
+            status: 'error',
+            stories: [],
+            more: false,
+            storyCount: 0,
+            liveActivity: {},
+          })
       }
-      if (active)
-        setResult({
-          key: requestKey,
-          status: 'ready',
-          stories: storyResult.stories,
-          more: storyResult.more,
-          liveActivity,
-        })
-    })().catch(() => {
-      if (active)
-        setResult({
-          key: requestKey,
-          status: 'error',
-          stories: [],
-          more: false,
-          liveActivity: {},
-        })
-    })
+    }
+    const refreshOnReturn = () => {
+      if (document.visibilityState !== 'hidden') void load()
+    }
+    void load()
+    window.addEventListener('focus', refreshOnReturn)
+    window.addEventListener('deardaily:public-stories', refreshOnReturn)
+    document.addEventListener('visibilitychange', refreshOnReturn)
     return () => {
       active = false
+      window.removeEventListener('focus', refreshOnReturn)
+      window.removeEventListener('deardaily:public-stories', refreshOnReturn)
+      document.removeEventListener('visibilitychange', refreshOnReturn)
     }
   }, [
     client,
@@ -122,10 +137,17 @@ export default function PublicProfilePreview({
           profile public.
         </p>
       )}
+      {current?.storyCount === 0 && (
+        <p className="tiny muted profile-preview-story-hint">
+          Published stories appear here when you attribute them to your public
+          profile.
+        </p>
+      )}
       <PublicProfileSurface
         profile={previewProfile}
         stories={current?.stories ?? []}
         photos={photos}
+        storyCount={current?.storyCount ?? 0}
         page={page}
         more={current?.more ?? false}
         onPageChange={changePage}

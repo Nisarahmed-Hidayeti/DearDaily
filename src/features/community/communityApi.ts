@@ -180,7 +180,7 @@ export async function storyPage(
 ) {
   let query = client
     .from('public_stories')
-    .select<string, CommunityStory>(storyFields)
+    .select<string, CommunityStory>(storyFields, { count: 'exact' })
     .order('published_at', { ascending: Boolean(options.oldest) })
     .order('id', { ascending: Boolean(options.oldest) })
   if (options.search?.trim())
@@ -191,11 +191,12 @@ export async function storyPage(
   if (options.category) query = query.eq('public_category', options.category)
   if (options.username) query = query.eq('public_username', options.username)
   const offset = (options.page ?? 0) * 12
-  const { data, error } = await query.range(offset, offset + 12)
+  const { data, error, count } = await query.range(offset, offset + 12)
   if (error) throw new Error('Stories unavailable')
   return {
     stories: (data ?? []).slice(0, 12) as CommunityStory[],
     more: (data?.length ?? 0) > 12,
+    count: count ?? 0,
   }
 }
 export interface ReportItem {
