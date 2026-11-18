@@ -121,14 +121,19 @@ export function usePublicImages(username?: string | null) {
     } | null>(null)
   useEffect(() => {
     let active = true
-    if (profileImagesEnabled && client && username)
-      void publicImages(client, username)
-        .then((images) => {
-          if (active) setState({ handle: username, images })
-        })
-        .catch(() => {})
+    const load = () => {
+      if (profileImagesEnabled && client && username)
+        void publicImages(client, username)
+          .then((images) => {
+            if (active) setState({ handle: username, images })
+          })
+          .catch(() => {})
+    }
+    load()
+    window.addEventListener('deardaily:profile-images', load)
     return () => {
       active = false
+      window.removeEventListener('deardaily:profile-images', load)
     }
   }, [client, username])
   return state?.handle === username ? state?.images : null

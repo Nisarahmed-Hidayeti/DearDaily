@@ -19,6 +19,15 @@
   max-width: 760px;
   margin: 24px 0 32px;
 }
+.profile-photo-editor.compact {
+  max-width: none;
+  margin: 16px 0 24px;
+}
+.profile-photo-editor.compact .profile-banner-editor,
+.profile-photo-editor.compact .profile-photo-identity,
+.profile-photo-editor.compact .profile-banner-adjustments {
+  display: none;
+}
 .profile-banner-editor {
   position: relative;
   height: 180px;
@@ -175,6 +184,9 @@
 }
 .public-profile-banner .profile-image {
   display: block;
+}
+.profile-photo-editor.compact .profile-photo-consent {
+  margin-top: 12px;
 }
 @media (max-width: 480px) {
   .profile-banner-editor {

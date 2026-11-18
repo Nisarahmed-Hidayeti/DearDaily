@@ -39,7 +39,7 @@ export default function ProfileSettings() {
   const [message, setMessage] = useState('')
   const [confirm, setConfirm] = useState(false)
   const [removing, setRemoving] = useState(false)
-  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(true)
   useEffect(() => {
     let active = true
     if (!client) return
@@ -102,12 +102,16 @@ export default function ProfileSettings() {
       <p className="muted">
         Choose what others see. Your journals stay private.
       </p>
-      <ProfilePhotos
-        key={session?.user.id}
-        fallback={avatars[form.avatar]}
-        preset={profileCovers.find((c) => c.id === form.cover_id)?.src}
-        publicVisible={savedProfile.visible}
-      />
+      <details
+        className="profile-settings-disclosure profile-preview"
+        open={previewOpen}
+        onToggle={(event) => setPreviewOpen(event.currentTarget.open)}
+      >
+        <summary>Preview your public page</summary>
+        {previewOpen && (
+          <PublicProfilePreview profile={form} savedUsername={previous} />
+        )}
+      </details>
       <form
         className="panel account-form"
         onSubmit={(e) => {
@@ -243,6 +247,16 @@ export default function ProfileSettings() {
         </fieldset>
       </form>
       <p role="status">{message}</p>
+      <details className="profile-settings-disclosure profile-photo-settings">
+        <summary>Photo settings</summary>
+        <ProfilePhotos
+          key={session?.user.id}
+          fallback={avatars[form.avatar]}
+          preset={profileCovers.find((c) => c.id === form.cover_id)?.src}
+          publicVisible={savedProfile.visible}
+          compact
+        />
+      </details>
       <section className="profile-sharing-settings">
         <h2>Writing rhythm</h2>
         {liveRhythmEnabled ? (
@@ -266,15 +280,6 @@ export default function ProfileSettings() {
           </>
         )}
       </section>
-      <details
-        className="profile-settings-disclosure profile-preview"
-        onToggle={(event) => setPreviewOpen(event.currentTarget.open)}
-      >
-        <summary>Preview your public page</summary>
-        {previewOpen && (
-          <PublicProfilePreview profile={form} savedUsername={previous} />
-        )}
-      </details>
       {session && (
         <details className="profile-settings-disclosure account-settings-disclosure">
           <summary>Your account &amp; security</summary>
