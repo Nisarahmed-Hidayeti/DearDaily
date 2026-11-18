@@ -2,6 +2,7 @@ import { liveRhythmEnabled } from './liveRhythm'
 import ActivityHeatmap from '../dashboard/ActivityHeatmap'
 import { publicRhythmEnabled, rhythmActivity } from './publicRhythm'
 import { ProfileImage, usePublicImages } from '../profile-images/ProfileImage'
+import type { PublicImages } from '../profile-images/api'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
 import { validateProfilePanel } from './profilePanel'
 import { publicStreaksEnabled } from './publicStreakConfig'
@@ -91,96 +92,125 @@ export default function PublicProfile() {
     )
   return (
     <div className="page public-profile">
-      <Link to="/explore" className="text-link">
-        Back to Explore
-      </Link>
       {status === 'loading' ? (
         <LoadingState>Loading profile…</LoadingState>
       ) : status === 'error' ? (
         <p role="alert">Profile unavailable. Reload to retry.</p>
       ) : profile ? (
-        <>
-          {photos?.banner ? (
-            <div className="public-profile-banner">
-              <ProfileImage
-                publicId={photos.banner}
-                position={photos.banner_position}
-                fallback={null}
-                alt="Author-selected public banner"
-              />
-            </div>
-          ) : (
-            photographicCovers.some((c) => c.id === profile.cover_id) && (
-              <div className="public-profile-banner">
-                <img
-                  src={
-                    photographicCovers.find((c) => c.id === profile.cover_id)!
-                      .src
-                  }
-                  alt="Author-selected public banner"
-                  loading="lazy"
-                />
-              </div>
-            )
-          )}
-          <section className="profile-masthead panel">
-            <div className="profile-identity">
-              <span className="profile-avatar" aria-hidden="true">
-                <ProfileImage
-                  publicId={photos?.avatar}
-                  fallback={avatars[profile.avatar]}
-                  alt=""
-                />
-              </span>
-              <PageHeading
-                eyebrow={`@${profile.username}`}
-                title={profile.display_name}
-              />
-              <p className="profile-bio">{profile.bio}</p>
-            </div>
-            <PublicRhythm
-              count={profile.public_streak}
-              live={!!profile.public_activity_live}
-              name={profile.display_name}
-              snapshot={profile.public_rhythm}
-            />
-          </section>
-          <div className="profile-writing-layout">
-            <div>
-              <div className="story-grid">
-                {stories.map((s) => (
-                  <StoryCard key={s.id} story={s} />
-                ))}
-              </div>
-              {!stories.length && (
-                <p className="panel">
-                  A quiet beginning. No attributed stories here yet.
-                </p>
-              )}
-              <div className="row">
-                <button
-                  className="button secondary"
-                  disabled={!page}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  Previous
-                </button>
-                <span>Page {page + 1}</span>
-                <button
-                  className="button secondary"
-                  disabled={!more}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-            <ProfileDetails profile={profile} />
-          </div>
-        </>
+        <PublicProfileSurface
+          profile={profile}
+          stories={stories}
+          photos={photos}
+          page={page}
+          more={more}
+          onPageChange={setPage}
+        />
       ) : (
         <h1>This public profile is not available.</h1>
       )}
+    </div>
+  )
+}
+
+export function PublicProfileSurface({
+  profile,
+  stories,
+  photos,
+  page,
+  more,
+  onPageChange,
+  preview = false,
+}: {
+  profile: Profile
+  stories: CommunityStory[]
+  photos: PublicImages | null | undefined
+  page: number
+  more: boolean
+  onPageChange: (page: number | ((current: number) => number)) => void
+  preview?: boolean
+}) {
+  const cover = photographicCovers.find((item) => item.id === profile.cover_id)
+  return (
+    <div
+      className={`public-profile${preview ? ' profile-surface-preview' : ''}`}
+    >
+      <Link to="/explore" className="text-link">
+        Back to Explore
+      </Link>
+      {photos?.banner ? (
+        <div className="public-profile-banner">
+          <ProfileImage
+            publicId={photos.banner}
+            position={photos.banner_position}
+            fallback={null}
+            alt="Author-selected public banner"
+          />
+        </div>
+      ) : (
+        cover && (
+          <div className="public-profile-banner">
+            <img
+              src={cover.src}
+              alt="Author-selected public banner"
+              loading="lazy"
+            />
+          </div>
+        )
+      )}
+      <section className="profile-masthead panel">
+        <div className="profile-identity">
+          <span className="profile-avatar" aria-hidden="true">
+            <ProfileImage
+              publicId={photos?.avatar}
+              fallback={avatars[profile.avatar]}
+              alt=""
+            />
+          </span>
+          <PageHeading
+            eyebrow={`@${profile.username}`}
+            title={profile.display_name}
+          />
+          <p className="profile-bio">{profile.bio}</p>
+        </div>
+        <PublicRhythm
+          count={profile.public_streak}
+          live={!!profile.public_activity_live}
+          name={profile.display_name}
+          snapshot={profile.public_rhythm}
+        />
+      </section>
+      <div className="profile-writing-layout">
+        <div>
+          <div className="story-grid">
+            {stories.map((story) => (
+              <StoryCard key={story.id} story={story} />
+            ))}
+          </div>
+          {!stories.length && (
+            <p className="panel">
+              A quiet beginning. No attributed stories here yet.
+            </p>
+          )}
+          <div className="row">
+            <button
+              className="button secondary"
+              disabled={!page}
+              onClick={() => onPageChange((current) => current - 1)}
+            >
+              Previous
+            </button>
+            <span>Page {page + 1}</span>
+            <button
+              className="button secondary"
+              disabled={!more}
+              onClick={() => onPageChange((current) => current + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+        <ProfileDetails profile={profile} />
+      </div>
     </div>
   )
 }
