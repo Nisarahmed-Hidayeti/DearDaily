@@ -103,7 +103,7 @@ export default function Shell() {
     <nav aria-label="Account controls">
       <Link to={session ? '/account' : '/auth/sign-in'} onClick={closeMenus}>
         <span className="avatar" aria-hidden="true">
-          <OwnProfileAvatar fallback={<UserRound size={17} />} />
+          <UserRound size={17} />
         </span>
         {session
           ? communityEnabled
