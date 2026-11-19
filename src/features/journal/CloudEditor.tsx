@@ -687,7 +687,7 @@ function EntryForm({
                       Include this music
                     </label>
                   )}
-                {voiceNotesEnabled && (
+                {voiceNotesEnabled && (draft.voice_notes?.length ?? 0) > 0 && (
                   <label className="publication-check">
                     <input
                       type="checkbox"
