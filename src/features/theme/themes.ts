@@ -1,4 +1,3 @@
-import { studioPolishEnabled } from '../rich-editor/studioPolish'
 const allThemes = [
   {
     id: 'midnight-purple',
@@ -37,7 +36,7 @@ const allThemes = [
     mood: 'Cool · Spacious',
   },
 ] as const
-export const themes = studioPolishEnabled ? allThemes : allThemes.slice(0, 4)
+export const themes = allThemes
 export type ThemeId = (typeof allThemes)[number]['id']
 export const defaultTheme: ThemeId = 'midnight-purple'
 export function isThemeId(value: unknown): value is ThemeId {
