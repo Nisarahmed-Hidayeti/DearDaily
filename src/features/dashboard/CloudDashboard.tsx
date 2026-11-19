@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 import { BookOpen, Plus } from 'lucide-react'
 import { LoadingState, PageHeading } from '../../components/Shared'
 import { useAuth } from '../auth/AuthProvider'
-import { listEntries } from '../journal/journalApi'
+import { entryTitle, listEntries } from '../journal/journalApi'
 import type { JournalEntry } from '../journal/journalApi'
 import { journalStats } from '../journal/journalStats'
 import ActivityHeatmap from './ActivityHeatmap'
@@ -244,7 +244,7 @@ export default function CloudDashboard({
                           {entryIcon(r.writing_document, r.page_icon)}{' '}
                         </span>
                       )}
-                      {r.title || 'Untitled entry'}
+                      {entryTitle(r.title, r.entry_date)}
                     </h3>
                     <p>{r.body.slice(0, 150)}</p>
                     <span className="visibility">Private source entry</span>

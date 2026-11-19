@@ -30,6 +30,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Eye, LockKeyhole, X } from 'lucide-react'
 import { Modal, PageHeading } from '../../components/Shared'
 import { useJournalEntry } from './useJournalEntry'
+import { entryTitle } from './journalApi'
 import { richEditorEnabled } from '../rich-editor/config'
 const RichWriter = lazy(() =>
   import('../rich-editor/RichWriter').then((module) => ({
@@ -439,7 +440,7 @@ function EntryForm({
           {preview && (
             <article className="entry-preview">
               <div className="editor-title-row">
-                <h2>{draft.title || 'Untitled entry'}</h2>
+                <h2>{entryTitle(draft.title, draft.entry_date)}</h2>
                 <WritingMusic
                   value={persistentMusicEnabled ? draft.music : undefined}
                 />
@@ -459,9 +460,7 @@ function EntryForm({
               <input
                 id="entry-title"
                 className="title-input"
-                placeholder={
-                  richEditorEnabled ? 'Untitled' : 'A new day, a new page…'
-                }
+                placeholder={entryTitle('', draft.entry_date)}
                 value={draft.title}
                 maxLength={200}
                 disabled={!ready}

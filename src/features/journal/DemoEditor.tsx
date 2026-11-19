@@ -4,7 +4,7 @@ import type { Mood, Visibility } from '../../data/demo'
 import { formatLocalDate } from '../../lib/dates'
 import { PageHeading, Modal } from '../../components/Shared'
 import { downloadPublicStory } from './publicExport'
-import { exportMarkdown, localDay } from './journalApi'
+import { entryTitle, exportMarkdown, localDay } from './journalApi'
 export default function Editor() {
   const [title, setTitle] = useState(''),
     [body, setBody] = useState(''),
@@ -47,7 +47,7 @@ export default function Editor() {
           </div>
           {preview ? (
             <article className="entry-preview">
-              <h2>{title || 'Untitled entry'}</h2>
+              <h2>{entryTitle(title, localDay())}</h2>
               <p>{body || 'Your words will appear here.'}</p>
             </article>
           ) : (
@@ -58,7 +58,7 @@ export default function Editor() {
               <input
                 id="entry-title"
                 className="title-input"
-                placeholder="A new day, a new page…"
+                placeholder={entryTitle('', localDay())}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -185,7 +185,7 @@ export default function Editor() {
             </button>
             <button
               className="button secondary"
-              disabled={!title.trim() || !body.trim()}
+              disabled={!body.trim()}
               onClick={() => setReviewPublic(true)}
             >
               Review public export
@@ -209,7 +209,7 @@ export default function Editor() {
             online. Review every word below; only the title and text are
             included. Keep your private export separate.
           </p>
-          <h3>{title}</h3>
+          <h3>{entryTitle(title, localDay())}</h3>
           <p
             style={{
               whiteSpace: 'pre-wrap',
@@ -222,7 +222,7 @@ export default function Editor() {
           <button
             className="button"
             onClick={() => {
-              downloadPublicStory(title, body)
+              downloadPublicStory(entryTitle(title, localDay()), body)
               setReviewPublic(false)
             }}
           >
