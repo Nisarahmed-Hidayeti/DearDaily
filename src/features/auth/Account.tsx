@@ -1,6 +1,7 @@
 import { OwnProfileAvatar } from '../profile-images/ProfileImage'
 import { communityEnabled } from '../community/communityApi'
 import { journalEnabled } from '../journal/journalApi'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
@@ -8,7 +9,41 @@ import { PageHeading } from '../../components/Shared'
 import { OwnerControlsLink } from '../admin/OwnerAdmin'
 import ModerationNotices from '../admin/ModerationNotices'
 
-export default function Account({ embedded = false }: { embedded?: boolean }) {
+export async function saveAccountDisplayName(
+  client: SupabaseClient,
+  userId: string,
+  name: string,
+) {
+  const displayName = name.trim() || null
+  const existing = await client
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .maybeSingle()
+  if (existing.error) throw existing.error
+  const result = existing.data
+    ? await client
+        .from('profiles')
+        .update({ display_name: displayName })
+        .eq('id', userId)
+        .select('id')
+        .single()
+    : await client
+        .from('profiles')
+        .insert({ id: userId, display_name: displayName })
+        .select('id')
+        .single()
+  if (result.error || result.data?.id !== userId)
+    throw new Error('Profile unavailable')
+}
+
+export default function Account({
+  embedded = false,
+  onDisplayNameLoaded,
+}: {
+  embedded?: boolean
+  onDisplayNameLoaded?: (name: string) => void
+}) {
   const { client, session, signOut } = useAuth()
   const navigate = useNavigate()
   const userId = session!.user.id
@@ -30,6 +65,7 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
       if (active) {
         setName(result.data?.display_name ?? '')
         setReady(true)
+        onDisplayNameLoaded?.(result.data?.display_name ?? '')
       }
     }
     void load().catch(() => {
@@ -39,34 +75,14 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
     return () => {
       active = false
     }
-  }, [client, userId, attempt])
+  }, [client, userId, attempt, onDisplayNameLoaded])
   async function save(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!client || !ready || busy) return
     setBusy(true)
     setMessage('')
     try {
-      // Insert only if absent. A concurrent initializer must not overwrite a profile.
-      const existing = await client
-        .from('profiles')
-        .select('id')
-        .eq('id', userId)
-        .maybeSingle()
-      if (existing.error) throw existing.error
-      const result = existing.data
-        ? await client
-            .from('profiles')
-            .update({ display_name: name.trim() || null })
-            .eq('id', userId)
-            .select('id')
-            .single()
-        : await client
-            .from('profiles')
-            .insert({ id: userId, display_name: name.trim() || null })
-            .select('id')
-            .single()
-      if (result.error || result.data?.id !== userId)
-        throw new Error('Profile unavailable')
+      await saveAccountDisplayName(client, userId, name)
       setMessage('Your display name is saved to your private account.')
     } catch {
       setMessage('Your profile was not saved. Reconnect and try again.')
@@ -132,21 +148,23 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
           </Link>
         </section>
       </div>
-      <form className="panel auth-card account-form" onSubmit={save}>
-        <label>
-          {embedded ? 'Account display name' : 'Display name (optional)'}
-          <input
-            value={name}
-            maxLength={80}
-            disabled={!ready || busy}
-            onChange={(e) => setName(e.target.value)}
-            autoComplete="nickname"
-          />
-        </label>
-        <button className="button" disabled={!ready || busy}>
-          {busy ? 'Saving…' : embedded ? 'Save' : 'Save display name'}
-        </button>
-      </form>
+      {!embedded && (
+        <form className="panel auth-card account-form" onSubmit={save}>
+          <label>
+            Display name (optional)
+            <input
+              value={name}
+              maxLength={80}
+              disabled={!ready || busy}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="nickname"
+            />
+          </label>
+          <button className="button" disabled={!ready || busy}>
+            {busy ? 'Saving…' : 'Save display name'}
+          </button>
+        </form>
+      )}
       {message && <p role="status">{message}</p>}
       {!ready && (
         <button
