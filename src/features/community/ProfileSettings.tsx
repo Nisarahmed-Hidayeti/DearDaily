@@ -1,5 +1,5 @@
 import WritingVisibilityControl from './WritingVisibilityControl'
-import Account, { saveAccountDisplayName } from '../auth/Account'
+import Account from '../auth/Account'
 import { liveRhythmEnabled } from './liveRhythm'
 import PublicRhythmControl from './PublicRhythmControl'
 import { profileImagesEnabled } from '../profile-images/api'
@@ -10,7 +10,7 @@ import { emptyProfilePanel } from './profilePanel'
 import PublicStreakControl from './PublicStreakControl'
 import { appearanceEnabled } from '../appearance/appearance'
 import { profileCovers } from '../rich-editor/covers'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PageHeading, Modal } from '../../components/Shared'
 import { useAuth } from '../auth/AuthProvider'
 import {
@@ -33,20 +33,12 @@ export default function ProfileSettings() {
   const { client, session } = useAuth()
   const [form, setForm] = useState(empty)
   const [savedProfile, setSavedProfile] = useState(empty)
-  const [accountName, setAccountName] = useState('')
-  const [savedAccountName, setSavedAccountName] = useState('')
-  const [accountNameReady, setAccountNameReady] = useState(false)
   const [previous, setPrevious] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [confirm, setConfirm] = useState(false)
   const [removing, setRemoving] = useState(false)
-  const handleAccountDisplayNameLoaded = useCallback((name: string) => {
-    setAccountName(name)
-    setSavedAccountName(name)
-    setAccountNameReady(true)
-  }, [])
   useEffect(() => {
     let active = true
     if (!client) return
@@ -68,38 +60,16 @@ export default function ProfileSettings() {
   }, [client])
   const patch = (p: Partial<PublicProfile>) => setForm((f) => ({ ...f, ...p }))
   async function save() {
-    if (!client || busy || !accountNameReady) return
-    const profileChanged = JSON.stringify(form) !== JSON.stringify(savedProfile)
-    const accountNameChanged = accountName.trim() !== savedAccountName.trim()
-    if (!profileChanged && !accountNameChanged) {
-      setConfirm(false)
-      return
-    }
+    if (!client || busy) return
     setBusy(true)
-    let profileSaved = false
     try {
-      if (profileChanged) {
-        const p = await saveProfile(client, form, previous)
-        setForm(p)
-        setSavedProfile(p)
-        setPrevious(p.username)
-        profileSaved = true
-      }
-      if (accountNameChanged && session) {
-        const normalizedName = accountName.trim()
-        await saveAccountDisplayName(client, session.user.id, normalizedName)
-        setAccountName(normalizedName)
-        setSavedAccountName(normalizedName)
-      }
-      setMessage(
-        profileChanged ? 'Profile saved.' : 'Account display name saved.',
-      )
+      const p = await saveProfile(client, form, previous)
+      setForm(p)
+      setSavedProfile(p)
+      setPrevious(p.username)
+      setMessage('Profile saved.')
     } catch (e) {
-      setMessage(
-        profileSaved
-          ? 'Profile saved. Account display name could not be saved. Try again.'
-          : (e as Error).message,
-      )
+      setMessage((e as Error).message)
     } finally {
       setBusy(false)
       setConfirm(false)
@@ -124,8 +94,6 @@ export default function ProfileSettings() {
     }
   }
   const hasProfileChanges = JSON.stringify(form) !== JSON.stringify(savedProfile)
-  const hasChanges =
-    hasProfileChanges || accountName.trim() !== savedAccountName.trim()
   return (
     <div className="page profile-settings">
       <PageHeading eyebrow="" title="Public profile" />
@@ -294,35 +262,22 @@ export default function ProfileSettings() {
             </>
           )}
         </div>
-        <div className="profile-account-display-name">
-          <label>
-            Account display name
-            <input
-              value={accountName}
-              maxLength={80}
-              disabled={!accountNameReady || busy}
-              onChange={(e) => setAccountName(e.target.value)}
-              autoComplete="nickname"
-            />
-          </label>
-        </div>
         <div className="row profile-form-actions">
           <button
             className="button"
             type="submit"
             form="public-profile-details-form"
-            disabled={!ready || !accountNameReady || busy}
+            disabled={!ready || busy}
           >
             Save changes
           </button>
-          {hasChanges && (
+          {hasProfileChanges && (
             <button
               type="button"
               className="button secondary"
               disabled={!ready || busy}
               onClick={() => {
                 setForm(savedProfile)
-                setAccountName(savedAccountName)
               }}
             >
               Cancel
@@ -332,10 +287,7 @@ export default function ProfileSettings() {
       </section>
       {session && (
         <section className="profile-settings-section account-settings-section">
-          <Account
-            embedded
-            onDisplayNameLoaded={handleAccountDisplayNameLoaded}
-          />
+          <Account embedded />
         </section>
       )}
       {previous && (
