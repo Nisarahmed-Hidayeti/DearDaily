@@ -92,7 +92,7 @@ it('keeps a newly cropped photo private until deliberate sharing and backend-con
   )
   await user.click(screen.getByRole('button', { name: 'Use crop fixture' }))
   const consent = await screen.findByRole('checkbox', {
-    name: /Show this photo/,
+    name: /Show my photo publicly/,
   })
   expect(consent).not.toBeChecked()
   expect(mocks.save).not.toHaveBeenCalled()
@@ -111,7 +111,7 @@ it('cannot share private photos while the public profile is hidden', async () =>
   const user = userEvent.setup()
   render(<ProfilePhotos fallback="❧" publicVisible={false} />)
   expect(
-    await screen.findByRole('checkbox', { name: /Show this photo/ }),
+    await screen.findByRole('checkbox', { name: /Show my photo publicly/ }),
   ).toBeDisabled()
   await user.click(
     screen.getByRole('button', { name: 'Remove photo · use icon' }),
@@ -145,7 +145,7 @@ it('routes a dropped banner through cropping and leaves it private before saving
   )
   expect(
     await screen.findByRole('checkbox', {
-      name: 'Show this banner on my public profile',
+      name: 'Show my banner publicly',
     }),
   ).not.toBeChecked()
   expect(mocks.save).not.toHaveBeenCalled()
@@ -181,12 +181,12 @@ it('does not claim success on a failed save and retains changes for explicit rec
   const user = userEvent.setup()
   render(<ProfilePhotos fallback="☾" publicVisible />)
   await user.click(
-    await screen.findByRole('checkbox', { name: /Show this photo/ }),
+    await screen.findByRole('checkbox', { name: /Show my photo publicly/ }),
   )
   await user.click(screen.getByRole('button', { name: 'Save photos' }))
   await screen.findByText('Reload before retrying.')
   expect(screen.queryByText('Photos saved.')).toBeNull()
   expect(
-    screen.getByRole('checkbox', { name: /Show this photo/ }),
+    screen.getByRole('checkbox', { name: /Show my photo publicly/ }),
   ).toBeChecked()
 })

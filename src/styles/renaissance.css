@@ -349,6 +349,7 @@
     transition: color 160ms ease;
   }
 }
+
 @media (max-width: 1000px) {
   .hero-memories {
     height: 420px;
@@ -1096,7 +1097,6 @@
 }
 .profile-settings .account-form > fieldset > label:has(textarea),
 .profile-settings .account-form > fieldset > small,
-.profile-settings .account-form > fieldset > .profile-settings-disclosure,
 .profile-settings .account-form > fieldset > .row,
 .profile-settings .account-form > fieldset > p {
   grid-column: 1 / -1;
@@ -1112,18 +1112,7 @@
 .profile-settings textarea {
   min-height: 88px;
 }
-.profile-settings-disclosure {
-  border-block-start: 1px solid var(--border);
-  padding-block: 18px;
-}
-.profile-settings-disclosure > summary {
-  cursor: pointer;
-  font-size: 13px;
-}
-.profile-settings-disclosure[open] > summary {
-  margin-bottom: 18px;
-}
-.account-settings-disclosure .account-embedded {
+.account-settings-section .account-embedded {
   max-width: none;
 }
 .account-embedded-title {
@@ -1408,5 +1397,132 @@
     to {
       transform: rotate(1turn);
     }
+  }
+}
+
+/* Public profile settings: keep every control visible in one calm layout. */
+.profile-settings > .account-form {
+  margin-block: 24px 30px;
+  padding: clamp(20px, 3vw, 32px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.profile-settings .account-form > fieldset {
+  padding: 0;
+  gap: 20px 24px;
+}
+.profile-settings .account-form > fieldset > h2,
+.profile-settings .account-form > fieldset > .profile-extra-fields,
+.profile-settings .account-form > fieldset > .profile-visibility-options,
+.profile-settings .account-form > fieldset > .profile-form-actions,
+.profile-settings .account-form > fieldset > label:has(textarea),
+.profile-settings .account-form > fieldset > small {
+  grid-column: 1 / -1;
+}
+.profile-details-form h2,
+.profile-settings-section > h2,
+.profile-sharing-settings > h2 {
+  margin: 0;
+  font: 400 24px/1.25 var(--serif);
+}
+.profile-settings .account-form > fieldset > h2 {
+  margin-bottom: -4px;
+}
+.profile-username-field > small {
+  font-size: 11px;
+}
+.profile-settings .account-form label {
+  display: grid;
+  gap: 8px;
+}
+.profile-settings .account-form label.row,
+.profile-visibility-options .row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.profile-settings input[type='checkbox'],
+.profile-photo-consent input[type='checkbox'] {
+  accent-color: var(--accent);
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.profile-extra-fields {
+  border-top: 1px solid var(--border);
+  padding-top: 22px;
+}
+.profile-extra-fields h3 {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.profile-settings .public-panel-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
+}
+.profile-visibility-options {
+  display: grid;
+  border-block: 1px solid var(--border);
+}
+.profile-visibility-options .row {
+  min-height: 54px;
+  margin: 0;
+  padding: 12px 0;
+}
+.profile-visibility-options .row + .row {
+  border-top: 1px solid var(--border);
+}
+.profile-form-actions {
+  margin: 0;
+}
+.profile-settings-section,
+.profile-sharing-settings {
+  margin-top: 28px;
+  padding-top: 26px;
+  border-top: 1px solid var(--border);
+}
+.profile-settings-section > h2,
+.profile-sharing-settings > h2 {
+  margin-bottom: 16px;
+}
+.profile-photo-settings .profile-photo-editor {
+  margin: 0;
+}
+.profile-photo-settings .profile-photo-consent {
+  margin-top: 0;
+}
+.profile-settings .account-settings-section .account-embedded {
+  max-width: none;
+}
+.account-embedded .account-overview-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.account-embedded .account-overview-grid .panel {
+  padding: 18px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.account-embedded-title {
+  margin-bottom: 16px;
+}
+.account-embedded .account-form {
+  margin-top: 16px;
+}
+.profile-danger-zone {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 600px) {
+  .profile-settings .public-panel-options,
+  .account-embedded .account-overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-settings > .account-form {
+    padding: 20px 16px;
   }
 }

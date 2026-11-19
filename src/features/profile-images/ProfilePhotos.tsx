@@ -220,12 +220,6 @@ export function ProfilePhotos({
           </button>
         </div>
       )}
-      {compact && (
-        <p className="tiny muted">
-          Choose a photo from your preview, then save it here. Photos stay
-          private until you choose to share them.
-        </p>
-      )}
       <fieldset disabled={busy || !ready} className="profile-photo-consent">
         {draft.avatar_asset && (
           <label>
@@ -235,7 +229,7 @@ export function ProfilePhotos({
               checked={publicVisible && draft.share_avatar}
               onChange={(e) => patch({ share_avatar: e.target.checked })}
             />
-            Show this photo on my public profile and bylines
+            Show my photo publicly
           </label>
         )}
         {draft.banner_asset && (
@@ -246,13 +240,12 @@ export function ProfilePhotos({
               checked={publicVisible && draft.share_banner}
               onChange={(e) => patch({ share_banner: e.target.checked })}
             />
-            Show this banner on my public profile
+            Show my banner publicly
           </label>
         )}
         {!publicVisible && (draft.avatar_asset || draft.banner_asset) && (
           <small>
-            Your uploads stay private. Enable your public profile below before
-            sharing photos.
+            Make your profile public to share photos.
           </small>
         )}
       </fieldset>
@@ -281,7 +274,7 @@ export function ProfilePhotos({
             setMessage('')
           }}
         >
-          Cancel photo edits
+          Cancel
         </button>
         {!ready && (
           <button

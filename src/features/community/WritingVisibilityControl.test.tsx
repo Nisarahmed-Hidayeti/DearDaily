@@ -27,7 +27,7 @@ it('has no separate refresh option and confirms ongoing sharing before showing a
     screen.getByRole('checkbox', { name: /Writing streak/ }),
   )
   expect(rpc).not.toHaveBeenCalled()
-  expect(screen.getByRole('dialog')).toHaveTextContent('update automatically')
+  expect(screen.getByRole('dialog')).toHaveTextContent('updates as you write')
   await userEvent.click(screen.getByRole('button', { name: 'Confirm sharing' }))
   expect(rpc).toHaveBeenCalledWith('set_public_writing_visibility', {
     show_streak: true,
@@ -64,5 +64,5 @@ it('requires one confirmation to upgrade existing snapshots rather than silently
     screen.getByRole('button', { name: 'Confirm updated sharing' }),
   )
   expect(rpc).not.toHaveBeenCalled()
-  expect(screen.getByRole('dialog')).toHaveTextContent('update automatically')
+  expect(screen.getByRole('dialog')).toHaveTextContent('updates as you write')
 })

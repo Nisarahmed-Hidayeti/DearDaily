@@ -54,13 +54,11 @@ export default function WritingVisibilityControl({
   }
   return (
     <div className="writing-visibility">
-      <p className="tiny muted">
-        Shared rhythm stays up to date automatically.
-      </p>
+      <p className="tiny muted">Updates automatically.</p>
       <label className="row">
         <span>
           <strong>Writing streak</strong>
-          <small>Show your current consecutive writing days.</small>
+          <small>Show your current day count.</small>
         </span>
         <input
           type="checkbox"
@@ -76,7 +74,7 @@ export default function WritingVisibilityControl({
       <label className="row">
         <span>
           <strong>Writing calendar</strong>
-          <small>Show which days you wrote. Your words remain private.</small>
+          <small>Show writing days; your entries stay private.</small>
         </span>
         <input
           type="checkbox"
@@ -108,10 +106,10 @@ export default function WritingVisibilityControl({
         >
           <p>
             {pending.calendar
-              ? 'Your writing dates will be visible on your public profile and update automatically as you write.'
-              : 'Your current writing-streak count will be visible on your public profile and update automatically.'}{' '}
-            Your writing, moods and entry counts stay private. You can hide
-            these details at any time.
+              ? 'Your writing days will appear on your public profile.'
+              : 'Your current day count will appear on your public profile.'}{' '}
+            This updates as you write. Journal text and moods stay private.
+            Turn sharing off anytime.
           </p>
           {error && <p role="alert">{error}</p>}
           <div className="row">
