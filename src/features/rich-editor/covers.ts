@@ -3,7 +3,7 @@ export const photographicCovers = [
   {
     id: 'met-oxbow',
     name: 'View from Mount Holyoke, Northampton, Massachusetts, after a Thunderstorm—The Oxbow',
-    collection: 'The Met · Hudson River School',
+    collection: 'Museum art',
     src: '/covers/met-oxbow.jpg',
     thumbnail: '/covers/met-oxbow-thumb.jpg',
     credit: 'Thomas Cole',
@@ -12,7 +12,7 @@ export const photographicCovers = [
   {
     id: 'met-lake-george',
     name: 'Lake George',
-    collection: 'The Met · Hudson River School',
+    collection: 'Museum art',
     src: '/covers/met-lake-george.jpg',
     thumbnail: '/covers/met-lake-george-thumb.jpg',
     credit: 'John Frederick Kensett',
@@ -21,7 +21,7 @@ export const photographicCovers = [
   {
     id: 'met-landers-peak',
     name: "The Rocky Mountains, Lander's Peak",
-    collection: 'The Met · Hudson River School',
+    collection: 'Museum art',
     src: '/covers/met-landers-peak.jpg',
     thumbnail: '/covers/met-landers-peak-thumb.jpg',
     credit: 'Albert Bierstadt',
@@ -30,7 +30,7 @@ export const photographicCovers = [
   {
     id: 'met-heart-andes',
     name: 'Heart of the Andes',
-    collection: 'The Met · Hudson River School',
+    collection: 'Museum art',
     src: '/covers/met-heart-andes.jpg',
     thumbnail: '/covers/met-heart-andes-thumb.jpg',
     credit: 'Frederic Edwin Church',
@@ -39,7 +39,7 @@ export const photographicCovers = [
   {
     id: 'met-lake-george-new-york',
     name: 'Lake George, New York',
-    collection: 'The Met · Hudson River School',
+    collection: 'Museum art',
     src: '/covers/met-lake-george-new-york.jpg',
     thumbnail: '/covers/met-lake-george-new-york-thumb.jpg',
     credit: 'John Frederick Kensett',
@@ -48,7 +48,7 @@ export const photographicCovers = [
   {
     id: 'met-beeches',
     name: 'Study of Beeches',
-    collection: 'The Met · Hudson River School',
+    collection: 'Museum art',
     src: '/covers/met-beeches.jpg',
     thumbnail: '/covers/met-beeches-thumb.jpg',
     credit: 'John Frederick Kensett',
@@ -57,7 +57,7 @@ export const photographicCovers = [
   {
     id: 'forest-light',
     name: 'Light through the trees',
-    collection: 'Quiet nature',
+    collection: 'Nature & seasons',
     src: '/covers/forest-light.jpg',
     thumbnail: '/covers/forest-light-thumb.jpg',
     credit: 'ClickerHappy',
@@ -66,7 +66,7 @@ export const photographicCovers = [
   {
     id: 'pacific-dusk',
     name: 'Pacific, after the rain',
-    collection: 'Quiet nature',
+    collection: 'Nature & seasons',
     src: '/covers/pacific-dusk.jpg',
     thumbnail: '/covers/pacific-dusk-thumb.jpg',
     credit: 'Julian Bracero',
@@ -75,7 +75,7 @@ export const photographicCovers = [
   {
     id: 'cafe-memory',
     name: 'A window seat',
-    collection: 'Everyday memories',
+    collection: 'Everyday & after dark',
     src: '/covers/cafe-memory.jpg',
     thumbnail: '/covers/cafe-memory-thumb.jpg',
     credit: 'Esra Afşar',
@@ -85,7 +85,7 @@ export const photographicCovers = [
   {
     id: 'quiet-lake',
     name: 'Still water, open sky',
-    collection: 'Quiet nature',
+    collection: 'Nature & seasons',
     src: '/covers/quiet-lake.jpg',
     thumbnail: '/covers/quiet-lake-thumb.jpg',
     credit: 'Quentin Martinez',
@@ -95,7 +95,7 @@ export const photographicCovers = [
   {
     id: 'golden-hour',
     name: 'Fields of gold',
-    collection: 'Seasons',
+    collection: 'Nature & seasons',
     src: '/covers/golden-hour.jpg',
     thumbnail: '/covers/golden-hour-thumb.jpg',
     credit: 'Meriç Tuna',
@@ -105,7 +105,7 @@ export const photographicCovers = [
   {
     id: 'soft-blossoms',
     name: 'A softer spring',
-    collection: 'Seasons',
+    collection: 'Nature & seasons',
     src: '/covers/soft-blossoms.jpg',
     thumbnail: '/covers/soft-blossoms-thumb.jpg',
     credit: 'Elina Volkova',
@@ -115,7 +115,7 @@ export const photographicCovers = [
   {
     id: 'city-after-dark',
     name: 'When the city quiets',
-    collection: 'After dark',
+    collection: 'Everyday & after dark',
     src: '/covers/city-after-dark.jpg',
     thumbnail: '/covers/city-after-dark-thumb.jpg',
     credit: 'Simon Robben',
@@ -124,7 +124,7 @@ export const photographicCovers = [
   {
     id: 'star-road',
     name: 'A road full of stars',
-    collection: 'After dark',
+    collection: 'Everyday & after dark',
     src: '/covers/star-road.jpg',
     thumbnail: '/covers/star-road-thumb.jpg',
     credit: 'Simon Steiner',
@@ -134,7 +134,7 @@ export const photographicCovers = [
   {
     id: 'misty-reflection',
     name: 'Between mist and water',
-    collection: 'Quiet nature',
+    collection: 'Nature & seasons',
     src: '/covers/misty-reflection.jpg',
     thumbnail: '/covers/misty-reflection-thumb.jpg',
     credit: 'Ray Bilcliff',

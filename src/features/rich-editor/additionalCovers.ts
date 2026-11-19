@@ -3,7 +3,7 @@ export const additionalCovers = [
   {
     id: 'nasa-art002e016354',
     name: 'A thin lunar crescent',
-    collection: 'Artemis II',
+    collection: 'Space & beyond',
     src: '/covers/nasa-art002e016354.jpg',
     thumbnail: '/covers/nasa-art002e016354-thumb.jpg',
     credit: 'NASA',
@@ -12,7 +12,7 @@ export const additionalCovers = [
   {
     id: 'nasa-art002e009582',
     name: 'The illuminated Moon',
-    collection: 'Artemis II',
+    collection: 'Space & beyond',
     src: '/covers/nasa-art002e009582.jpg',
     thumbnail: '/covers/nasa-art002e009582-thumb.jpg',
     credit: 'NASA',
@@ -21,7 +21,7 @@ export const additionalCovers = [
   {
     id: 'nasa-art002e009281',
     name: 'Shadows at the edge of lunar day',
-    collection: 'Artemis II',
+    collection: 'Space & beyond',
     src: '/covers/nasa-art002e009281.jpg',
     thumbnail: '/covers/nasa-art002e009281-thumb.jpg',
     credit: 'NASA',
@@ -30,7 +30,7 @@ export const additionalCovers = [
   {
     id: 'nasa-art002e009282',
     name: 'Craters along the terminator',
-    collection: 'Artemis II',
+    collection: 'Space & beyond',
     src: '/covers/nasa-art002e009282.jpg',
     thumbnail: '/covers/nasa-art002e009282-thumb.jpg',
     credit: 'NASA',
@@ -39,7 +39,7 @@ export const additionalCovers = [
   {
     id: 'nasa-art002e009285',
     name: 'Earthset',
-    collection: 'Artemis II',
+    collection: 'Space & beyond',
     src: '/covers/nasa-art002e009285.jpg',
     thumbnail: '/covers/nasa-art002e009285-thumb.jpg',
     credit: 'NASA',
@@ -48,7 +48,7 @@ export const additionalCovers = [
   {
     id: 'nasa-art002e009301',
     name: 'Total solar eclipse from Orion',
-    collection: 'Artemis II',
+    collection: 'Space & beyond',
     src: '/covers/nasa-art002e009301.jpg',
     thumbnail: '/covers/nasa-art002e009301-thumb.jpg',
     credit: 'NASA',
@@ -57,7 +57,7 @@ export const additionalCovers = [
   {
     id: 'nasa-art002e010208',
     name: 'The Moon, half in shadow',
-    collection: 'Artemis II',
+    collection: 'Space & beyond',
     src: '/covers/nasa-art002e010208.jpg',
     thumbnail: '/covers/nasa-art002e010208-thumb.jpg',
     credit: 'NASA',
@@ -66,7 +66,7 @@ export const additionalCovers = [
   {
     id: 'nasa-art002e012028',
     name: 'Across the lunar surface',
-    collection: 'Artemis II',
+    collection: 'Space & beyond',
     src: '/covers/nasa-art002e012028.jpg',
     thumbnail: '/covers/nasa-art002e012028-thumb.jpg',
     credit: 'NASA',
@@ -237,7 +237,7 @@ export const additionalCovers = [
   {
     id: 'nasa-s36-39-014',
     name: 'New York after sunset',
-    collection: 'After dark',
+    collection: 'Everyday & after dark',
     src: '/covers/nasa-s36-39-014.jpg',
     thumbnail: '/covers/nasa-s36-39-014-thumb.jpg',
     credit: 'NASA',
@@ -246,7 +246,7 @@ export const additionalCovers = [
   {
     id: 'nasa-iss025e015176',
     name: 'A world of lights',
-    collection: 'After dark',
+    collection: 'Everyday & after dark',
     src: '/covers/nasa-iss025e015176.jpg',
     thumbnail: '/covers/nasa-iss025e015176-thumb.jpg',
     credit: 'NASA',
@@ -255,7 +255,7 @@ export const additionalCovers = [
   {
     id: 'nasa-iss037e004654',
     name: 'Night over the Nile',
-    collection: 'After dark',
+    collection: 'Everyday & after dark',
     src: '/covers/nasa-iss037e004654.jpg',
     thumbnail: '/covers/nasa-iss037e004654-thumb.jpg',
     credit: 'NASA / Karen Nyberg',
@@ -264,7 +264,7 @@ export const additionalCovers = [
   {
     id: 'webb-stephans-quintet-nircam-and-miri-composite-image',
     name: 'Stephan’s Quintet',
-    collection: 'James Webb Telescope',
+    collection: 'Space & beyond',
     src: '/covers/webb-stephans-quintet-nircam-and-miri-composite-image.jpg',
     thumbnail:
       '/covers/webb-stephans-quintet-nircam-and-miri-composite-image-thumb.jpg',
@@ -275,7 +275,7 @@ export const additionalCovers = [
   {
     id: 'webb-pillars-of-creation-nircam-image',
     name: 'Pillars of Creation',
-    collection: 'James Webb Telescope',
+    collection: 'Space & beyond',
     src: '/covers/webb-pillars-of-creation-nircam-image.jpg',
     thumbnail: '/covers/webb-pillars-of-creation-nircam-image-thumb.jpg',
     credit: 'NASA, ESA, CSA, STScI',
@@ -285,7 +285,7 @@ export const additionalCovers = [
   {
     id: 'webb-webbs-first-deep-field-unveiled-nircam-image',
     name: 'Webb’s first deep field',
-    collection: 'James Webb Telescope',
+    collection: 'Space & beyond',
     src: '/covers/webb-webbs-first-deep-field-unveiled-nircam-image.jpg',
     thumbnail:
       '/covers/webb-webbs-first-deep-field-unveiled-nircam-image-thumb.jpg',
@@ -296,7 +296,7 @@ export const additionalCovers = [
   {
     id: 'nasa-carina-nebula',
     name: 'Cosmic Cliffs in Carina',
-    collection: 'James Webb Telescope',
+    collection: 'Space & beyond',
     src: '/covers/nasa-carina-nebula.jpg',
     thumbnail: '/covers/nasa-carina-nebula-thumb.jpg',
     credit: 'NASA, ESA, CSA, STScI',
@@ -305,7 +305,7 @@ export const additionalCovers = [
   {
     id: 'nasa-southern-ring-nebula',
     name: 'Southern Ring Nebula',
-    collection: 'James Webb Telescope',
+    collection: 'Space & beyond',
     src: '/covers/nasa-southern-ring-nebula.jpg',
     thumbnail: '/covers/nasa-southern-ring-nebula-thumb.jpg',
     credit: 'NASA, ESA, CSA, STScI',
@@ -323,7 +323,7 @@ export const additionalCovers = [
   {
     id: 'met-art-437984',
     name: 'La Berceuse (Woman Rocking a Cradle; Augustine-Alix Pellicot Roulin, 1851–1930)',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-437984.jpg',
     thumbnail: '/covers/met-art-437984-thumb.jpg',
     credit: 'Vincent van Gogh',
@@ -332,7 +332,7 @@ export const additionalCovers = [
   {
     id: 'met-art-11130',
     name: 'Northeaster',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-11130.jpg',
     thumbnail: '/covers/met-art-11130-thumb.jpg',
     credit: 'Winslow Homer',
@@ -341,7 +341,7 @@ export const additionalCovers = [
   {
     id: 'met-art-10482',
     name: 'The Parthenon',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-10482.jpg',
     thumbnail: '/covers/met-art-10482-thumb.jpg',
     credit: 'Frederic Edwin Church',
@@ -350,7 +350,7 @@ export const additionalCovers = [
   {
     id: 'met-art-437310',
     name: 'The Boulevard Montmartre on a Winter Morning',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-437310.jpg',
     thumbnail: '/covers/met-art-437310-thumb.jpg',
     credit: 'Camille Pissarro',
@@ -359,7 +359,7 @@ export const additionalCovers = [
   {
     id: 'met-art-438817',
     name: 'The Dance Class',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-438817.jpg',
     thumbnail: '/covers/met-art-438817-thumb.jpg',
     credit: 'Edgar Degas',
@@ -368,7 +368,7 @@ export const additionalCovers = [
   {
     id: 'met-art-437159',
     name: 'Young Woman Knitting',
-    collection: 'Everyday memories',
+    collection: 'Everyday & after dark',
     src: '/covers/met-art-437159.jpg',
     thumbnail: '/covers/met-art-437159-thumb.jpg',
     credit: 'Berthe Morisot',
@@ -377,7 +377,7 @@ export const additionalCovers = [
   {
     id: 'met-art-437654',
     name: 'Circus Sideshow (Parade de cirque)',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-437654.jpg',
     thumbnail: '/covers/met-art-437654-thumb.jpg',
     credit: 'Georges Seurat',
@@ -386,7 +386,7 @@ export const additionalCovers = [
   {
     id: 'met-art-826444',
     name: 'A Street Scene in Seville',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-826444.jpg',
     thumbnail: '/covers/met-art-826444-thumb.jpg',
     credit: 'Thomas Eakins',
@@ -395,7 +395,7 @@ export const additionalCovers = [
   {
     id: 'met-art-11392',
     name: 'Roses',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-11392.jpg',
     thumbnail: '/covers/met-art-11392-thumb.jpg',
     credit: 'George Cochran Lambdin',
@@ -404,7 +404,7 @@ export const additionalCovers = [
   {
     id: 'met-art-11417',
     name: 'Washington Crossing the Delaware',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-11417.jpg',
     thumbnail: '/covers/met-art-11417-thumb.jpg',
     credit: 'Emanuel Leutze',
@@ -413,7 +413,7 @@ export const additionalCovers = [
   {
     id: 'met-art-459123',
     name: 'Madame Roulin and Her Baby',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-459123.jpg',
     thumbnail: '/covers/met-art-459123-thumb.jpg',
     credit: 'Vincent van Gogh',
@@ -422,7 +422,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436787',
     name: 'The Pont Neuf',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436787.jpg',
     thumbnail: '/covers/met-art-436787-thumb.jpg',
     credit: 'Johan Barthold Jongkind',
@@ -431,7 +431,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436483',
     name: 'Pygmalion and Galatea',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436483.jpg',
     thumbnail: '/covers/met-art-436483-thumb.jpg',
     credit: 'Jean-Léon Gérôme',
@@ -440,7 +440,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436528',
     name: 'Irises',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436528.jpg',
     thumbnail: '/covers/met-art-436528-thumb.jpg',
     credit: 'Vincent van Gogh',
@@ -449,7 +449,7 @@ export const additionalCovers = [
   {
     id: 'met-art-435809',
     name: 'The Harvesters',
-    collection: 'Seasons',
+    collection: 'Nature & seasons',
     src: '/covers/met-art-435809.jpg',
     thumbnail: '/covers/met-art-435809-thumb.jpg',
     credit: 'Pieter Bruegel the Elder',
@@ -458,7 +458,7 @@ export const additionalCovers = [
   {
     id: 'met-art-437312',
     name: 'The Garden of the Tuileries on a Winter Afternoon',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-437312.jpg',
     thumbnail: '/covers/met-art-437312-thumb.jpg',
     credit: 'Camille Pissarro',
@@ -467,7 +467,7 @@ export const additionalCovers = [
   {
     id: 'met-art-11227',
     name: 'Autumn Oaks',
-    collection: 'Seasons',
+    collection: 'Nature & seasons',
     src: '/covers/met-art-11227.jpg',
     thumbnail: '/covers/met-art-11227-thumb.jpg',
     credit: 'George Inness',
@@ -476,7 +476,7 @@ export const additionalCovers = [
   {
     id: 'met-art-435882',
     name: 'Still Life with Apples and a Pot of Primroses',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-435882.jpg',
     thumbnail: '/covers/met-art-435882-thumb.jpg',
     credit: 'Paul Cézanne',
@@ -485,7 +485,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436529',
     name: "L'Arlésienne: Madame Joseph-Michel Ginoux (Marie Julien, 1848–1911)",
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436529.jpg',
     thumbnail: '/covers/met-art-436529-thumb.jpg',
     credit: 'Vincent van Gogh',
@@ -494,7 +494,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436532',
     name: 'Self-Portrait with a Straw Hat (obverse: The Potato Peeler)',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436532.jpg',
     thumbnail: '/covers/met-art-436532-thumb.jpg',
     credit: 'Vincent van Gogh',
@@ -503,7 +503,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436534',
     name: 'Roses',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436534.jpg',
     thumbnail: '/covers/met-art-436534-thumb.jpg',
     credit: 'Vincent van Gogh',
@@ -512,7 +512,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436535',
     name: 'Wheat Field with Cypresses',
-    collection: 'Quiet nature',
+    collection: 'Nature & seasons',
     src: '/covers/met-art-436535.jpg',
     thumbnail: '/covers/met-art-436535-thumb.jpg',
     credit: 'Vincent van Gogh',
@@ -521,7 +521,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436833',
     name: 'Red Sunset',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436833.jpg',
     thumbnail: '/covers/met-art-436833-thumb.jpg',
     credit: 'Arkhyp Kuindzhi (Arkhip Ivanovich Kuindzhi)',
@@ -530,7 +530,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436065',
     name: 'Children and a Cow',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436065.jpg',
     thumbnail: '/covers/met-art-436065-thumb.jpg',
     credit: 'Aelbert Cuyp',
@@ -539,7 +539,7 @@ export const additionalCovers = [
   {
     id: 'met-art-437317',
     name: 'Still Life with Apples and Pitcher',
-    collection: 'Everyday memories',
+    collection: 'Everyday & after dark',
     src: '/covers/met-art-437317.jpg',
     thumbnail: '/covers/met-art-437317-thumb.jpg',
     credit: 'Camille Pissarro',
@@ -548,7 +548,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436121',
     name: 'A Woman Seated beside a Vase of Flowers (Madame Paul Valpinçon?)',
-    collection: 'Everyday memories',
+    collection: 'Everyday & after dark',
     src: '/covers/met-art-436121.jpg',
     thumbnail: '/covers/met-art-436121-thumb.jpg',
     credit: 'Edgar Degas',
@@ -557,7 +557,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436085',
     name: 'Apple Blossoms',
-    collection: 'Seasons',
+    collection: 'Nature & seasons',
     src: '/covers/met-art-436085.jpg',
     thumbnail: '/covers/met-art-436085-thumb.jpg',
     credit: 'Charles-François Daubigny',
@@ -566,7 +566,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436095',
     name: 'The Third-Class Carriage',
-    collection: 'Everyday memories',
+    collection: 'Everyday & after dark',
     src: '/covers/met-art-436095.jpg',
     thumbnail: '/covers/met-art-436095-thumb.jpg',
     credit: 'Honoré Daumier',
@@ -575,7 +575,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436106',
     name: 'Antoine Laurent Lavoisier (1743–1794) and Marie Anne Lavoisier (Marie Anne Pierrette Paulze, 1758–1836)',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436106.jpg',
     thumbnail: '/covers/met-art-436106-thumb.jpg',
     credit: 'Jacques Louis David',
@@ -584,7 +584,7 @@ export const additionalCovers = [
   {
     id: 'met-art-436016',
     name: 'Madame Auguste Cuoq (Mathilde Desportes, 1827–1910)',
-    collection: 'The Met Museum',
+    collection: 'Museum art',
     src: '/covers/met-art-436016.jpg',
     thumbnail: '/covers/met-art-436016-thumb.jpg',
     credit: 'Gustave Courbet',
