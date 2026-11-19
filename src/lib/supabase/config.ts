@@ -63,5 +63,9 @@ export function authRedirect(
 }
 // Only known internal destinations can be used after login; never echo a URL.
 export function safeNext(value: string | null): string {
-  return value === '/app/settings' || value === '/account' ? value : '/account'
+  return value === '/app/settings' ||
+    value === '/app/journal' ||
+    value === '/account'
+    ? value
+    : '/account'
 }
