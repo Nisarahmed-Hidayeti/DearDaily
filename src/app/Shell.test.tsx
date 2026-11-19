@@ -31,6 +31,11 @@ function workspace(path = '/app/write') {
     </MemoryRouter>,
   )
 }
+function primaryLink(label: string) {
+  return within(
+    screen.getByRole('navigation', { name: 'Primary navigation' }),
+  ).getByRole('link', { name: label })
+}
 it('automatically minimizes navigation for writing without saving an implicit preference', async () => {
   workspace()
   expect(document.querySelector('.studio-shell')).toHaveAttribute(
@@ -38,13 +43,13 @@ it('automatically minimizes navigation for writing without saving an implicit pr
     'true',
   )
   expect(localStorage.getItem(sidebarPreferenceKey)).toBeNull()
-  await userEvent.click(screen.getByRole('link', { name: 'Home' }))
+  await userEvent.click(primaryLink('Home'))
   expect(document.querySelector('.studio-shell')).toHaveAttribute(
     'data-collapsed',
     'false',
   )
-  await userEvent.click(screen.getByRole('link', { name: 'My Journal' }))
-  expect(screen.getByRole('link', { name: 'My Journal' })).toHaveAttribute(
+  await userEvent.click(primaryLink('My Journal'))
+  expect(primaryLink('My Journal')).toHaveAttribute(
     'aria-current',
     'page',
   )
@@ -91,7 +96,7 @@ it('keeps mobile navigation at the bottom and opens account controls separately'
   expect(mobileTabs).toHaveTextContent('Write')
   expect(mobileTabs).toHaveTextContent('Explore')
   const accountButton = mobileTabs?.querySelector('button')
-  expect(accountButton).toHaveAccessibleName('Open account menu')
+  expect(accountButton).toHaveAccessibleName('Open account controls')
   fireEvent.click(accountButton!)
   const dialog = screen.getByRole('dialog', { name: 'Your workspace' })
   expect(dialog).toHaveAttribute('open')

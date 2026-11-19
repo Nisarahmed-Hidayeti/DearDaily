@@ -230,7 +230,7 @@ export default function Shell() {
         ))}
         <button
           className="studio-mobile-tab"
-          aria-label="Open account menu"
+          aria-label="Open account controls"
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen(true)}
         >

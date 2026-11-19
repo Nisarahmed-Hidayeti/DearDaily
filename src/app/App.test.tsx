@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { AppRoutes } from '../App'
@@ -10,6 +10,11 @@ function page(route = '/') {
       <AppRoutes />
     </MemoryRouter>,
   )
+}
+function primaryLink(label: string) {
+  return within(
+    screen.getByRole('navigation', { name: 'Primary navigation' }),
+  ).getByRole('link', { name: label })
 }
 describe('DearDaily prototype', () => {
   it('offers a useful empty journal state', () => {
@@ -29,14 +34,14 @@ describe('DearDaily prototype', () => {
       screen.getByRole('heading', { name: /Every day has a story/ }),
     ).toBeInTheDocument()
     await userEvent.click(screen.getByRole('link', { name: /Try the demo/ }))
-    await userEvent.click(screen.getByRole('link', { name: 'Write' }))
+    await userEvent.click(primaryLink('Write'))
     expect(screen.getByLabelText('Entry title')).toBeInTheDocument()
   })
   it('renders fictional dashboard data and working navigation', async () => {
     page('/app')
     expect(screen.getByText(/Fictional sample content/)).toBeInTheDocument()
     expect(screen.getByText('24')).toBeInTheDocument()
-    await userEvent.click(screen.getByRole('link', { name: 'Explore' }))
+    await userEvent.click(primaryLink('Explore'))
     expect(
       screen.getByRole('heading', { name: /Different lives/ }),
     ).toBeInTheDocument()
@@ -98,8 +103,8 @@ describe('DearDaily prototype', () => {
       screen.getByLabelText('Journal body'),
       'Temporary private thought',
     )
-    await userEvent.click(screen.getByRole('link', { name: 'Home' }))
-    await userEvent.click(screen.getByRole('link', { name: 'Write' }))
+    await userEvent.click(primaryLink('Home'))
+    await userEvent.click(primaryLink('Write'))
     expect(screen.getByLabelText('Journal body')).toHaveValue('')
   })
   it('has a 404 and honest unconfigured authentication page', async () => {
