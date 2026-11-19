@@ -33,6 +33,7 @@ it('confirms new public details with canonical JSON and never writes a backend-o
             interests: ['Books'],
           },
           public_streak: null,
+          stories_collapsed: false,
         },
         error: null,
       }),
@@ -54,5 +55,7 @@ it('confirms new public details with canonical JSON and never writes a backend-o
   })
   expect(insert.mock.calls[0][0]).not.toHaveProperty('public_streak')
   expect(insert.mock.calls[0][0]).not.toHaveProperty('user_id')
-  expect(select).toHaveBeenCalledWith('public_streak,public_panel')
+  expect(select).toHaveBeenCalledWith(
+    'public_streak,stories_collapsed,public_panel',
+  )
 })
