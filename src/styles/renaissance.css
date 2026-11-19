@@ -1547,25 +1547,31 @@
   display: grid;
   gap: 0;
   margin-top: 0;
-  padding-block: 12px 20px;
+  padding-block: 8px 12px;
 }
 .profile-settings .profile-sharing-settings > h2 {
-  margin-bottom: 18px;
+  margin-bottom: 8px;
 }
 .profile-sharing-settings .profile-visibility-options .row {
-  min-height: 54px;
+  min-height: 42px;
   margin: 0;
-  padding: 12px 0;
+  padding: 8px 0;
 }
 .profile-sharing-settings .profile-form-actions {
   margin: 0;
   padding-block: 16px;
 }
 .profile-sharing-group {
-  margin-top: 16px;
+  margin-top: 8px;
   padding-top: 0;
 }
 .profile-sharing-group > h3 {
-  margin: 0 0 14px;
+  margin: 0 0 6px;
   font: 400 19px/1.25 var(--serif);
+}
+.profile-settings .profile-photo-editor.compact {
+  margin: 0;
+}
+.profile-settings .profile-photo-editor.compact .profile-photo-consent {
+  margin: 4px 0 0;
 }

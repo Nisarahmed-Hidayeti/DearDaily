@@ -225,6 +225,7 @@
 }
 .studio-mobile-menu nav {
   display: grid;
+  align-content: start;
   gap: 4px;
 }
 .mobile-account-links {
