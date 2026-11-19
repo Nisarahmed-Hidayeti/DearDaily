@@ -46,7 +46,9 @@ export default function Settings() {
             <h2 id="appearance-title">The mood of your space</h2>
             <p>One palette for every page. Choose your favorite.</p>
           </div>
-          <span className="badge">4 thoughtfully chosen palettes</span>
+          <span className="badge">
+            {themes.length} thoughtfully chosen palettes
+          </span>
         </div>
         <fieldset className="theme-options">
           <legend className="sr-only">Website theme</legend>

@@ -119,22 +119,6 @@ export default function Shell() {
           My published stories
         </Link>
       )}
-      <button
-        aria-pressed={preference === null}
-        onClick={() => {
-          setPreference(null)
-          try {
-            localStorage.removeItem(sidebarPreferenceKey)
-          } catch {
-            /* Browser storage is optional. */
-          }
-          closeMenus()
-          account.current?.querySelector('summary')?.focus()
-        }}
-      >
-        <PanelLeftClose size={17} />
-        Automatic writing layout
-      </button>
       {session && (
         <button
           disabled={signingOut}
