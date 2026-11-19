@@ -103,9 +103,7 @@ it('keeps mobile navigation at the bottom and opens account controls separately'
   expect(
     within(dialog).getByRole('link', { name: 'Settings & appearance' }),
   ).toBeVisible()
-  await userEvent.click(
-    within(dialog).getByRole('button', { name: 'Close dialog' }),
-  )
+  fireEvent.click(dialog)
   expect(screen.queryByRole('dialog')).toBeNull()
 })
 it('continues to toggle when preference storage is unavailable', async () => {

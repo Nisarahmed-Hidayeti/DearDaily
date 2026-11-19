@@ -241,7 +241,11 @@ export default function Shell() {
         </button>
       </nav>
       {mobileOpen && (
-        <Modal title="Your workspace" onClose={() => setMobileOpen(false)}>
+        <Modal
+          title="Your workspace"
+          closeOnBackdrop
+          onClose={() => setMobileOpen(false)}
+        >
           <div className="studio-mobile-menu">
             <div className="mobile-account-links">{accountLinks}</div>
           </div>

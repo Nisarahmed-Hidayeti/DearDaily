@@ -74,8 +74,10 @@ export function Modal({
   onClose,
   className = '',
   style,
+  closeOnBackdrop = false,
 }: {
   className?: string
+  closeOnBackdrop?: boolean
   style?: CSSProperties
   title: string
   children: ReactNode
@@ -100,6 +102,9 @@ export function Modal({
       style={style}
       aria-labelledby={titleId}
       onCancel={onClose}
+      onClick={(event) => {
+        if (closeOnBackdrop && event.target === event.currentTarget) onClose()
+      }}
     >
       <div className="modal-header">
         <h2 id={titleId}>{title}</h2>
