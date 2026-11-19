@@ -215,10 +215,7 @@ export function PublicProfileSurface({
       </section>
       <div className="profile-writing-layout">
         <div>
-          <details
-            className="profile-stories-disclosure"
-            open={!profile.stories_collapsed}
-          >
+          <details className="profile-stories-disclosure">
             <summary>Published stories · {storyCount}</summary>
             <div className="story-grid">
               {stories.map((story) => (

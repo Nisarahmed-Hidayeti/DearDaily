@@ -28,7 +28,6 @@ const empty: PublicProfile = {
   bio: '',
   avatar: 'leaf',
   visible: false,
-  stories_collapsed: false,
   joined_month: null,
 }
 export default function ProfileSettings() {
@@ -100,6 +99,7 @@ export default function ProfileSettings() {
       <PageHeading eyebrow="" title="Public profile" />
       <PublicProfilePreview profile={form} savedUsername={previous} />
       <form
+        id="public-profile-details-form"
         className="panel account-form profile-details-form"
         onSubmit={(e) => {
           e.preventDefault()
@@ -210,77 +210,77 @@ export default function ProfileSettings() {
               </div>
             </section>
           )}
-          <div className="profile-visibility-options">
-            <label className="row">
-              <span>Make my profile public</span>
-              <input
-                type="checkbox"
-                checked={form.visible}
-                onChange={(e) => patch({ visible: e.target.checked })}
-              />
-            </label>
-            <label className="row">
-              <span>Start with stories collapsed</span>
-              <input
-                type="checkbox"
-                checked={!!form.stories_collapsed}
-                onChange={(e) =>
-                  patch({ stories_collapsed: e.target.checked })
-                }
-              />
-            </label>
-          </div>
+        </fieldset>
+      </form>
+      <section className="profile-settings-section profile-sharing-settings">
+        <h2>Sharing &amp; visibility</h2>
+        <div className="profile-visibility-options">
+          <label className="row">
+            <span>Make my profile public</span>
+            <input
+              type="checkbox"
+              checked={form.visible}
+              disabled={!ready || busy}
+              onChange={(e) => patch({ visible: e.target.checked })}
+            />
+          </label>
           <div className="row profile-form-actions">
-            <button className="button" disabled={!ready || busy}>
+            <button
+              className="button"
+              type="submit"
+              form="public-profile-details-form"
+              disabled={!ready || busy}
+            >
               Save changes
             </button>
             {JSON.stringify(form) !== JSON.stringify(savedProfile) && (
               <button
                 type="button"
                 className="button secondary"
+                disabled={!ready || busy}
                 onClick={() => setForm(savedProfile)}
               >
                 Cancel
               </button>
             )}
           </div>
-        </fieldset>
-      </form>
-      {message && <p role="status">{message}</p>}
-      {profileImagesEnabled && (
-        <section className="profile-settings-section profile-photo-settings">
-          <h2>Photos</h2>
-          <ProfilePhotos
-            key={session?.user.id}
-            fallback={avatars[form.avatar]}
-            preset={profileCovers.find((c) => c.id === form.cover_id)?.src}
-            publicVisible={savedProfile.visible}
-            compact
-          />
-        </section>
-      )}
-      <section className="profile-sharing-settings">
-        <h2>Writing rhythm</h2>
-        {liveRhythmEnabled ? (
-          <WritingVisibilityControl
-            key={`${previous}:visibility`}
-            saved={!!previous}
-            initial={savedProfile}
-          />
-        ) : (
-          <>
-            <PublicRhythmControl
-              key={`${previous}:calendar`}
-              saved={!!previous}
-              initial={savedProfile.public_rhythm}
+        </div>
+        {message && <p role="status">{message}</p>}
+        {profileImagesEnabled && (
+          <div className="profile-sharing-group profile-photo-settings">
+            <h3>Photos</h3>
+            <ProfilePhotos
+              key={session?.user.id}
+              fallback={avatars[form.avatar]}
+              preset={profileCovers.find((c) => c.id === form.cover_id)?.src}
+              publicVisible={savedProfile.visible}
+              compact
             />
-            <PublicStreakControl
-              key={`${previous}:count`}
-              saved={!!previous}
-              initial={savedProfile.public_streak}
-            />
-          </>
+          </div>
         )}
+        <div className="profile-sharing-group">
+          <h3>Writing rhythm</h3>
+          {liveRhythmEnabled ? (
+            <WritingVisibilityControl
+              key={`${previous}:visibility`}
+              saved={!!previous}
+              initial={savedProfile}
+            />
+          ) : (
+            <>
+              <PublicRhythmControl
+                key={`${previous}:calendar`}
+                saved={!!previous}
+                initial={savedProfile.public_rhythm}
+              />
+              <PublicStreakControl
+                key={`${previous}:count`}
+                saved={!!previous}
+                initial={savedProfile.public_streak}
+              />
+            </>
+          )}
+        </div>
       </section>
       {session && (
         <section className="profile-settings-section account-settings-section">
@@ -312,8 +312,8 @@ export default function ProfileSettings() {
         >
           <p>
             Your profile and its story bylines will be removed. Published story
-            text stays public until you unpublish it. Your private journals
-            stay saved.
+            text stays public until you unpublish it. Your private journals stay
+            saved.
           </p>
           <button
             className="button"
