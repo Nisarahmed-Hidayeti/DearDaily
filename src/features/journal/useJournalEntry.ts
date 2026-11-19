@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthProvider'
 import {
   draftOf,
   draftFingerprint,
+  entryTitle,
   loadEntry,
   newDraft,
   readStories,
@@ -19,9 +20,12 @@ export function useJournalEntry(existingId?: string, newId?: string) {
   const userId = session!.user.id
   const [id] = useState(() => existingId ?? newId ?? crypto.randomUUID())
   const [loadInitially] = useState(Boolean(existingId))
-  const [draft, setDraft] = useState<Draft>(newDraft)
+  const [initialDraft] = useState(newDraft)
+  const [draft, setDraft] = useState<Draft>(initialDraft)
   const [row, setRow] = useState<JournalEntry | null>(null)
-  const [confirmed, setConfirmed] = useState(() => draftFingerprint(newDraft()))
+  const [confirmed, setConfirmed] = useState(() =>
+    draftFingerprint(initialDraft),
+  )
   const [ready, setReady] = useState(!existingId)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -34,7 +38,7 @@ export function useJournalEntry(existingId?: string, newId?: string) {
   const pendingSave = useRef<Promise<JournalEntry | undefined> | null>(null)
   const emptyNewPage =
     !row &&
-    !draft.title.trim() &&
+    (!draft.title.trim() || draft.title === entryTitle('', draft.entry_date)) &&
     !draft.body.trim() &&
     !draft.page_icon &&
     !draft.music &&
@@ -114,8 +118,13 @@ export function useJournalEntry(existingId?: string, newId?: string) {
           }
           setRow(result)
           setConfirmed(draftFingerprint(draftOf(result)))
-          // Only status is merged; words typed during the request are preserved.
-          if (saved) setDraft((current) => ({ ...current, status: 'saved' }))
+          // Canonical titles are merged only if the submitted title was not edited meanwhile.
+          setDraft((current) => ({
+            ...current,
+            title:
+              current.title === snapshot.title ? result.title : current.title,
+            ...(saved ? { status: 'saved' as const } : {}),
+          }))
           return result
         } catch {
           if (generation === epoch.current)
@@ -135,10 +144,25 @@ export function useJournalEntry(existingId?: string, newId?: string) {
   )
   useEffect(() => {
     if (!ready || !dirty || busy || error) return
-    if (!row && !draft.title.trim() && !draft.body.trim()) return
+    if (
+      !row &&
+      !draft.body.trim() &&
+      (!draft.title.trim() || draft.title === entryTitle('', draft.entry_date))
+    )
+      return
     const timer = window.setTimeout(() => void save(), 1200)
     return () => window.clearTimeout(timer)
-  }, [ready, dirty, busy, error, save, row, draft.title, draft.body])
+  }, [
+    ready,
+    dirty,
+    busy,
+    error,
+    save,
+    row,
+    draft.title,
+    draft.body,
+    draft.entry_date,
+  ])
   useEffect(() => {
     if (!dirty && !busy) return
     const before = (event: BeforeUnloadEvent) => {

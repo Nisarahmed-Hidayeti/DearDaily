@@ -27,6 +27,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Mood } from '../../data/demo'
 import type { WritingDocument, CoverPreset } from '../rich-editor/document'
 import { richEditorEnabled, richPublicFields } from '../rich-editor/config'
+import { formatLocalDate, parseLocalDate } from '../../lib/dates'
 
 export const journalEnabled = import.meta.env.VITE_ENABLE_JOURNALS === 'true'
 export interface Draft {
@@ -70,7 +71,11 @@ const readableFields: string = communityEnabled ? storyFields : publicFields
 export function localDay(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
+export function entryTitle(title: string, entryDate: string): string {
+  return title.trim() || formatLocalDate(parseLocalDate(entryDate))
+}
 export function newDraft(): Draft {
+  const entry_date = localDay()
   return {
     ...(voiceNotesEnabled ? { voice_notes: [] } : {}),
     ...(persistentMusicEnabled ? { music: null } : {}),
@@ -82,7 +87,7 @@ export function newDraft(): Draft {
     mood: 'Calm',
     tags: [],
     category: 'Personal',
-    entry_date: localDay(),
+    entry_date,
     status: 'draft',
   }
 }
@@ -127,14 +132,20 @@ export async function saveEntry(
   draft: Draft,
   version: number | null,
 ) {
+  const savedDraft = {
+    ...draft,
+    title: entryTitle(draft.title, draft.entry_date),
+  }
   if (draft.voice_notes) validateVoiceNotes(draft.voice_notes)
   if (draft.music) validateMusic(draft.music, true)
   const query =
     version === null
-      ? client.from('journal_entries').insert({ ...draft, id, user_id: userId })
+      ? client
+          .from('journal_entries')
+          .insert({ ...savedDraft, id, user_id: userId })
       : client
           .from('journal_entries')
-          .update(draft)
+          .update(savedDraft)
           .eq('id', id)
           .eq('user_id', userId)
           .eq('version', version)
@@ -261,7 +272,7 @@ export async function unpublishStory(client: SupabaseClient, id: string) {
 }
 export function exportMarkdown(draft: Draft, publicOnly = false) {
   const text =
-    `# ${draft.title || 'Untitled entry'}\n\n${draft.body}\n` +
+    `# ${entryTitle(draft.title, draft.entry_date)}\n\n${draft.body}\n` +
     (publicOnly
       ? ''
       : `\n---\nDate: ${draft.entry_date}\nMood: ${draft.mood}\nCategory: ${draft.category}\nTags: ${draft.tags.join(', ')}\n`)
