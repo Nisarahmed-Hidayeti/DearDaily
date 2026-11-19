@@ -39,10 +39,8 @@ export async function saveAccountDisplayName(
 
 export default function Account({
   embedded = false,
-  onDisplayNameLoaded,
 }: {
   embedded?: boolean
-  onDisplayNameLoaded?: (name: string) => void
 }) {
   const { client, session, signOut } = useAuth()
   const navigate = useNavigate()
@@ -65,7 +63,6 @@ export default function Account({
       if (active) {
         setName(result.data?.display_name ?? '')
         setReady(true)
-        onDisplayNameLoaded?.(result.data?.display_name ?? '')
       }
     }
     void load().catch(() => {
@@ -75,7 +72,7 @@ export default function Account({
     return () => {
       active = false
     }
-  }, [client, userId, attempt, onDisplayNameLoaded])
+  }, [client, userId, attempt])
   async function save(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!client || !ready || busy) return
