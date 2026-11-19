@@ -1,23 +1,53 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Eye, LockKeyhole, Globe, Feather, X } from 'lucide-react'
 import type { Mood, Visibility } from '../../data/demo'
 import { formatLocalDate } from '../../lib/dates'
 import { PageHeading, Modal } from '../../components/Shared'
 import { downloadPublicStory } from './publicExport'
-import { entryTitle, exportMarkdown, localDay } from './journalApi'
+import { entryTitle, exportMarkdown, localDay, newDraft } from './journalApi'
+import type { Draft } from './journalApi'
+import { getDeviceDraft, saveDeviceDraft } from './localDrafts'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 export default function Editor() {
-  const [title, setTitle] = useState(''),
-    [body, setBody] = useState(''),
-    [mood, setMood] = useState<Mood>('Calm'),
-    [tags, setTags] = useState<string[]>([]),
-    [tag, setTag] = useState(''),
-    [visibility, setVisibility] = useState<Visibility>('Private'),
+  const { id: routeId } = useParams()
+  const navigate = useNavigate()
+  const [id] = useState(() => routeId ?? crypto.randomUUID())
+  const [draft, setDraft] = useState<Draft>(
+    () => getDeviceDraft(routeId ?? id) ?? newDraft(),
+  )
+  const { title, body, mood, tags } = draft
+  const [tag, setTag] = useState('')
+  const [visibility, setVisibility] = useState<Visibility>('Private'),
     [preview, setPreview] = useState(false)
   const [reviewPublic, setReviewPublic] = useState(false)
+  const [publishGate, setPublishGate] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<
+    'editing' | 'saved' | 'unavailable'
+  >('saved')
+  useEffect(() => {
+    if (
+      !title.trim() &&
+      !body.trim() &&
+      !tags.length &&
+      draft.mood === 'Calm' &&
+      draft.category === 'Personal'
+    )
+      return
+    setSaveStatus('editing')
+    const timer = window.setTimeout(() => {
+      if (saveDeviceDraft(draft, id)) {
+        setSaveStatus('saved')
+        if (!routeId) navigate(`/app/write/${id}`, { replace: true })
+      } else setSaveStatus('unavailable')
+    }, 900)
+    return () => window.clearTimeout(timer)
+  }, [draft, id, navigate, routeId, title, body, tags.length])
+  const changeDraft = (updates: Partial<typeof draft>) =>
+    setDraft((current) => ({ ...current, ...updates }))
   const count = body.trim() ? body.trim().split(/\s+/).length : 0
   function addTag() {
     const value = tag.trim().replace(/^#/, '')
-    if (value && !tags.includes(value)) setTags([...tags, value])
+    if (value && !tags.includes(value)) changeDraft({ tags: [...tags, value] })
     setTag('')
   }
   return (
@@ -37,7 +67,14 @@ export default function Editor() {
       </PageHeading>
       <p className="draft-notice">
         <LockKeyhole size={14} />
-        Temporary draft · Not saved. Leaving this editor clears your words.
+        <span>Private writing · Saved on this device as you type.</span>
+        <span className="device-save-status" aria-live="polite">
+          {saveStatus === 'editing'
+            ? 'Saving…'
+            : saveStatus === 'saved'
+              ? 'Saved'
+              : 'Could not save here'}
+        </span>
       </p>
       <div className="editor-layout">
         <section className="writing-paper">
@@ -60,7 +97,7 @@ export default function Editor() {
                 className="title-input"
                 placeholder={entryTitle('', localDay())}
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => changeDraft({ title: e.target.value })}
               />
               <label className="sr-only" htmlFor="entry-body">
                 Journal body
@@ -69,7 +106,7 @@ export default function Editor() {
                 id="entry-body"
                 placeholder="What’s on your mind today? Take your time. This space is yours."
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={(e) => changeDraft({ body: e.target.value })}
               />
             </>
           )}
@@ -111,7 +148,7 @@ export default function Editor() {
                     <button
                       className={mood === item ? 'selected' : ''}
                       aria-pressed={mood === item}
-                      onClick={() => setMood(item)}
+                      onClick={() => changeDraft({ mood: item })}
                       key={item}
                     >
                       <span>{['☁', '☀', '☾', '☂'][i]}</span>
@@ -146,7 +183,9 @@ export default function Editor() {
                   #{item}
                   <button
                     aria-label={`Remove ${item} tag`}
-                    onClick={() => setTags(tags.filter((t) => t !== item))}
+                    onClick={() =>
+                      changeDraft({ tags: tags.filter((t) => t !== item) })
+                    }
                   >
                     <X size={12} />
                   </button>
@@ -154,7 +193,11 @@ export default function Editor() {
               ))}
             </div>
             <label htmlFor="category">Journal category</label>
-            <select id="category">
+            <select
+              id="category"
+              value={draft.category}
+              onChange={(e) => changeDraft({ category: e.target.value })}
+            >
               <option>Personal</option>
               <option>Gratitude</option>
               <option>Growth</option>
@@ -162,10 +205,10 @@ export default function Editor() {
             </select>
           </section>
           <div className="save-panel">
-            <p>This is a quiet place to try writing.</p>
+            <p>Your words stay in this browser until you choose to publish.</p>
             <span className="tiny muted">
-              Cloud saving and publishing are not enabled here. Export a private
-              copy to keep your writing. No draft is stored or sent.
+              This draft saves automatically on this device. Sign in to publish
+              it.
             </span>
             <button
               className="button secondary"
@@ -190,11 +233,21 @@ export default function Editor() {
             >
               Review public export
             </button>
-            <button className="button" disabled>
-              Save draft — coming later
+            <button
+              className="button"
+              onClick={() => {
+                saveDeviceDraft(draft, id)
+                setSaveStatus('saved')
+              }}
+            >
+              Save now
             </button>
-            <button className="button secondary" disabled>
-              Publish — unavailable
+            <button
+              className="button secondary"
+              disabled={!body.trim()}
+              onClick={() => setPublishGate(true)}
+            >
+              Publish
             </button>
           </div>
         </aside>
@@ -228,6 +281,28 @@ export default function Editor() {
           >
             Confirm public export
           </button>
+        </Modal>
+      )}
+      {publishGate && (
+        <Modal title="Sign in to publish" onClose={() => setPublishGate(false)}>
+          <p>
+            Your private draft is saved on this device. Sign in or create an
+            account to publish a story.
+          </p>
+          <div className="row">
+            <Link
+              className="button"
+              to={`/auth/sign-in?next=${encodeURIComponent('/app/journal')}`}
+            >
+              Sign in
+            </Link>
+            <Link
+              className="button secondary"
+              to={`/auth/sign-up?next=${encodeURIComponent('/app/journal')}`}
+            >
+              Create account
+            </Link>
+          </div>
         </Modal>
       )}
     </div>

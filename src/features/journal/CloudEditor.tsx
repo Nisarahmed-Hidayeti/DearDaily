@@ -30,7 +30,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Eye, LockKeyhole, X } from 'lucide-react'
 import { Modal, PageHeading } from '../../components/Shared'
 import { useJournalEntry } from './useJournalEntry'
-import { entryTitle } from './journalApi'
+import { draftOf, entryTitle } from './journalApi'
 import { richEditorEnabled } from '../rich-editor/config'
 const RichWriter = lazy(() =>
   import('../rich-editor/RichWriter').then((module) => ({
@@ -39,6 +39,7 @@ const RichWriter = lazy(() =>
 )
 import { RichRead } from '../rich-editor/RichRead'
 import { documentFromText, documentText } from '../rich-editor/document'
+import { deleteDeviceDraft, getDeviceDraft } from './localDrafts'
 
 export default function CloudEditor() {
   const { id } = useParams()
@@ -60,8 +61,29 @@ function EntryForm({
   existingId?: string
   newId?: string
 }) {
+  const location = useLocation()
   const state = useJournalEntry(existingId, newId)
   const { draft, setDraft, ready, busy, error, dirty, row, published } = state
+  const importedDeviceDraft = useRef<string | null>(null)
+  const deviceDraftId = new URLSearchParams(location.search).get('deviceDraft')
+  useEffect(() => {
+    if (
+      !ready ||
+      existingId ||
+      !deviceDraftId ||
+      importedDeviceDraft.current === deviceDraftId
+    )
+      return
+    const localDraft = getDeviceDraft(deviceDraftId)
+    if (!localDraft) return
+    setDraft(draftOf(localDraft))
+    importedDeviceDraft.current = deviceDraftId
+  }, [ready, existingId, deviceDraftId, setDraft])
+  useEffect(() => {
+    if (!row || !importedDeviceDraft.current) return
+    deleteDeviceDraft(importedDeviceDraft.current)
+    importedDeviceDraft.current = null
+  }, [row])
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
       if (
@@ -626,7 +648,10 @@ function EntryForm({
               disabled={!ready}
             />
             {communityEnabled && (
-              <section aria-label="Public story settings" className="public-story-settings">
+              <section
+                aria-label="Public story settings"
+                className="public-story-settings"
+              >
                 <h2>Public story</h2>
                 {profile?.visible && (
                   <label className="publication-check">
@@ -642,27 +667,37 @@ function EntryForm({
                     Attribute this story to @{profile.username}
                   </label>
                 )}
-                {persistentMusicEnabled && draft.music?.provider === 'youtube' && (
-                  <label className="publication-check">
-                    <input
-                      type="checkbox"
-                      checked={draft.music.share}
-                      disabled={!ready || busy}
-                      onChange={(event) => {
-                        rememberDefault('music', event.target.checked)
-                        patch({ music: { ...draft.music!, share: event.target.checked } })
-                      }}
-                    />
-                    Include this music
-                  </label>
-                )}
+                {persistentMusicEnabled &&
+                  draft.music?.provider === 'youtube' && (
+                    <label className="publication-check">
+                      <input
+                        type="checkbox"
+                        checked={draft.music.share}
+                        disabled={!ready || busy}
+                        onChange={(event) => {
+                          rememberDefault('music', event.target.checked)
+                          patch({
+                            music: {
+                              ...draft.music!,
+                              share: event.target.checked,
+                            },
+                          })
+                        }}
+                      />
+                      Include this music
+                    </label>
+                  )}
                 {voiceNotesEnabled && (
                   <label className="publication-check">
                     <input
                       type="checkbox"
                       checked={shareVoiceNotes}
-                      disabled={!ready || busy || (draft.voice_notes?.length ?? 0) === 0}
-                      onChange={(event) => patchPlan({ voiceNotes: event.target.checked })}
+                      disabled={
+                        !ready || busy || (draft.voice_notes?.length ?? 0) === 0
+                      }
+                      onChange={(event) =>
+                        patchPlan({ voiceNotes: event.target.checked })
+                      }
                     />
                     Include a copy of voice notes in public
                   </label>
@@ -687,11 +722,7 @@ function EntryForm({
             <button
               className="button secondary"
               disabled={
-                !row ||
-                busy ||
-                dirty ||
-                !draft.body.trim() ||
-                invalidPublicTags
+                !row || busy || dirty || !draft.body.trim() || invalidPublicTags
               }
               aria-describedby={
                 !row || dirty || !draft.body.trim()
@@ -791,8 +822,8 @@ function EntryForm({
                       )
                     }
                   />
-                  I approve publishing these photos and their alt text.
-                  Public links may remain valid for up to 60 seconds after
+                  I approve publishing these photos and their alt text. Public
+                  links may remain valid for up to 60 seconds after
                   unpublishing; downloaded copies cannot be recalled.
                 </label>
               )}

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { LoadingState } from '../../components/Shared'
 import { CloudUnavailable } from '../journal/CloudUnavailable'
 import { Link } from 'react-router-dom'
@@ -18,6 +19,8 @@ import { useAuth } from '../auth/AuthProvider'
 import { RequireAccount } from '../auth/AuthPages'
 import { journalEnabled } from '../journal/journalApi'
 import type { Entry } from '../../data/demo'
+import { listDeviceDrafts, type DeviceDraft } from '../journal/localDrafts'
+import { entryTitle } from '../journal/journalApi'
 const statIcons = { streak: Flame, entries: BookOpen, words: PenLine }
 function DemoDashboard({
   recentEntries = entries,
@@ -26,6 +29,8 @@ function DemoDashboard({
   recentEntries?: Entry[]
   library?: boolean
 }) {
+  const [deviceDrafts, setDeviceDrafts] = useState<DeviceDraft[]>([])
+  useEffect(() => setDeviceDrafts(listDeviceDrafts()), [])
   return (
     <div className={`page dashboard ${library ? 'journal-library' : ''}`}>
       <PageHeading
@@ -73,6 +78,45 @@ function DemoDashboard({
           </div>
           <ActivityHeatmap />
         </>
+      )}
+      {library && (
+        <section className="panel recent device-drafts">
+          <div className="row spread">
+            <h2>Saved on this device</h2>
+            <span className="badge">Private drafts</span>
+          </div>
+          {!deviceDrafts.length ? (
+            <div className="empty-state">
+              <BookOpen />
+              <h3>No saved drafts yet.</h3>
+              <p>Write without an account. Your words save in this browser.</p>
+              <ArrowLink to="/app/write">Start writing</ArrowLink>
+            </div>
+          ) : (
+            deviceDrafts.map((draft) => (
+              <Link
+                to={`/app/write/${draft.id}`}
+                className="entry-row"
+                key={draft.id}
+              >
+                <div>
+                  <span className="tiny muted">
+                    Saved {new Date(draft.updated_at).toLocaleString()}
+                  </span>
+                  <h3>{entryTitle(draft.title, draft.entry_date)}</h3>
+                  <p>
+                    {draft.body.slice(0, 180) ||
+                      'An empty page, ready when you are.'}
+                  </p>
+                  <span className="visibility">
+                    Private · Stored on this device
+                  </span>
+                </div>
+                <ArrowRight size={16} />
+              </Link>
+            ))
+          )}
+        </section>
       )}
       <div className="dashboard-bottom">
         <section className="panel recent">

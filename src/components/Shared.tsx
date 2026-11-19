@@ -74,7 +74,7 @@ export function Modal({
   onClose,
   className = '',
   style,
-  closeOnBackdrop = false,
+  closeOnBackdrop = true,
 }: {
   className?: string
   closeOnBackdrop?: boolean

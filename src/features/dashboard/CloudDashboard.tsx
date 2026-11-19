@@ -9,6 +9,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { entryTitle, listEntries } from '../journal/journalApi'
 import type { JournalEntry } from '../journal/journalApi'
 import { journalStats } from '../journal/journalStats'
+import { listDeviceDrafts } from '../journal/localDrafts'
 import ActivityHeatmap from './ActivityHeatmap'
 export default function CloudDashboard({
   library = false,
@@ -22,6 +23,7 @@ export default function CloudDashboard({
   const [search, setSearch] = useState('')
   const [mood, setMood] = useState('All moods')
   const [date, setDate] = useState('')
+  const [deviceDrafts, setDeviceDrafts] = useState(() => listDeviceDrafts())
   const [order, setOrder] = useState('newest')
   const [view, setView] = useState<'list' | 'gallery'>(() => {
     try {
@@ -55,6 +57,11 @@ export default function CloudDashboard({
       window.removeEventListener('focus', load)
     }
   }, [client, session, refresh])
+  useEffect(() => {
+    const refreshLocal = () => setDeviceDrafts(listDeviceDrafts())
+    window.addEventListener('focus', refreshLocal)
+    return () => window.removeEventListener('focus', refreshLocal)
+  }, [])
   const stats = journalStats(rows)
   const filtered = rows
     .filter(
@@ -103,6 +110,35 @@ export default function CloudDashboard({
       )}
       {status !== 'loading' && (
         <>
+          {!!deviceDrafts.length && (
+            <section className="panel recent device-drafts">
+              <div className="row spread">
+                <h2>Saved on this device</h2>
+                <span className="badge">Private drafts</span>
+              </div>
+              {deviceDrafts.map((draft) => (
+                <Link
+                  to={`/app/write?deviceDraft=${encodeURIComponent(draft.id)}`}
+                  className="entry-row"
+                  key={draft.id}
+                >
+                  <div>
+                    <span className="tiny muted">
+                      Saved {new Date(draft.updated_at).toLocaleString()}
+                    </span>
+                    <h3>{entryTitle(draft.title, draft.entry_date)}</h3>
+                    <p>
+                      {draft.body.slice(0, 180) ||
+                        'An empty page, ready when you are.'}
+                    </p>
+                    <span className="visibility">
+                      Import this private draft into your account
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </section>
+          )}
           {!library && (
             <>
               <div className="stats">
