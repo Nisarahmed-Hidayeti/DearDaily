@@ -227,7 +227,7 @@ export async function publishStory(
         }
       : {}),
     ...(persistentMusicEnabled ? { music: publicMusic(entry.music) } : {}),
-    title: entry.title,
+    title: entryTitle(entry.title, entry.entry_date),
     body: entry.body,
     ...(richEditorEnabled
       ? {

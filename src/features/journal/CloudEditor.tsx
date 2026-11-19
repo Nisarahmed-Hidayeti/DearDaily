@@ -690,12 +690,11 @@ function EntryForm({
                 !row ||
                 busy ||
                 dirty ||
-                !draft.title.trim() ||
                 !draft.body.trim() ||
                 invalidPublicTags
               }
               aria-describedby={
-                !row || dirty || !draft.title.trim() || !draft.body.trim()
+                !row || dirty || !draft.body.trim()
                   ? 'publish-explanation'
                   : undefined
               }
@@ -713,14 +712,14 @@ function EntryForm({
             >
               {published ? 'Update public story' : 'Publish story'}
             </button>
-            {(!row || dirty || !draft.title.trim() || !draft.body.trim()) && (
+            {(!row || dirty || !draft.body.trim()) && (
               <p id="publish-explanation" className="tiny muted">
                 {!row
                   ? 'Save your entry before publishing.'
                   : dirty
                     ? 'Wait for your latest edits to save before publishing.'
-                    : !draft.title.trim() || !draft.body.trim()
-                      ? 'Add a title and some words before publishing.'
+                    : !draft.body.trim()
+                      ? 'Add some words before publishing.'
                       : ''}
               </p>
             )}

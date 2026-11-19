@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { it, expect, vi, beforeEach } from 'vitest'
@@ -82,19 +82,26 @@ it('moves settings/profile into the account disclosure and closes it with Escape
   expect(details.open).toBe(false)
   expect(screen.getByLabelText('Open account menu')).toHaveFocus()
 })
-it('offers mobile navigation in a dismissible dialog, not a permanent editor overlay', async () => {
-  workspace()
-  await userEvent.click(screen.getByRole('button', { name: 'Open navigation' }))
+it('keeps mobile navigation at the bottom and opens account controls separately', async () => {
+  const { container } = workspace()
+  const mobileTabs = container.querySelector('.studio-mobile-tabs')
+  expect(mobileTabs).toBeInTheDocument()
+  expect(mobileTabs).toHaveTextContent('Home')
+  expect(mobileTabs).toHaveTextContent('Journal')
+  expect(mobileTabs).toHaveTextContent('Write')
+  expect(mobileTabs).toHaveTextContent('Explore')
+  const accountButton = mobileTabs?.querySelector('button')
+  expect(accountButton).toHaveAccessibleName('Open account menu')
+  fireEvent.click(accountButton!)
   const dialog = screen.getByRole('dialog', { name: 'Your workspace' })
   expect(dialog).toHaveAttribute('open')
+  expect(
+    within(dialog).getByRole('link', { name: 'Settings & appearance' }),
+  ).toBeVisible()
   await userEvent.click(
-    within(dialog).getByRole('link', { name: 'My Journal' }),
+    within(dialog).getByRole('button', { name: 'Close dialog' }),
   )
   expect(screen.queryByRole('dialog')).toBeNull()
-  expect(screen.getByRole('link', { name: 'My Journal' })).toHaveAttribute(
-    'aria-current',
-    'page',
-  )
 })
 it('continues to toggle when preference storage is unavailable', async () => {
   vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
