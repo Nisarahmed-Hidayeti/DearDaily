@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { LoadingState } from '../../components/Shared'
 import { CloudUnavailable } from '../journal/CloudUnavailable'
 import { Link } from 'react-router-dom'
@@ -30,6 +30,11 @@ function DemoDashboard({
   library?: boolean
 }) {
   const [deviceDrafts] = useState<DeviceDraft[]>(listDeviceDrafts)
+  const [drafts, setDrafts] = useState(deviceDrafts)
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDrafts(listDeviceDrafts()), 0)
+    return () => window.clearTimeout(timer)
+  }, [])
   return (
     <div className={`page dashboard ${library ? 'journal-library' : ''}`}>
       <PageHeading
@@ -84,7 +89,7 @@ function DemoDashboard({
             <h2>Saved on this device</h2>
             <span className="badge">Private drafts</span>
           </div>
-          {!deviceDrafts.length ? (
+          {!drafts.length ? (
             <div className="empty-state">
               <BookOpen />
               <h3>No saved drafts yet.</h3>
@@ -92,7 +97,7 @@ function DemoDashboard({
               <ArrowLink to="/app/write">Start writing</ArrowLink>
             </div>
           ) : (
-            deviceDrafts.map((draft) => (
+            drafts.map((draft) => (
               <Link
                 to={`/app/write/${draft.id}`}
                 className="entry-row"
@@ -117,57 +122,59 @@ function DemoDashboard({
           )}
         </section>
       )}
-      <div className="dashboard-bottom">
-        <section className="panel recent">
-          <div className="row spread">
-            <h2>Recent pages</h2>
-            <span className="badge">Sample entries</span>
-          </div>
-          {recentEntries.length === 0 && (
-            <div className="empty-state">
-              <BookOpen />
-              <h3>Your first page is waiting.</h3>
-              <p>Begin with one small moment.</p>
-              <ArrowLink to="/app/write">Write your first entry</ArrowLink>
+      {!library && (
+        <div className="dashboard-bottom">
+          <section className="panel recent">
+            <div className="row spread">
+              <h2>Recent pages</h2>
+              <span className="badge">Sample entries</span>
             </div>
-          )}
-          {recentEntries.map((entry, i) => (
-            <Link
-              to={`/app/entries/${entry.id}`}
-              className="entry-row"
-              key={entry.id}
-            >
-              <Scene kind={['mountains', 'window', 'stars'][i]} />
-              <div>
-                <span className="tiny muted">{entry.date}</span>
-                <h3>{entry.title}</h3>
-                <p>{entry.body}</p>
-                <span className="visibility">
-                  {entry.visibility === 'Private' ? (
-                    <LockKeyhole size={12} />
-                  ) : (
-                    <Globe size={12} />
-                  )}{' '}
-                  {entry.visibility} · Sample
-                </span>
+            {recentEntries.length === 0 && (
+              <div className="empty-state">
+                <BookOpen />
+                <h3>Your first page is waiting.</h3>
+                <p>Begin with one small moment.</p>
+                <ArrowLink to="/app/write">Write your first entry</ArrowLink>
               </div>
-              <ArrowRight size={16} />
-            </Link>
-          ))}
-        </section>
-        {!library && (
-          <section className="panel prompt">
-            <p className="eyebrow">A thought to begin with</p>
-            <span className="prompt-star">✧</span>
-            <h2>What’s one small thing that made today feel like yours?</h2>
-            <p>
-              You don’t need a remarkable day to have something worth writing.
-            </p>
-            <ArrowLink to="/app/write">Write about it</ArrowLink>
-            <ArrowLink to="/explore">Find inspiration in stories</ArrowLink>
+            )}
+            {recentEntries.map((entry, i) => (
+              <Link
+                to={`/app/entries/${entry.id}`}
+                className="entry-row"
+                key={entry.id}
+              >
+                <Scene kind={['mountains', 'window', 'stars'][i]} />
+                <div>
+                  <span className="tiny muted">{entry.date}</span>
+                  <h3>{entry.title}</h3>
+                  <p>{entry.body}</p>
+                  <span className="visibility">
+                    {entry.visibility === 'Private' ? (
+                      <LockKeyhole size={12} />
+                    ) : (
+                      <Globe size={12} />
+                    )}{' '}
+                    {entry.visibility} · Sample
+                  </span>
+                </div>
+                <ArrowRight size={16} />
+              </Link>
+            ))}
           </section>
-        )}
-      </div>
+          {!library && (
+            <section className="panel prompt">
+              <p className="eyebrow">A thought to begin with</p>
+              <span className="prompt-star">✧</span>
+              <h2>What’s one small thing that made today feel like yours?</h2>
+              <p>
+                You don’t need a remarkable day to have something worth writing.
+              </p>
+              <ArrowLink to="/app/write">Write about it</ArrowLink>
+              <ArrowLink to="/explore">Find inspiration in stories</ArrowLink>
+            </section>
+          )}
+        </div>
+      )}
     </div>
   )
 }

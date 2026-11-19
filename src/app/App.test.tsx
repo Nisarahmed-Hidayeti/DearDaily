@@ -104,7 +104,7 @@ describe('DearDaily prototype', () => {
       'A private thought to keep',
     )
     await userEvent.click(primaryLink('My Journal'))
-    const savedPage = screen.getByRole('link', {
+    const savedPage = await screen.findByRole('link', {
       name: /A private thought to keep/,
     })
     expect(savedPage).toBeInTheDocument()
