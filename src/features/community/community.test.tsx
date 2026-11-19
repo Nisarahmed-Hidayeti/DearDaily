@@ -37,6 +37,16 @@ const story = {
   public_category: 'Growth',
   public_tags: ['chosen'],
 }
+const ownStoryPreferences = () => ({
+  select: () => ({
+    eq: () => ({
+      single: async () => ({
+        data: { stories_collapsed: false },
+        error: null,
+      }),
+    }),
+  }),
+})
 describe('public identity validation', () => {
   it.each(['abc', 'writer_123', 'a'.repeat(24)])('accepts %s', (v) =>
     expect(validUsername(v)).toBe(true),
@@ -204,12 +214,13 @@ describe('profile writes preserve hidden ownership', () => {
     avatar: 'leaf',
     visible: false,
     joined_month: null,
+    stories_collapsed: false,
   }
   it('inserts with no row representation and confirms via the safe own-profile RPC', async () => {
     const insert = vi.fn().mockResolvedValue({ error: null })
     const rpc = vi.fn().mockResolvedValue({ data: profile, error: null })
     const client = {
-      from: vi.fn().mockReturnValue({ insert }),
+      from: vi.fn().mockReturnValue({ insert, ...ownStoryPreferences() }),
       rpc,
     } as unknown as SupabaseClient
     expect(await saveProfile(client, profile, null)).toEqual(profile)
@@ -229,7 +240,7 @@ describe('profile writes preserve hidden ownership', () => {
     const eq = vi.fn().mockResolvedValue({ error: null })
     const update = vi.fn().mockReturnValue({ eq })
     const client = {
-      from: vi.fn().mockReturnValue({ update }),
+      from: vi.fn().mockReturnValue({ update, select: ownStoryPreferences().select }),
       rpc: vi.fn().mockResolvedValue({ data: profile, error: null }),
     } as unknown as SupabaseClient
     expect(await saveProfile(client, profile, 'previous_name')).toEqual(profile)
@@ -239,6 +250,7 @@ describe('profile writes preserve hidden ownership', () => {
     const client = {
       from: vi.fn().mockReturnValue({
         insert: vi.fn().mockResolvedValue({ error: null }),
+        ...ownStoryPreferences(),
       }),
       rpc: vi.fn().mockResolvedValue({
         data: { ...profile, bio: 'Old server version' },
@@ -270,7 +282,7 @@ describe('public profile removal confirmation', () => {
     const del = vi.fn(() => ({ eq }))
     const rpc = vi.fn().mockResolvedValue({ data: null, error: null })
     const client = {
-      from: vi.fn(() => ({ delete: del })),
+      from: vi.fn(() => ({ delete: del, ...ownStoryPreferences() })),
       rpc,
     } as unknown as SupabaseClient
     await removePublicProfile(client, 'synthetic_writer')
@@ -279,7 +291,10 @@ describe('public profile removal confirmation', () => {
   })
   it('does not claim removal if the server still returns an own profile', async () => {
     const client = {
-      from: () => ({ delete: () => ({ eq: async () => ({ error: null }) }) }),
+      from: () => ({
+        delete: () => ({ eq: async () => ({ error: null }) }),
+        ...ownStoryPreferences(),
+      }),
       rpc: async () => ({
         data: { username: 'synthetic_writer' },
         error: null,
@@ -292,6 +307,7 @@ describe('public profile removal confirmation', () => {
 })
 
 it('removes an own public profile only after its confirmation dialog', async () => {
+  auth.session = null
   const eq = vi.fn().mockResolvedValue({ error: null })
   const rpc = vi
     .fn()
@@ -307,7 +323,10 @@ it('removes an own public profile only after its confirmation dialog', async () 
       error: null,
     })
     .mockResolvedValue({ data: null, error: null })
-  auth.client = { rpc, from: () => ({ delete: () => ({ eq }) }) }
+  auth.client = {
+    rpc,
+    from: () => ({ delete: () => ({ eq }), ...ownStoryPreferences() }),
+  }
   render(
     <MemoryRouter>
       <ProfileSettings />
