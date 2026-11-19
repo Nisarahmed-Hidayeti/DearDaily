@@ -1461,10 +1461,42 @@
 }
 .profile-settings input[type='checkbox'],
 .profile-photo-consent input[type='checkbox'] {
-  accent-color: var(--accent);
+  appearance: none;
+  display: grid;
+  place-content: center;
   width: 18px;
   height: 18px;
   flex: 0 0 18px;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  cursor: pointer;
+}
+.profile-settings input[type='checkbox']:checked,
+.profile-photo-consent input[type='checkbox']:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.profile-settings input[type='checkbox']:checked::after,
+.profile-photo-consent input[type='checkbox']:checked::after {
+  content: '';
+  width: 8px;
+  height: 4px;
+  border: 2px solid var(--bg);
+  border-top: 0;
+  border-right: 0;
+  transform: translateY(-1px) rotate(-45deg);
+}
+.profile-settings input[type='checkbox']:focus-visible,
+.profile-photo-consent input[type='checkbox']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.profile-settings input[type='checkbox']:disabled,
+.profile-photo-consent input[type='checkbox']:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 .profile-visibility-options {
   display: grid;
@@ -1568,6 +1600,18 @@
 .profile-sharing-group > h3 {
   margin: 0 0 10px;
   font: 400 19px/1.25 var(--serif);
+}
+.profile-settings .profile-photo-consent label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  margin: 0;
+  padding: 10px 0;
+  gap: 16px;
+}
+.profile-settings .profile-photo-consent label > span {
+  min-width: 0;
 }
 .profile-settings .profile-photo-editor.compact {
   margin: 4px 0 8px;

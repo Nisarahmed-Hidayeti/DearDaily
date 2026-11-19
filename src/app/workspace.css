@@ -228,6 +228,12 @@
   align-content: start;
   gap: 4px;
 }
+.studio-mobile-menu nav a {
+  justify-content: flex-start;
+}
+.studio-shell .studio-mobile-menu .nav-label {
+  display: inline !important;
+}
 .mobile-account-links {
   border-top: 1px solid var(--border);
   margin-top: 16px;
