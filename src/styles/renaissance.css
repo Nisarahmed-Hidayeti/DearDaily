@@ -1585,6 +1585,19 @@
   margin: 0;
   padding-block: 16px;
 }
+.profile-account-display-name {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+.profile-account-display-name label {
+  display: grid;
+  gap: 8px;
+  max-width: 520px;
+}
+.profile-account-display-name input {
+  width: 100%;
+}
 .profile-sharing-group {
   margin-top: 24px;
   padding-top: 22px;
