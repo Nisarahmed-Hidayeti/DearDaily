@@ -16,6 +16,7 @@ import {
   storyPage,
 } from './communityApi'
 import { StoryCard } from './StoryCard'
+import { PublicProfileSurface } from './PublicProfile'
 import ReportStory from './ReportStory'
 import Moderation from './Moderation'
 import ProfileSettings from './ProfileSettings'
@@ -86,6 +87,30 @@ describe('public identity validation', () => {
   })
 })
 describe('public surfaces', () => {
+  it('starts a public profile with its published stories closed', () => {
+    render(
+      <MemoryRouter>
+        <PublicProfileSurface
+          profile={{
+            username: 'writer_a',
+            display_name: 'Writer',
+            bio: '',
+            avatar: 'leaf',
+            visible: true,
+            joined_month: null,
+          }}
+          stories={[story]}
+          photos={null}
+          page={0}
+          more={false}
+          onPageChange={vi.fn()}
+        />
+      </MemoryRouter>,
+    )
+    expect(
+      document.querySelector('.profile-stories-disclosure'),
+    ).not.toHaveAttribute('open')
+  })
   it('renders escaped story text, no owner identifier and no implied byline', () => {
     render(
       <MemoryRouter>

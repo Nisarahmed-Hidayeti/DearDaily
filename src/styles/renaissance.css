@@ -1148,6 +1148,25 @@
   box-shadow: none;
   background: transparent;
 }
+.profile-sharing-group > .panel {
+  border: 0;
+  padding: 14px 0;
+  margin: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.profile-sharing-group > .panel h2 {
+  font-size: 13px;
+  font-family: inherit;
+  margin: 0 0 6px;
+}
+.profile-sharing-group > .panel p {
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 65ch;
+  line-height: 1.6;
+  margin-block: 6px 12px;
+}
 .profile-sharing-settings > .panel h2 {
   font-size: 13px;
   font-family: inherit;
@@ -1414,8 +1433,6 @@
 }
 .profile-settings .account-form > fieldset > h2,
 .profile-settings .account-form > fieldset > .profile-extra-fields,
-.profile-settings .account-form > fieldset > .profile-visibility-options,
-.profile-settings .account-form > fieldset > .profile-form-actions,
 .profile-settings .account-form > fieldset > label:has(textarea),
 .profile-settings .account-form > fieldset > small {
   grid-column: 1 / -1;
@@ -1511,6 +1528,21 @@
 }
 .account-embedded .account-form {
   margin-top: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 16px;
+}
+.account-embedded .account-form label {
+  min-width: 0;
+}
+.account-embedded .account-form input {
+  min-width: 0;
+  width: 100%;
+}
+.account-embedded .account-form > button {
+  width: auto;
+  min-width: 112px;
 }
 .profile-danger-zone {
   margin-top: 28px;
@@ -1522,7 +1554,43 @@
   .account-embedded .account-overview-grid {
     grid-template-columns: 1fr;
   }
+  .account-embedded .account-form {
+    grid-template-columns: 1fr;
+  }
+  .account-embedded .account-form > button {
+    width: 100%;
+  }
   .profile-settings > .account-form {
     padding: 20px 16px;
   }
+}
+.profile-settings .profile-sharing-settings {
+  display: grid;
+  gap: 0;
+  padding-block: 26px;
+  border-block: 1px solid var(--border);
+}
+.profile-settings .profile-sharing-settings > h2 {
+  margin-bottom: 18px;
+}
+.profile-sharing-settings .profile-visibility-options {
+  border-block: 1px solid var(--border);
+}
+.profile-sharing-settings .profile-visibility-options .row {
+  min-height: 54px;
+  margin: 0;
+  padding: 12px 0;
+}
+.profile-sharing-settings .profile-form-actions {
+  margin: 0;
+  padding-block: 16px;
+}
+.profile-sharing-group {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+.profile-sharing-group > h3 {
+  margin: 0 0 14px;
+  font: 400 19px/1.25 var(--serif);
 }
