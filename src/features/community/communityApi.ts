@@ -24,6 +24,7 @@ export interface PublicProfile {
   public_activity_live?: boolean
   public_rhythm?: RhythmSnapshot | null
   public_streak?: number | null
+  stories_collapsed?: boolean
   cover_id?: string | null
   username: string
   display_name: string
@@ -45,6 +46,7 @@ export const profileFields =
   (publicStreaksEnabled ? ',public_streak' : '') +
   (publicRhythmEnabled ? ',public_rhythm' : '') +
   (liveRhythmEnabled ? ',public_activity_live' : '') +
+  ',stories_collapsed' +
   (studioPolishEnabled ? ',public_panel' : '')
 export const storyFields: string =
   'id,title,body,published_at,public_username,public_category,public_tags' +
@@ -76,14 +78,7 @@ export async function myProfile(
 ): Promise<PublicProfile | null> {
   const { data, error } = await client.rpc('my_public_profile')
   if (error) throw new Error('Profile unavailable')
-  if (
-    !data ||
-    (!publicStreaksEnabled &&
-      !studioPolishEnabled &&
-      !publicRhythmEnabled &&
-      !liveRhythmEnabled)
-  )
-    return data
+  if (!data) return data
   // Keep the legacy RPC response writable for already-deployed clients.
   const streak = await client
     .from('public_profiles')
@@ -92,12 +87,14 @@ export async function myProfile(
         ...(publicStreaksEnabled ? ['public_streak'] : []),
         ...(publicRhythmEnabled ? ['public_rhythm'] : []),
         ...(liveRhythmEnabled ? ['public_activity_live'] : []),
+        'stories_collapsed',
         ...(studioPolishEnabled ? ['public_panel'] : []),
       ].join(','),
     )
     .eq('username', data.username)
     .single<{
       public_streak?: number | null
+      stories_collapsed?: boolean
       public_panel?: ProfilePanel
       public_rhythm?: RhythmSnapshot | null
     }>()
