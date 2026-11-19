@@ -33,7 +33,6 @@ export default function Editor() {
       draft.category === 'Personal'
     )
       return
-    setSaveStatus('editing')
     const timer = window.setTimeout(() => {
       if (saveDeviceDraft(draft, id)) {
         setSaveStatus('saved')
@@ -42,8 +41,10 @@ export default function Editor() {
     }, 900)
     return () => window.clearTimeout(timer)
   }, [draft, id, navigate, routeId, title, body, tags.length])
-  const changeDraft = (updates: Partial<typeof draft>) =>
+  const changeDraft = (updates: Partial<typeof draft>) => {
+    setSaveStatus('editing')
     setDraft((current) => ({ ...current, ...updates }))
+  }
   const count = body.trim() ? body.trim().split(/\s+/).length : 0
   function addTag() {
     const value = tag.trim().replace(/^#/, '')

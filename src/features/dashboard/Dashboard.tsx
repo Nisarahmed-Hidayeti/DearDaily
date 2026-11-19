@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { LoadingState } from '../../components/Shared'
 import { CloudUnavailable } from '../journal/CloudUnavailable'
 import { Link } from 'react-router-dom'
@@ -29,8 +29,7 @@ function DemoDashboard({
   recentEntries?: Entry[]
   library?: boolean
 }) {
-  const [deviceDrafts, setDeviceDrafts] = useState<DeviceDraft[]>([])
-  useEffect(() => setDeviceDrafts(listDeviceDrafts()), [])
+  const [deviceDrafts] = useState<DeviceDraft[]>(listDeviceDrafts)
   return (
     <div className={`page dashboard ${library ? 'journal-library' : ''}`}>
       <PageHeading
