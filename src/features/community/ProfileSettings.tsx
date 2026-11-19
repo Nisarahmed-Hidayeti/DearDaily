@@ -2,6 +2,7 @@ import WritingVisibilityControl from './WritingVisibilityControl'
 import Account from '../auth/Account'
 import { liveRhythmEnabled } from './liveRhythm'
 import PublicRhythmControl from './PublicRhythmControl'
+import { profileImagesEnabled } from '../profile-images/api'
 import { ProfilePhotos } from '../profile-images/ProfilePhotos'
 import PublicProfilePreview from './PublicProfilePreview'
 import { studioPolishEnabled } from '../rich-editor/studioPolish'
@@ -68,9 +69,7 @@ export default function ProfileSettings() {
       setForm(p)
       setSavedProfile(p)
       setPrevious(p.username)
-      setMessage(
-        'Profile saved. Hidden or renamed profiles detach existing story bylines; they are never reattached automatically.',
-      )
+      setMessage('Profile saved.')
     } catch (e) {
       setMessage((e as Error).message)
     } finally {
@@ -101,13 +100,14 @@ export default function ProfileSettings() {
       <PageHeading eyebrow="" title="Public profile" />
       <PublicProfilePreview profile={form} savedUsername={previous} />
       <form
-        className="panel account-form"
+        className="panel account-form profile-details-form"
         onSubmit={(e) => {
           e.preventDefault()
           setConfirm(true)
         }}
       >
         <fieldset disabled={!ready || busy}>
+          <h2>Profile details</h2>
           <div className="profile-username-field">
             <label>
               Username
@@ -120,7 +120,7 @@ export default function ProfileSettings() {
                 onChange={(e) => patch({ username: e.target.value })}
               />
             </label>
-            <small>3–24 lowercase letters, numbers or underscores.</small>
+            <small>3–24 lowercase letters, numbers, or underscores.</small>
           </div>
           <label>
             Public display name
@@ -152,35 +152,31 @@ export default function ProfileSettings() {
               ))}
             </select>
           </label>
-          <label>
-            Public profile banner
-            <select
-              disabled={!appearanceEnabled}
-              value={form.cover_id ?? ''}
-              onChange={(e) => patch({ cover_id: e.target.value || null })}
-            >
-              <option value="">No banner</option>
-              {profileCovers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          {!appearanceEnabled && (
-            <p className="tiny muted">
-              Banner synchronization awaits the reviewed settings migration.
-              Your existing profile controls remain available.
-            </p>
+          {appearanceEnabled && (
+            <label>
+              Profile banner
+              <select
+                value={form.cover_id ?? ''}
+                onChange={(e) => patch({ cover_id: e.target.value || null })}
+              >
+                <option value="">No banner</option>
+                {profileCovers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
           {studioPolishEnabled && (
-            <details className="profile-settings-disclosure">
-              <summary>More about you</summary>
-              <fieldset className="public-panel-options">
+            <section className="profile-extra-fields">
+              <h3>About</h3>
+              <div className="public-panel-options">
                 <label>
-                  Interests · comma separated
+                  Interests
                   <input
                     maxLength={245}
+                    placeholder="Books, travel, music"
                     value={form.public_panel?.interests.join(',') ?? ''}
                     onChange={(e) =>
                       patch({
@@ -194,7 +190,7 @@ export default function ProfileSettings() {
                   />
                 </label>
                 <label>
-                  Personal link · optional
+                  Website · optional
                   <input
                     type="url"
                     placeholder="https://"
@@ -211,48 +207,58 @@ export default function ProfileSettings() {
                     }
                   />
                 </label>
-              </fieldset>
-            </details>
+              </div>
+            </section>
           )}
-          <label className="row">
-            <input
-              type="checkbox"
-              checked={form.visible}
-              onChange={(e) => patch({ visible: e.target.checked })}
-            />
-            Make this public profile visible
-          </label>
-          <label className="row">
-            <input
-              type="checkbox"
-              checked={!!form.stories_collapsed}
-              onChange={(e) => patch({ stories_collapsed: e.target.checked })}
-            />
-            Collapse stories on my profile by default
-          </label>
-          <div className="row">
-            <button className="button">Review profile changes</button>
-            <button
-              type="button"
-              className="button secondary"
-              onClick={() => setForm(savedProfile)}
-            >
-              Cancel edits
+          <div className="profile-visibility-options">
+            <label className="row">
+              <span>Make my profile public</span>
+              <input
+                type="checkbox"
+                checked={form.visible}
+                onChange={(e) => patch({ visible: e.target.checked })}
+              />
+            </label>
+            <label className="row">
+              <span>Start with stories collapsed</span>
+              <input
+                type="checkbox"
+                checked={!!form.stories_collapsed}
+                onChange={(e) =>
+                  patch({ stories_collapsed: e.target.checked })
+                }
+              />
+            </label>
+          </div>
+          <div className="row profile-form-actions">
+            <button className="button" disabled={!ready || busy}>
+              Save changes
             </button>
+            {JSON.stringify(form) !== JSON.stringify(savedProfile) && (
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => setForm(savedProfile)}
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </fieldset>
       </form>
-      <p role="status">{message}</p>
-      <details className="profile-settings-disclosure profile-photo-settings">
-        <summary>Photo settings</summary>
-        <ProfilePhotos
-          key={session?.user.id}
-          fallback={avatars[form.avatar]}
-          preset={profileCovers.find((c) => c.id === form.cover_id)?.src}
-          publicVisible={savedProfile.visible}
-          compact
-        />
-      </details>
+      {message && <p role="status">{message}</p>}
+      {profileImagesEnabled && (
+        <section className="profile-settings-section profile-photo-settings">
+          <h2>Photos</h2>
+          <ProfilePhotos
+            key={session?.user.id}
+            fallback={avatars[form.avatar]}
+            preset={profileCovers.find((c) => c.id === form.cover_id)?.src}
+            publicVisible={savedProfile.visible}
+            compact
+          />
+        </section>
+      )}
       <section className="profile-sharing-settings">
         <h2>Writing rhythm</h2>
         {liveRhythmEnabled ? (
@@ -277,10 +283,9 @@ export default function ProfileSettings() {
         )}
       </section>
       {session && (
-        <details className="profile-settings-disclosure account-settings-disclosure">
-          <summary>Your account &amp; security</summary>
+        <section className="profile-settings-section account-settings-section">
           <Account embedded />
-        </details>
+        </section>
       )}
       {previous && form.visible && (
         <Link className="text-link" to={`/u/${previous}`}>
@@ -288,13 +293,15 @@ export default function ProfileSettings() {
         </Link>
       )}
       {previous && (
-        <button
-          className="button secondary"
-          disabled={busy}
-          onClick={() => setRemoving(true)}
-        >
-          Remove public profile
-        </button>
+        <section className="profile-danger-zone">
+          <button
+            className="button secondary"
+            disabled={busy}
+            onClick={() => setRemoving(true)}
+          >
+            Remove public profile
+          </button>
+        </section>
       )}
       {removing && (
         <Modal
@@ -304,9 +311,9 @@ export default function ProfileSettings() {
           }}
         >
           <p>
-            This deletes your public identity and removes its story bylines.
-            Published story text stays public until you unpublish it. Your
-            private account and journals stay saved.
+            Your profile and its story bylines will be removed. Published story
+            text stays public until you unpublish it. Your private journals
+            stay saved.
           </p>
           <button
             className="button"
@@ -326,15 +333,15 @@ export default function ProfileSettings() {
         >
           <p>
             {form.visible
-              ? 'Your chosen username, display name, biography, avatar and selected public details will be publicly readable. Stories gain a byline only when you explicitly select it during publication.'
-              : 'Your profile will be hidden. Existing public story bylines will be removed. Story text remains published until you unpublish it.'}
+              ? 'Your profile details will be public. Stories show your byline only when you choose it while publishing.'
+              : 'Your profile and story bylines will be hidden. Published story text stays public until you unpublish it.'}
           </p>
           <button
             className="button"
             disabled={busy}
             onClick={() => void save()}
           >
-            Confirm profile changes
+            Save profile
           </button>
         </Modal>
       )}

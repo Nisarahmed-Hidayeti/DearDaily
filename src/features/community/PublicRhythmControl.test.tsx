@@ -22,7 +22,7 @@ it('shares individual dates only after separate explicit confirmation and backen
   )
   expect(rpc).not.toHaveBeenCalled()
   expect(
-    screen.getByText(/individual days you saved private journal entries/),
+    screen.getByText(/Your saved writing days will be public/),
   ).toBeVisible()
   await userEvent.click(
     screen.getByRole('button', { name: 'Share my writing dates' }),

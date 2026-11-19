@@ -48,11 +48,10 @@ export default function PublicStreakControl({
   if (!publicStreaksEnabled) return null
   return (
     <section className="panel">
-      <h2>Your writing streak, your choice.</h2>
+      <h2>Writing streak</h2>
       <p>
-        Hidden by default. Share only a day count, never your private dates,
-        entries or moods. The count is a snapshot: private writing does not
-        refresh it automatically. Hidden profiles remain hidden.
+        Share only your current day count. Private dates, entries, and moods
+        stay hidden. Refresh the snapshot when you want to update it.
       </p>
       <p>
         {streak === null
@@ -60,7 +59,7 @@ export default function PublicStreakControl({
           : `Shared snapshot: ${streak} ${streak === 1 ? 'day' : 'days'}.`}
       </p>
       {!saved && (
-        <p>Save your public profile before choosing a shared streak.</p>
+        <p>Save your profile before sharing a streak.</p>
       )}
       <div className="account-actions">
         <button
@@ -89,9 +88,8 @@ export default function PublicStreakControl({
           }}
         >
           <p>
-            Your current saved-day count becomes public when your profile is
-            visible. No journal dates, text or private details are included. You
-            can hide it at any time.
+            Your day count will be public while your profile is public. Journal
+            dates, text, and moods stay private.
           </p>
           <div className="account-actions">
             <button

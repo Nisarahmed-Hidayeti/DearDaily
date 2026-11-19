@@ -106,7 +106,7 @@ export default function PublicProfilePreview({
   if (!validUsername(username))
     return (
       <p className="tiny muted">
-        Choose a valid username to preview your public page.
+        Add a username to preview your profile.
       </p>
     )
 
@@ -132,15 +132,11 @@ export default function PublicProfilePreview({
   return (
     <div className="profile-preview-surface">
       {!visible && (
-        <p className="tiny muted">
-          Private preview. Visitors can see this page after you make your
-          profile public.
-        </p>
+        <p className="tiny muted">Private preview · only you can see this.</p>
       )}
       {current?.storyCount === 0 && (
         <p className="tiny muted profile-preview-story-hint">
-          Published stories appear here when you attribute them to your public
-          profile.
+          Published stories will appear here.
         </p>
       )}
       <PublicProfileSurface

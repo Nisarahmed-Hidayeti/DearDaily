@@ -97,13 +97,13 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
       )}
       <div className="account-overview-grid">
         <section className="panel account-identity">
-          <p className="eyebrow">Your identity</p>
+          {!embedded && <p className="eyebrow">Your identity</p>}
           <span className="profile-avatar">
             <OwnProfileAvatar fallback="✧" />
           </span>
-          <h2>Personal information</h2>
+          <h2>{embedded ? 'Account' : 'Personal information'}</h2>
           <dl>
-            <dt>Email address</dt>
+            <dt>Email</dt>
             <dd>{session!.user.email}</dd>
             <dt>Email status</dt>
             <dd>
@@ -111,34 +111,30 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
                 ? 'Confirmed'
                 : 'Confirmation pending'}
             </dd>
-            <dt>Member since</dt>
-            <dd>
-              {new Date(session!.user.created_at).toLocaleDateString(
-                undefined,
-                { month: 'long', year: 'numeric' },
-              )}
-            </dd>
+            {!embedded && (
+              <>
+                <dt>Member since</dt>
+                <dd>
+                  {new Date(session!.user.created_at).toLocaleDateString(
+                    undefined,
+                    { month: 'long', year: 'numeric' },
+                  )}
+                </dd>
+              </>
+            )}
           </dl>
         </section>
         <section className="panel account-security">
-          <p className="eyebrow">Security & access</p>
-          <h2>Sign-in & recovery</h2>
-          <p>
-            Use a unique password. A recovery code sent to your email verifies
-            your identity before you can set a new password.
-          </p>
+          {!embedded && <p className="eyebrow">Security & access</p>}
+          <h2>{embedded ? 'Security' : 'Sign-in & recovery'}</h2>
           <Link className="button secondary" to="/auth/forgot-password">
             Password recovery
           </Link>
-          <p className="tiny muted">
-            Check your inbox and spam folder for the newest code. Never share
-            recovery codes or passwords.
-          </p>
         </section>
       </div>
       <form className="panel auth-card account-form" onSubmit={save}>
         <label>
-          Display name (optional)
+          {embedded ? 'Account display name' : 'Display name (optional)'}
           <input
             value={name}
             maxLength={80}
@@ -148,7 +144,7 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
           />
         </label>
         <button className="button" disabled={!ready || busy}>
-          {busy ? 'Saving…' : 'Save display name'}
+          {busy ? 'Saving…' : embedded ? 'Save' : 'Save display name'}
         </button>
       </form>
       {message && <p role="status">{message}</p>}
@@ -160,7 +156,7 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
           Retry profile loading
         </button>
       )}
-      {communityEnabled && (
+      {communityEnabled && !embedded && (
         <div className="account-actions">
           <Link className="button secondary" to="/app/published">
             My published stories
@@ -173,12 +169,19 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
           </Link>
         </div>
       )}
-      <ModerationNotices />
+      {!embedded && <ModerationNotices />}
       <div className="account-actions">
-        <OwnerControlsLink />
-        <Link className="button secondary" to="/app/settings">
-          Appearance settings
-        </Link>
+        {!embedded && <OwnerControlsLink />}
+        {!embedded && (
+          <Link className="button secondary" to="/app/settings">
+            Appearance settings
+          </Link>
+        )}
+        {embedded && (
+          <Link className="button secondary" to="/account/privacy">
+            Data &amp; privacy
+          </Link>
+        )}
         <button
           className="button secondary"
           onClick={async () => {

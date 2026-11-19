@@ -42,9 +42,8 @@ export default function PublicRhythmControl({
     <section className="panel">
       <h2>Public writing calendar</h2>
       <p>
-        Optional. Share which days you wrote during the last 12 weeks. No
-        writing, moods or entry counts are included. It stays a snapshot until
-        you refresh it.
+        Share your writing days from the last 12 weeks. This calendar is a
+        snapshot; refresh it when you want to update it.
       </p>
       <div className="account-actions">
         <button
@@ -76,10 +75,9 @@ export default function PublicRhythmControl({
           }}
         >
           <p>
-            This makes the individual days you saved private journal entries
-            visible to anyone when your profile is public. This is separate from
-            sharing a streak count. You can hide the calendar later, but others
-            may save a copy.
+            Your saved writing days will be public while your profile is public.
+            Journal text, moods, and entry counts stay private. Others may save
+            a copy.
           </p>
           {message && <p role="alert">{message}</p>}
           <div className="account-actions">
