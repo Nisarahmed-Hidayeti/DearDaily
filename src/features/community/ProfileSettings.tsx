@@ -153,63 +153,44 @@ export default function ProfileSettings() {
               ))}
             </select>
           </label>
-          {appearanceEnabled && (
-            <label>
-              Profile banner
-              <select
-                value={form.cover_id ?? ''}
-                onChange={(e) => patch({ cover_id: e.target.value || null })}
-              >
-                <option value="">No banner</option>
-                {profileCovers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
           {studioPolishEnabled && (
-            <section className="profile-extra-fields">
-              <h3>About</h3>
-              <div className="public-panel-options">
-                <label>
-                  Interests
-                  <input
-                    maxLength={245}
-                    placeholder="Books, travel, music"
-                    value={form.public_panel?.interests.join(',') ?? ''}
-                    onChange={(e) =>
-                      patch({
-                        public_panel: {
-                          ...emptyProfilePanel,
-                          ...form.public_panel,
-                          interests: e.target.value.split(',').slice(0, 6),
-                        },
-                      })
-                    }
-                  />
-                </label>
-                <label>
-                  Website · optional
-                  <input
-                    type="url"
-                    placeholder="https://"
-                    maxLength={300}
-                    value={form.public_panel?.link ?? ''}
-                    onChange={(e) =>
-                      patch({
-                        public_panel: {
-                          ...emptyProfilePanel,
-                          ...form.public_panel,
-                          link: e.target.value || null,
-                        },
-                      })
-                    }
-                  />
-                </label>
-              </div>
-            </section>
+            <>
+              <label>
+                Interests
+                <input
+                  maxLength={245}
+                  placeholder="Books, travel, music"
+                  value={form.public_panel?.interests.join(',') ?? ''}
+                  onChange={(e) =>
+                    patch({
+                      public_panel: {
+                        ...emptyProfilePanel,
+                        ...form.public_panel,
+                        interests: e.target.value.split(',').slice(0, 6),
+                      },
+                    })
+                  }
+                />
+              </label>
+              <label className="profile-website-field">
+                Website · optional
+                <input
+                  type="url"
+                  placeholder="https://"
+                  maxLength={300}
+                  value={form.public_panel?.link ?? ''}
+                  onChange={(e) =>
+                    patch({
+                      public_panel: {
+                        ...emptyProfilePanel,
+                        ...form.public_panel,
+                        link: e.target.value || null,
+                      },
+                    })
+                  }
+                />
+              </label>
+            </>
           )}
         </fieldset>
       </form>
