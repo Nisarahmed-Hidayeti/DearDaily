@@ -1421,7 +1421,7 @@
 
 /* Public profile settings: keep every control visible in one calm layout. */
 .profile-settings > .account-form {
-  margin-block: 24px 30px;
+  margin-block: 24px 12px;
   padding: clamp(20px, 3vw, 32px);
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1429,10 +1429,10 @@
 }
 .profile-settings .account-form > fieldset {
   padding: 0;
-  gap: 20px 24px;
+  gap: 16px 20px;
 }
 .profile-settings .account-form > fieldset > h2,
-.profile-settings .account-form > fieldset > .profile-extra-fields,
+.profile-settings .account-form > fieldset > .profile-website-field,
 .profile-settings .account-form > fieldset > label:has(textarea),
 .profile-settings .account-form > fieldset > small {
   grid-column: 1 / -1;
@@ -1466,20 +1466,6 @@
   height: 18px;
   flex: 0 0 18px;
 }
-.profile-extra-fields {
-  border-top: 1px solid var(--border);
-  padding-top: 22px;
-}
-.profile-extra-fields h3 {
-  margin: 0 0 16px;
-  font-size: 14px;
-  font-weight: 500;
-}
-.profile-settings .public-panel-options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px 24px;
-}
 .profile-visibility-options {
   display: grid;
 }
@@ -1493,8 +1479,8 @@
 }
 .profile-settings-section,
 .profile-sharing-settings {
-  margin-top: 28px;
-  padding-top: 26px;
+  margin-top: 12px;
+  padding-top: 0;
 }
 .profile-settings-section > h2,
 .profile-sharing-settings > h2 {
@@ -1544,7 +1530,6 @@
   padding-top: 22px;
 }
 @media (max-width: 600px) {
-  .profile-settings .public-panel-options,
   .account-embedded .account-overview-grid {
     grid-template-columns: 1fr;
   }
@@ -1561,7 +1546,8 @@
 .profile-settings .profile-sharing-settings {
   display: grid;
   gap: 0;
-  padding-block: 26px;
+  margin-top: 0;
+  padding-block: 12px 20px;
 }
 .profile-settings .profile-sharing-settings > h2 {
   margin-bottom: 18px;
@@ -1576,8 +1562,8 @@
   padding-block: 16px;
 }
 .profile-sharing-group {
-  margin-top: 24px;
-  padding-top: 22px;
+  margin-top: 16px;
+  padding-top: 0;
 }
 .profile-sharing-group > h3 {
   margin: 0 0 14px;
