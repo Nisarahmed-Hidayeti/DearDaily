@@ -75,7 +75,7 @@ describe('DearDaily prototype', () => {
     )
     expect(screen.queryByText('#gratitude')).not.toBeInTheDocument()
   })
-  it('cannot save or publish even with public visibility', async () => {
+  it('saves privately on the device and does not publish an empty entry', async () => {
     page('/app/write')
     await userEvent.selectOptions(
       screen.getByLabelText('Entry visibility'),
@@ -83,7 +83,7 @@ describe('DearDaily prototype', () => {
     )
     expect(screen.getByText(/This entry is not public/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Publish/ })).toBeDisabled()
-    expect(screen.getByRole('button', { name: /Save draft/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Save now' })).toBeEnabled()
   })
   it('shows filters and opens sample stories', async () => {
     page('/explore')
@@ -97,15 +97,21 @@ describe('DearDaily prototype', () => {
       screen.getByText(/Beyond the last streetlight, the sky opened up/),
     ).toBeInTheDocument()
   })
-  it('clears temporary writing when the editor unmounts', async () => {
+  it('keeps private writing when the editor unmounts', async () => {
     page('/app/write')
     await userEvent.type(
       screen.getByLabelText('Journal body'),
-      'Temporary private thought',
+      'A private thought to keep',
     )
-    await userEvent.click(primaryLink('Home'))
-    await userEvent.click(primaryLink('Write'))
-    expect(screen.getByLabelText('Journal body')).toHaveValue('')
+    await userEvent.click(primaryLink('My Journal'))
+    const savedPage = screen.getByRole('link', {
+      name: /A private thought to keep/,
+    })
+    expect(savedPage).toBeInTheDocument()
+    await userEvent.click(savedPage)
+    expect(screen.getByLabelText('Journal body')).toHaveValue(
+      'A private thought to keep',
+    )
   })
   it('has a 404 and honest unconfigured authentication page', async () => {
     const view = page('/missing')

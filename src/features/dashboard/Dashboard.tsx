@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { LoadingState } from '../../components/Shared'
 import { CloudUnavailable } from '../journal/CloudUnavailable'
 import { Link } from 'react-router-dom'
@@ -14,7 +14,7 @@ import {
 import { ArrowLink, PageHeading, Scene } from '../../components/Shared'
 import { entries, dashboardStats } from '../../data/demo'
 import ActivityHeatmap from './ActivityHeatmap'
-import CloudDashboard from './CloudDashboard'
+const CloudDashboard = lazy(() => import('./CloudDashboard'))
 import { useAuth } from '../auth/AuthProvider'
 import { RequireAccount } from '../auth/AuthPages'
 import { journalEnabled } from '../journal/journalApi'
@@ -182,7 +182,11 @@ export default function Dashboard(props: {
   if (session)
     return (
       <RequireAccount>
-        <CloudDashboard library={props.library} />
+        <Suspense
+          fallback={<LoadingState>Loading your private journal…</LoadingState>}
+        >
+          <CloudDashboard library={props.library} />
+        </Suspense>
       </RequireAccount>
     )
   return <DemoDashboard {...props} />

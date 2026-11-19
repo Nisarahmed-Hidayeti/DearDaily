@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Eye, LockKeyhole, Globe, Feather, X } from 'lucide-react'
 import type { Mood, Visibility } from '../../data/demo'
 import { formatLocalDate } from '../../lib/dates'
@@ -15,6 +15,7 @@ export default function Editor() {
   const [draft, setDraft] = useState<Draft>(
     () => getDeviceDraft(routeId ?? id) ?? newDraft(),
   )
+  const latestDraft = useRef(draft)
   const { title, body, mood, tags } = draft
   const [tag, setTag] = useState('')
   const [visibility, setVisibility] = useState<Visibility>('Private'),
@@ -41,9 +42,25 @@ export default function Editor() {
     }, 900)
     return () => window.clearTimeout(timer)
   }, [draft, id, navigate, routeId, title, body, tags.length])
+  useEffect(
+    () => () => {
+      const current = latestDraft.current
+      if (
+        current.title.trim() ||
+        current.body.trim() ||
+        current.tags.length ||
+        current.mood !== 'Calm' ||
+        current.category !== 'Personal'
+      )
+        saveDeviceDraft(current, id)
+    },
+    [id],
+  )
   const changeDraft = (updates: Partial<typeof draft>) => {
+    const next = { ...latestDraft.current, ...updates }
+    latestDraft.current = next
     setSaveStatus('editing')
-    setDraft((current) => ({ ...current, ...updates }))
+    setDraft(next)
   }
   const count = body.trim() ? body.trim().split(/\s+/).length : 0
   function addTag() {

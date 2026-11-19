@@ -38,33 +38,26 @@ const OwnerSecurityCheck = import.meta.env.DEV
 const RegistrationSecurityCheck = import.meta.env.DEV
   ? lazy(() => import('./features/auth/RegistrationSecurityCheck'))
   : null
-const Landing = lazy(() => import('./features/landing/Landing'))
+import Landing from './features/landing/Landing'
 const LegalPage = lazy(() => import('./features/legal/LegalPage'))
-const Dashboard = lazy(() => import('./features/dashboard/Dashboard'))
-const Editor = lazy(() => import('./features/journal/Editor'))
-const Explore = lazy(() => import('./features/explore/Explore'))
-const StoryDetail = lazy(() =>
-  import('./features/explore/Explore').then((m) => ({
-    default: m.StoryDetail,
-  })),
-)
-const PublishedStory = lazy(() =>
-  import('./features/explore/Explore').then((m) => ({
-    default: m.PublishedStory,
-  })),
-)
-const DemoExplore = lazy(() => import('./features/explore/DemoExplore'))
+import Dashboard from './features/dashboard/Dashboard'
+import Editor from './features/journal/Editor'
+import Explore, {
+  StoryDetail,
+  PublishedStory,
+} from './features/explore/Explore'
+import DemoExplore from './features/explore/DemoExplore'
 import Shell from './app/Shell'
 import RouteFocus from './app/RouteFocus'
-const Settings = lazy(() => import('./features/settings/Settings'))
+import Settings from './features/settings/Settings'
 import { AuthProvider, AuthStatus, useAuth } from './features/auth/AuthProvider'
 import {
   AuthPage,
   AuthCallback,
   RequireAccount,
 } from './features/auth/AuthPages'
-const Account = lazy(() => import('./features/auth/Account'))
-const OwnerAdmin = lazy(() => import('./features/admin/OwnerAdmin'))
+import Account from './features/auth/Account'
+import OwnerAdmin from './features/admin/OwnerAdmin'
 import SecurityCheck from './features/auth/SecurityCheck'
 import JournalSecurityCheck from './features/auth/JournalSecurityCheck'
 import { ThemeProvider } from './features/theme/ThemeProvider'
