@@ -223,24 +223,24 @@ export function ProfilePhotos({
       <fieldset disabled={busy || !ready} className="profile-photo-consent">
         {draft.avatar_asset && (
           <label>
+            <span>Show my photo publicly</span>
             <input
               type="checkbox"
               disabled={!publicVisible}
               checked={publicVisible && draft.share_avatar}
               onChange={(e) => patch({ share_avatar: e.target.checked })}
             />
-            Show my photo publicly
           </label>
         )}
         {draft.banner_asset && (
           <label>
+            <span>Show my banner publicly</span>
             <input
               type="checkbox"
               disabled={!publicVisible}
               checked={publicVisible && draft.share_banner}
               onChange={(e) => patch({ share_banner: e.target.checked })}
             />
-            Show my banner publicly
           </label>
         )}
         {!publicVisible && (draft.avatar_asset || draft.banner_asset) && (
