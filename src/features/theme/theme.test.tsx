@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { AppRoutes } from '../../App'
@@ -12,6 +12,11 @@ function renderApp(path = '/app/settings') {
       <AppRoutes />
     </MemoryRouter>,
   )
+}
+function primaryLink(label: string) {
+  return within(
+    screen.getByRole('navigation', { name: 'Primary navigation' }),
+  ).getByRole('link', { name: label })
 }
 
 describe('theme preferences', () => {
@@ -60,16 +65,16 @@ describe('theme preferences', () => {
       'paper-white',
     )
     await userEvent.click(screen.getByRole('link', { name: /Try the demo/ }))
-    await userEvent.click(screen.getByRole('link', { name: 'Write' }))
+    await userEvent.click(primaryLink('Write'))
     expect(document.documentElement).toHaveAttribute(
       'data-theme',
       'paper-white',
     )
-    await userEvent.click(screen.getByRole('link', { name: 'Home' }))
+    await userEvent.click(primaryLink('Home'))
     expect(
       screen.getByRole('region', { name: 'Writing activity calendar' }),
     ).toBeInTheDocument()
-    await userEvent.click(screen.getByRole('link', { name: 'Explore' }))
+    await userEvent.click(primaryLink('Explore'))
     await userEvent.click(
       screen.getByRole('link', { name: /There is no hurry to become/ }),
     )
@@ -151,7 +156,7 @@ describe('theme preferences', () => {
     const writes = vi.spyOn(Storage.prototype, 'setItem')
     renderApp()
     await userEvent.click(screen.getByRole('radio', { name: 'Obsidian Black' }))
-    await userEvent.click(screen.getByRole('link', { name: 'Write' }))
+    await userEvent.click(primaryLink('Write'))
     await userEvent.type(screen.getByLabelText('Entry title'), 'Private title')
     await userEvent.type(
       screen.getByLabelText('Journal body'),

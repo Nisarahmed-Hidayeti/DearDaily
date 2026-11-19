@@ -9,7 +9,6 @@ import {
   Compass,
   PanelLeftClose,
   PanelLeftOpen,
-  Menu,
   ChevronUp,
   Settings,
   UserRound,
@@ -203,14 +202,6 @@ export default function Shell() {
       <div className="studio-main">
         <header className="studio-mobile-header">
           <Logo />
-          <button
-            className="sidebar-toggle"
-            aria-label="Open navigation"
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen(true)}
-          >
-            <Menu size={21} />
-          </button>
         </header>
         {!writing &&
           !pathname.startsWith('/dev/') &&
@@ -223,10 +214,35 @@ export default function Shell() {
           />
         </main>
       </div>
+      <nav className="studio-mobile-tabs" aria-label="Mobile navigation">
+        {navigation.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            end={to !== '/app/write'}
+            to={to}
+            key={to}
+            className="studio-mobile-tab"
+            aria-label={label}
+            onClick={closeMenus}
+          >
+            <Icon size={21} aria-hidden="true" />
+            <span>{label === 'My Journal' ? 'Journal' : label}</span>
+          </NavLink>
+        ))}
+        <button
+          className="studio-mobile-tab"
+          aria-label="Open account controls"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen(true)}
+        >
+          <span className="mobile-tab-avatar" aria-hidden="true">
+            <OwnProfileAvatar fallback={<UserRound size={19} />} />
+          </span>
+          <span>Account</span>
+        </button>
+      </nav>
       {mobileOpen && (
         <Modal title="Your workspace" onClose={() => setMobileOpen(false)}>
           <div className="studio-mobile-menu">
-            {primaryLinks}
             <div className="mobile-account-links">{accountLinks}</div>
           </div>
         </Modal>
