@@ -2,15 +2,25 @@ import { AndroidAuthLinks } from './features/auth/AndroidAuthLinks'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { AppearanceProvider } from './features/appearance/AppearanceProvider'
 import { LoadingState } from './components/Shared'
-import RichWritingSecurityCheck from './features/auth/RichWritingSecurityCheck'
-import CommunityPreview from './features/community/CommunityPreview'
-import CommunitySecurityCheck from './features/auth/CommunitySecurityCheck'
+const RichWritingSecurityCheck = lazy(
+  () => import('./features/auth/RichWritingSecurityCheck'),
+)
+const CommunityPreview = lazy(
+  () => import('./features/community/CommunityPreview'),
+)
+const CommunitySecurityCheck = lazy(
+  () => import('./features/auth/CommunitySecurityCheck'),
+)
 import { communityEnabled } from './features/community/communityApi'
-import PublicProfile from './features/community/PublicProfile'
-import ProfileSettings from './features/community/ProfileSettings'
-import PublishedManager from './features/community/PublishedManager'
-import Moderation from './features/community/Moderation'
-import AccountPrivacy from './features/community/AccountPrivacy'
+const PublicProfile = lazy(() => import('./features/community/PublicProfile'))
+const ProfileSettings = lazy(
+  () => import('./features/community/ProfileSettings'),
+)
+const PublishedManager = lazy(
+  () => import('./features/community/PublishedManager'),
+)
+const Moderation = lazy(() => import('./features/community/Moderation'))
+const AccountPrivacy = lazy(() => import('./features/community/AccountPrivacy'))
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 const VoiceSecurityCheck = import.meta.env.DEV
@@ -29,7 +39,7 @@ const RegistrationSecurityCheck = import.meta.env.DEV
   ? lazy(() => import('./features/auth/RegistrationSecurityCheck'))
   : null
 import Landing from './features/landing/Landing'
-import LegalPage from './features/legal/LegalPage'
+const LegalPage = lazy(() => import('./features/legal/LegalPage'))
 import Dashboard from './features/dashboard/Dashboard'
 import Editor from './features/journal/Editor'
 import Explore, {
@@ -69,221 +79,238 @@ function ThemedRoutes() {
           Skip to content
         </a>
         <AuthStatus />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/privacy" element={<LegalPage kind="privacy" />} />
-          <Route path="/terms" element={<LegalPage kind="terms" />} />
-          {(
-            ['sign-in', 'sign-up', 'forgot-password', 'reset-password'] as const
-          ).map((mode) => (
-            <Route
-              key={mode}
-              path={'/auth/' + mode}
-              element={<AuthPage key={mode} mode={mode} />}
-            />
-          ))}
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route element={<Shell />}>
-            <Route
-              path="/account/owner"
-              element={
-                <RequireAccount>
-                  <OwnerAdmin />
-                </RequireAccount>
-              }
-            />
-            {import.meta.env.DEV && VoiceSecurityCheck && (
+        <Suspense fallback={<LoadingState>Opening your space…</LoadingState>}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/privacy" element={<LegalPage kind="privacy" />} />
+            <Route path="/terms" element={<LegalPage kind="terms" />} />
+            {(
+              [
+                'sign-in',
+                'sign-up',
+                'forgot-password',
+                'reset-password',
+              ] as const
+            ).map((mode) => (
               <Route
-                path="/dev/profile-image-check"
+                key={mode}
+                path={'/auth/' + mode}
+                element={<AuthPage key={mode} mode={mode} />}
+              />
+            ))}
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route element={<Shell />}>
+              <Route
+                path="/account/owner"
                 element={
-                  <Suspense
-                    fallback={
-                      <LoadingState>Preparing image checks…</LoadingState>
-                    }
-                  >
-                    <VoiceSecurityCheck />
-                  </Suspense>
+                  <RequireAccount>
+                    <OwnerAdmin />
+                  </RequireAccount>
                 }
               />
-            )}
-            {import.meta.env.DEV && VoiceSecurityCheck && (
-              <Route
-                path="/dev/voice-check"
-                element={
-                  <Suspense
-                    fallback={
-                      <LoadingState>Preparing audio checks…</LoadingState>
-                    }
-                  >
-                    <VoiceSecurityCheck />
-                  </Suspense>
-                }
-              />
-            )}
-            {import.meta.env.DEV && ProfilePhotoWorkshop && (
-              <Route
-                path="/dev/profile-photo-workshop"
-                element={
-                  <Suspense
-                    fallback={
-                      <LoadingState>Preparing photo preview…</LoadingState>
-                    }
-                  >
-                    <ProfilePhotoWorkshop />
-                  </Suspense>
-                }
-              />
-            )}
-            {import.meta.env.DEV && EditorWorkshop && (
-              <Route
-                path="/dev/editor-workshop"
-                element={
-                  <Suspense
-                    fallback={
-                      <LoadingState>Preparing your writing space…</LoadingState>
-                    }
-                  >
-                    <EditorWorkshop />
-                  </Suspense>
-                }
-              />
-            )}
-            {import.meta.env.DEV && (
-              <Route path="/dev/security-check" element={<SecurityCheck />} />
-            )}
-            {import.meta.env.DEV && OwnerSecurityCheck && (
-              <Route
-                path="/dev/owner-check"
-                element={
-                  <Suspense
-                    fallback={
-                      <LoadingState>Preparing owner verification…</LoadingState>
-                    }
-                  >
-                    <OwnerSecurityCheck />
-                  </Suspense>
-                }
-              />
-            )}
-            {import.meta.env.DEV && RegistrationSecurityCheck && (
-              <Route
-                path="/dev/registration-check"
-                element={
-                  <Suspense
-                    fallback={
-                      <LoadingState>Preparing verification…</LoadingState>
-                    }
-                  >
-                    <RegistrationSecurityCheck />
-                  </Suspense>
-                }
-              />
-            )}
-            {import.meta.env.DEV && (
-              <Route
-                path="/dev/journal-check"
-                element={<JournalSecurityCheck />}
-              />
-            )}
-            {import.meta.env.DEV && (
-              <Route
-                path="/dev/community-preview"
-                element={<CommunityPreview />}
-              />
-            )}
-            {import.meta.env.DEV && (
-              <Route
-                path="/dev/community-check"
-                element={<CommunitySecurityCheck />}
-              />
-            )}
-            {communityEnabled && (
-              <>
-                <Route path="/u/:username" element={<PublicProfile />} />
+              {import.meta.env.DEV && VoiceSecurityCheck && (
                 <Route
-                  path="/account/public-profile"
+                  path="/dev/profile-image-check"
                   element={
-                    <RequireAccount>
-                      <ProfileSettings />
-                    </RequireAccount>
+                    <Suspense
+                      fallback={
+                        <LoadingState>Preparing image checks…</LoadingState>
+                      }
+                    >
+                      <VoiceSecurityCheck />
+                    </Suspense>
                   }
                 />
+              )}
+              {import.meta.env.DEV && VoiceSecurityCheck && (
                 <Route
-                  path="/app/published"
+                  path="/dev/voice-check"
                   element={
-                    <RequireAccount>
-                      <PublishedManager />
-                    </RequireAccount>
+                    <Suspense
+                      fallback={
+                        <LoadingState>Preparing audio checks…</LoadingState>
+                      }
+                    >
+                      <VoiceSecurityCheck />
+                    </Suspense>
                   }
                 />
+              )}
+              {import.meta.env.DEV && ProfilePhotoWorkshop && (
                 <Route
-                  path="/moderation"
+                  path="/dev/profile-photo-workshop"
                   element={
-                    <RequireAccount>
-                      <Moderation />
-                    </RequireAccount>
+                    <Suspense
+                      fallback={
+                        <LoadingState>Preparing photo preview…</LoadingState>
+                      }
+                    >
+                      <ProfilePhotoWorkshop />
+                    </Suspense>
                   }
                 />
+              )}
+              {import.meta.env.DEV && EditorWorkshop && (
                 <Route
-                  path="/account/privacy"
+                  path="/dev/editor-workshop"
                   element={
-                    <RequireAccount>
-                      <AccountPrivacy />
-                    </RequireAccount>
+                    <Suspense
+                      fallback={
+                        <LoadingState>
+                          Preparing your writing space…
+                        </LoadingState>
+                      }
+                    >
+                      <EditorWorkshop />
+                    </Suspense>
                   }
                 />
-              </>
-            )}
-            {import.meta.env.DEV && (
-              <>
+              )}
+              {import.meta.env.DEV && (
+                <Route path="/dev/security-check" element={<SecurityCheck />} />
+              )}
+              {import.meta.env.DEV && OwnerSecurityCheck && (
                 <Route
-                  path="/dev/rich-check"
-                  element={<RichWritingSecurityCheck />}
+                  path="/dev/owner-check"
+                  element={
+                    <Suspense
+                      fallback={
+                        <LoadingState>
+                          Preparing owner verification…
+                        </LoadingState>
+                      }
+                    >
+                      <OwnerSecurityCheck />
+                    </Suspense>
+                  }
                 />
+              )}
+              {import.meta.env.DEV && RegistrationSecurityCheck && (
                 <Route
-                  path="/dev/renaissance-check"
-                  element={<RichWritingSecurityCheck />}
+                  path="/dev/registration-check"
+                  element={
+                    <Suspense
+                      fallback={
+                        <LoadingState>Preparing verification…</LoadingState>
+                      }
+                    >
+                      <RegistrationSecurityCheck />
+                    </Suspense>
+                  }
                 />
-              </>
-            )}
-            <Route path="/app" element={<Dashboard />} />
-            <Route path="/app/journal" element={<Dashboard library />} />
-            <Route
-              path="/account"
-              element={
-                <RequireAccount>
-                  {communityEnabled ? (
-                    <ProfileSettings key={session?.user.id} />
-                  ) : (
-                    <Account key={session?.user.id} />
-                  )}
-                </RequireAccount>
-              }
-            />
-            <Route path="/app/write" element={<Editor />} />
-            <Route path="/app/write/:id" element={<Editor />} />
-            <Route path="/app/settings" element={<Settings />} />
-            <Route path="/app/entries/:id" element={<StoryDetail personal />} />
-            <Route path="/explore" element={<Explore />} />
-            <Route path="/explore/samples" element={<DemoExplore />} />
-            <Route path="/explore/published/:id" element={<PublishedStory />} />
-            <Route path="/explore/:id" element={<PublishedStory />} />
-            <Route path="/explore/samples/:id" element={<StoryDetail />} />
-            <Route
-              path="*"
-              element={
-                <div className="page not-found">
-                  <p className="eyebrow">404 / An unwritten page</p>
-                  <h1>A little off the beaten path.</h1>
-                  <p>Let’s find your way back to a fresh page.</p>
-                  <Link className="button" to="/">
-                    Back home
-                  </Link>
-                </div>
-              }
-            />
-          </Route>
-        </Routes>
+              )}
+              {import.meta.env.DEV && (
+                <Route
+                  path="/dev/journal-check"
+                  element={<JournalSecurityCheck />}
+                />
+              )}
+              {import.meta.env.DEV && (
+                <Route
+                  path="/dev/community-preview"
+                  element={<CommunityPreview />}
+                />
+              )}
+              {import.meta.env.DEV && (
+                <Route
+                  path="/dev/community-check"
+                  element={<CommunitySecurityCheck />}
+                />
+              )}
+              {communityEnabled && (
+                <>
+                  <Route path="/u/:username" element={<PublicProfile />} />
+                  <Route
+                    path="/account/public-profile"
+                    element={
+                      <RequireAccount>
+                        <ProfileSettings />
+                      </RequireAccount>
+                    }
+                  />
+                  <Route
+                    path="/app/published"
+                    element={
+                      <RequireAccount>
+                        <PublishedManager />
+                      </RequireAccount>
+                    }
+                  />
+                  <Route
+                    path="/moderation"
+                    element={
+                      <RequireAccount>
+                        <Moderation />
+                      </RequireAccount>
+                    }
+                  />
+                  <Route
+                    path="/account/privacy"
+                    element={
+                      <RequireAccount>
+                        <AccountPrivacy />
+                      </RequireAccount>
+                    }
+                  />
+                </>
+              )}
+              {import.meta.env.DEV && (
+                <>
+                  <Route
+                    path="/dev/rich-check"
+                    element={<RichWritingSecurityCheck />}
+                  />
+                  <Route
+                    path="/dev/renaissance-check"
+                    element={<RichWritingSecurityCheck />}
+                  />
+                </>
+              )}
+              <Route path="/app" element={<Dashboard />} />
+              <Route path="/app/journal" element={<Dashboard library />} />
+              <Route
+                path="/account"
+                element={
+                  <RequireAccount>
+                    {communityEnabled ? (
+                      <ProfileSettings key={session?.user.id} />
+                    ) : (
+                      <Account key={session?.user.id} />
+                    )}
+                  </RequireAccount>
+                }
+              />
+              <Route path="/app/write" element={<Editor />} />
+              <Route path="/app/write/:id" element={<Editor />} />
+              <Route path="/app/settings" element={<Settings />} />
+              <Route
+                path="/app/entries/:id"
+                element={<StoryDetail personal />}
+              />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/explore/samples" element={<DemoExplore />} />
+              <Route
+                path="/explore/published/:id"
+                element={<PublishedStory />}
+              />
+              <Route path="/explore/:id" element={<PublishedStory />} />
+              <Route path="/explore/samples/:id" element={<StoryDetail />} />
+              <Route
+                path="*"
+                element={
+                  <div className="page not-found">
+                    <p className="eyebrow">404 / An unwritten page</p>
+                    <h1>A little off the beaten path.</h1>
+                    <p>Let’s find your way back to a fresh page.</p>
+                    <Link className="button" to="/">
+                      Back home
+                    </Link>
+                  </div>
+                }
+              />
+            </Route>
+          </Routes>
+        </Suspense>
       </AppearanceProvider>
     </ThemeProvider>
   )

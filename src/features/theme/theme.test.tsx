@@ -152,9 +152,9 @@ describe('theme preferences', () => {
     )
   })
 
-  it('persists only the theme and never journal title, body, mood, or tags', async () => {
+  it('keeps the theme preference separate from a device-local journal draft', async () => {
     const writes = vi.spyOn(Storage.prototype, 'setItem')
-    renderApp()
+    const view = renderApp()
     await userEvent.click(screen.getByRole('radio', { name: 'Obsidian Black' }))
     await userEvent.click(primaryLink('Write'))
     await userEvent.type(screen.getByLabelText('Entry title'), 'Private title')
@@ -164,10 +164,17 @@ describe('theme preferences', () => {
     )
     await userEvent.type(screen.getByLabelText('Tags'), 'private-tag{enter}')
     await userEvent.click(screen.getByRole('button', { name: /Happy/ }))
-    expect(writes).toHaveBeenCalledExactlyOnceWith(
-      themeStorageKey,
-      'obsidian-black',
+    view.unmount()
+    expect(writes).toHaveBeenCalledWith(themeStorageKey, 'obsidian-black')
+    const deviceDrafts = JSON.parse(
+      localStorage.getItem('deardaily.device-drafts.v1') ?? '[]',
     )
-    expect(localStorage.length).toBe(1)
+    expect(deviceDrafts[0]).toMatchObject({
+      title: 'Private title',
+      body: 'A private thought',
+      mood: 'Happy',
+      tags: ['private-tag'],
+    })
+    expect(localStorage.length).toBe(2)
   })
 })

@@ -20,7 +20,7 @@ vi.mock('./journalApi', async (original) => ({
 }))
 vi.mock('./CloudEditor', () => ({ default: () => <h1>Real cloud editor</h1> }))
 vi.mock('./DemoEditor', () => ({
-  default: () => <h1>Sample writing is not saved</h1>,
+  default: () => <h1>Private device-local writing</h1>,
 }))
 beforeEach(() => {
   flags.enabled = false
@@ -39,11 +39,11 @@ it('never shows sample writing to an authenticated account when cloud features a
   expect(screen.getByText(/Cloud writing is not available/)).toBeVisible()
   expect(screen.queryByText('Sample writing is not saved')).toBeNull()
 })
-it('uses only the cloud editor for authenticated writing', () => {
+it('uses only the cloud editor for authenticated writing', async () => {
   flags.enabled = true
   flags.session = { user: { id: 'A' } }
   show()
-  expect(screen.getByText('Real cloud editor')).toBeVisible()
+  expect(await screen.findByText('Real cloud editor')).toBeVisible()
 })
 it('does not flash a sample editor while restoring a session', () => {
   flags.loading = true
@@ -51,7 +51,7 @@ it('does not flash a sample editor while restoring a session', () => {
   expect(screen.getByText('Restoring your account…')).toBeVisible()
   expect(screen.queryByText('Sample writing is not saved')).toBeNull()
 })
-it('keeps guests in explicitly unsaved sample mode', () => {
+it('uses private device-local writing for guests', () => {
   show()
-  expect(screen.getByText('Sample writing is not saved')).toBeVisible()
+  expect(screen.getByText('Private device-local writing')).toBeVisible()
 })
