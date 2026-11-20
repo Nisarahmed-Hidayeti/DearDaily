@@ -719,6 +719,13 @@ footer a:not(.logo) {
   color: var(--muted);
   margin: 20px 0 30px;
 }
+.device-save-status {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.device-drafts {
+  margin: 22px 0;
+}
 .editor-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 265px;
