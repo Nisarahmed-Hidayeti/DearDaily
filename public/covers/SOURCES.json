@@ -1,11 +1,11 @@
 {
-  "retrieved": "2026-11-09",
+  "retrieved": "2026-11-20",
   "transform": "Locally optimized JPEG, up to 2560px longest edge, no upscaling; 480px previews. No Notion assets copied.",
   "images": [
     {
       "id": "nasa-art002e016354",
       "name": "A thin lunar crescent",
-      "collection": "Artemis II",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/art002e016354/art002e016354~large.jpg",
       "original": "https://images-assets.nasa.gov/image/art002e016354/art002e016354~orig.jpg",
       "credit": "NASA",
@@ -22,7 +22,7 @@
     {
       "id": "nasa-art002e009582",
       "name": "The illuminated Moon",
-      "collection": "Artemis II",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/art002e009582/art002e009582~large.jpg",
       "original": "https://images-assets.nasa.gov/image/art002e009582/art002e009582~orig.jpg",
       "credit": "NASA",
@@ -39,7 +39,7 @@
     {
       "id": "nasa-art002e009281",
       "name": "Shadows at the edge of lunar day",
-      "collection": "Artemis II",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/art002e009281/art002e009281~large.jpg",
       "original": "https://images-assets.nasa.gov/image/art002e009281/art002e009281~orig.jpg",
       "credit": "NASA",
@@ -56,7 +56,7 @@
     {
       "id": "nasa-art002e009282",
       "name": "Craters along the terminator",
-      "collection": "Artemis II",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/art002e009282/art002e009282~large.jpg",
       "original": "https://images-assets.nasa.gov/image/art002e009282/art002e009282~orig.jpg",
       "credit": "NASA",
@@ -73,7 +73,7 @@
     {
       "id": "nasa-art002e009285",
       "name": "Earthset",
-      "collection": "Artemis II",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/art002e009285/art002e009285~large.jpg",
       "original": "https://images-assets.nasa.gov/image/art002e009285/art002e009285~orig.jpg",
       "credit": "NASA",
@@ -90,7 +90,7 @@
     {
       "id": "nasa-art002e009301",
       "name": "Total solar eclipse from Orion",
-      "collection": "Artemis II",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/art002e009301/art002e009301~large.jpg",
       "original": "https://images-assets.nasa.gov/image/art002e009301/art002e009301~orig.jpg",
       "credit": "NASA",
@@ -107,7 +107,7 @@
     {
       "id": "nasa-art002e010208",
       "name": "The Moon, half in shadow",
-      "collection": "Artemis II",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/art002e010208/art002e010208~large.jpg",
       "original": "https://images-assets.nasa.gov/image/art002e010208/art002e010208~orig.jpg",
       "credit": "NASA",
@@ -124,7 +124,7 @@
     {
       "id": "nasa-art002e012028",
       "name": "Across the lunar surface",
-      "collection": "Artemis II",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/art002e012028/art002e012028~large.jpg",
       "original": "https://images-assets.nasa.gov/image/art002e012028/art002e012028~orig.jpg",
       "credit": "NASA",
@@ -447,7 +447,7 @@
     {
       "id": "nasa-s36-39-014",
       "name": "New York after sunset",
-      "collection": "After dark",
+      "collection": "Everyday & after dark",
       "url": "https://images-assets.nasa.gov/image/s36-39-014/s36-39-014~large.jpg",
       "original": "https://images-assets.nasa.gov/image/s36-39-014/s36-39-014~orig.jpg",
       "credit": "NASA",
@@ -464,7 +464,7 @@
     {
       "id": "nasa-iss025e015176",
       "name": "A world of lights",
-      "collection": "After dark",
+      "collection": "Everyday & after dark",
       "url": "https://images-assets.nasa.gov/image/iss025e015176/iss025e015176~large.jpg",
       "original": "https://images-assets.nasa.gov/image/iss025e015176/iss025e015176~orig.jpg",
       "credit": "NASA",
@@ -481,7 +481,7 @@
     {
       "id": "nasa-iss037e004654",
       "name": "Night over the Nile",
-      "collection": "After dark",
+      "collection": "Everyday & after dark",
       "url": "https://images-assets.nasa.gov/image/iss037e004654/iss037e004654~large.jpg",
       "original": "https://images-assets.nasa.gov/image/iss037e004654/iss037e004654~orig.jpg",
       "credit": "NASA / Karen Nyberg",
@@ -498,7 +498,7 @@
     {
       "id": "webb-stephans-quintet-nircam-and-miri-composite-image",
       "name": "Stephan’s Quintet",
-      "collection": "James Webb Telescope",
+      "collection": "Space & beyond",
       "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/missions/webb/science/2022/07/STScI-01G8H49RQ0E48YDM8WKW9PP5XS.png?w=2560&fit=max",
       "original": "https://assets.science.nasa.gov/content/dam/science/missions/webb/science/2022/07/STScI-01G8H49RQ0E48YDM8WKW9PP5XS.png",
       "source": "https://science.nasa.gov/asset/webb/stephans-quintet-nircam-and-miri-composite-image/",
@@ -514,7 +514,7 @@
     {
       "id": "webb-pillars-of-creation-nircam-image",
       "name": "Pillars of Creation",
-      "collection": "James Webb Telescope",
+      "collection": "Space & beyond",
       "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/missions/webb/science/2022/10/STScI-01GGF8H15VZ09MET9HFBRQX4S3.png?w=2560&fit=max",
       "original": "https://assets.science.nasa.gov/content/dam/science/missions/webb/science/2022/10/STScI-01GGF8H15VZ09MET9HFBRQX4S3.png",
       "source": "https://science.nasa.gov/asset/webb/pillars-of-creation-nircam-image/",
@@ -530,7 +530,7 @@
     {
       "id": "webb-webbs-first-deep-field-unveiled-nircam-image",
       "name": "Webb’s first deep field",
-      "collection": "James Webb Telescope",
+      "collection": "Space & beyond",
       "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/missions/webb/science/2022/07/STScI-01G8H15R2PGEXQD7TYYBFJ3FT4.png?w=2560&fit=max",
       "original": "https://assets.science.nasa.gov/content/dam/science/missions/webb/science/2022/07/STScI-01G8H15R2PGEXQD7TYYBFJ3FT4.png",
       "source": "https://science.nasa.gov/asset/webb/webbs-first-deep-field-unveiled-nircam-image/",
@@ -546,7 +546,7 @@
     {
       "id": "nasa-carina-nebula",
       "name": "Cosmic Cliffs in Carina",
-      "collection": "James Webb Telescope",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/carina_nebula/carina_nebula~large.jpg",
       "original": "https://images-assets.nasa.gov/image/carina_nebula/carina_nebula~orig.png",
       "credit": "NASA, ESA, CSA, STScI",
@@ -563,7 +563,7 @@
     {
       "id": "nasa-southern-ring-nebula",
       "name": "Southern Ring Nebula",
-      "collection": "James Webb Telescope",
+      "collection": "Space & beyond",
       "url": "https://images-assets.nasa.gov/image/southern_ring_nebula/southern_ring_nebula~large.jpg",
       "original": "https://images-assets.nasa.gov/image/southern_ring_nebula/southern_ring_nebula~orig.png",
       "credit": "NASA, ESA, CSA, STScI",
@@ -597,7 +597,7 @@
     {
       "id": "met-art-437984",
       "name": "La Berceuse (Woman Rocking a Cradle; Augustine-Alix Pellicot Roulin, 1851–1930)",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-19279-001.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-19279-001.jpg",
       "credit": "Vincent van Gogh",
@@ -613,7 +613,7 @@
     {
       "id": "met-art-11130",
       "name": "Northeaster",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ad/original/DT1545.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ad/original/DT1545.jpg",
       "credit": "Winslow Homer",
@@ -629,7 +629,7 @@
     {
       "id": "met-art-10482",
       "name": "The Parthenon",
-      "collection": "The Met Museum",
+      "collection": "City & architecture",
       "url": "https://images.metmuseum.org/CRDImages/ad/original/DT1540.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ad/original/DT1540.jpg",
       "credit": "Frederic Edwin Church",
@@ -645,7 +645,7 @@
     {
       "id": "met-art-437310",
       "name": "The Boulevard Montmartre on a Winter Morning",
-      "collection": "The Met Museum",
+      "collection": "City & architecture",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-21959-001.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-21959-001.jpg",
       "credit": "Camille Pissarro",
@@ -661,7 +661,7 @@
     {
       "id": "met-art-438817",
       "name": "The Dance Class",
-      "collection": "The Met Museum",
+      "collection": "Everyday & after dark",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-20101-001.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-20101-001.jpg",
       "credit": "Edgar Degas",
@@ -677,7 +677,7 @@
     {
       "id": "met-art-437159",
       "name": "Young Woman Knitting",
-      "collection": "Everyday memories",
+      "collection": "Everyday & after dark",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DT1928.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DT1928.jpg",
       "credit": "Berthe Morisot",
@@ -693,7 +693,7 @@
     {
       "id": "met-art-437654",
       "name": "Circus Sideshow (Parade de cirque)",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP375450_cropped.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP375450_cropped.jpg",
       "credit": "Georges Seurat",
@@ -709,7 +709,7 @@
     {
       "id": "met-art-826444",
       "name": "A Street Scene in Seville",
-      "collection": "The Met Museum",
+      "collection": "City & architecture",
       "url": "https://images.metmuseum.org/CRDImages/ad/original/IA-HRCWJD.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ad/original/IA-HRCWJD.jpg",
       "credit": "Thomas Eakins",
@@ -725,7 +725,7 @@
     {
       "id": "met-art-11392",
       "name": "Roses",
-      "collection": "The Met Museum",
+      "collection": "Flowers & botanicals",
       "url": "https://images.metmuseum.org/CRDImages/ad/original/ap18.116.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ad/original/ap18.116.jpg",
       "credit": "George Cochran Lambdin",
@@ -741,7 +741,7 @@
     {
       "id": "met-art-11417",
       "name": "Washington Crossing the Delaware",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ad/original/DP215410.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ad/original/DP215410.jpg",
       "credit": "Emanuel Leutze",
@@ -757,7 +757,7 @@
     {
       "id": "met-art-459123",
       "name": "Madame Roulin and Her Baby",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/rl/original/DT3154.jpg",
       "original": "https://images.metmuseum.org/CRDImages/rl/original/DT3154.jpg",
       "credit": "Vincent van Gogh",
@@ -773,7 +773,7 @@
     {
       "id": "met-art-436787",
       "name": "The Pont Neuf",
-      "collection": "The Met Museum",
+      "collection": "City & architecture",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP319656.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP319656.jpg",
       "credit": "Johan Barthold Jongkind",
@@ -789,7 +789,7 @@
     {
       "id": "met-art-436483",
       "name": "Pygmalion and Galatea",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-14201-005.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-14201-005.jpg",
       "credit": "Jean-Léon Gérôme",
@@ -805,7 +805,7 @@
     {
       "id": "met-art-436528",
       "name": "Irises",
-      "collection": "The Met Museum",
+      "collection": "Flowers & botanicals",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP346474.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP346474.jpg",
       "credit": "Vincent van Gogh",
@@ -821,7 +821,7 @@
     {
       "id": "met-art-435809",
       "name": "The Harvesters",
-      "collection": "Seasons",
+      "collection": "Nature & seasons",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP119115.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP119115.jpg",
       "credit": "Pieter Bruegel the Elder",
@@ -837,7 +837,7 @@
     {
       "id": "met-art-437312",
       "name": "The Garden of the Tuileries on a Winter Afternoon",
-      "collection": "The Met Museum",
+      "collection": "Flowers & botanicals",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-14936-037.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-14936-037.jpg",
       "credit": "Camille Pissarro",
@@ -853,7 +853,7 @@
     {
       "id": "met-art-11227",
       "name": "Autumn Oaks",
-      "collection": "Seasons",
+      "collection": "Nature & seasons",
       "url": "https://images.metmuseum.org/CRDImages/ad/original/DT264804.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ad/original/DT264804.jpg",
       "credit": "George Inness",
@@ -869,7 +869,7 @@
     {
       "id": "met-art-435882",
       "name": "Still Life with Apples and a Pot of Primroses",
-      "collection": "The Met Museum",
+      "collection": "Flowers & botanicals",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DT47.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DT47.jpg",
       "credit": "Paul Cézanne",
@@ -885,7 +885,7 @@
     {
       "id": "met-art-436529",
       "name": "L'Arlésienne: Madame Joseph-Michel Ginoux (Marie Julien, 1848–1911)",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DT1396.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DT1396.jpg",
       "credit": "Vincent van Gogh",
@@ -901,7 +901,7 @@
     {
       "id": "met-art-436532",
       "name": "Self-Portrait with a Straw Hat (obverse: The Potato Peeler)",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DT1502_cropped2.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DT1502_cropped2.jpg",
       "credit": "Vincent van Gogh",
@@ -917,7 +917,7 @@
     {
       "id": "met-art-436534",
       "name": "Roses",
-      "collection": "The Met Museum",
+      "collection": "Flowers & botanicals",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP346475.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP346475.jpg",
       "credit": "Vincent van Gogh",
@@ -933,7 +933,7 @@
     {
       "id": "met-art-436535",
       "name": "Wheat Field with Cypresses",
-      "collection": "Quiet nature",
+      "collection": "Nature & seasons",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-42549-001.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-42549-001.jpg",
       "credit": "Vincent van Gogh",
@@ -949,7 +949,7 @@
     {
       "id": "met-art-436833",
       "name": "Red Sunset",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DT2557.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DT2557.jpg",
       "credit": "Arkhyp Kuindzhi (Arkhip Ivanovich Kuindzhi)",
@@ -965,7 +965,7 @@
     {
       "id": "met-art-436065",
       "name": "Children and a Cow",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP146486.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP146486.jpg",
       "credit": "Aelbert Cuyp",
@@ -981,7 +981,7 @@
     {
       "id": "met-art-437317",
       "name": "Still Life with Apples and Pitcher",
-      "collection": "Everyday memories",
+      "collection": "Everyday & after dark",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-21958-001.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-21958-001.jpg",
       "credit": "Camille Pissarro",
@@ -997,7 +997,7 @@
     {
       "id": "met-art-436121",
       "name": "A Woman Seated beside a Vase of Flowers (Madame Paul Valpinçon?)",
-      "collection": "Everyday memories",
+      "collection": "Everyday & after dark",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-25460-001.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-25460-001.jpg",
       "credit": "Edgar Degas",
@@ -1013,7 +1013,7 @@
     {
       "id": "met-art-436085",
       "name": "Apple Blossoms",
-      "collection": "Seasons",
+      "collection": "Nature & seasons",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DT2145.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DT2145.jpg",
       "credit": "Charles-François Daubigny",
@@ -1029,7 +1029,7 @@
     {
       "id": "met-art-436095",
       "name": "The Third-Class Carriage",
-      "collection": "Everyday memories",
+      "collection": "City & architecture",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-21027-001.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-21027-001.jpg",
       "credit": "Honoré Daumier",
@@ -1045,7 +1045,7 @@
     {
       "id": "met-art-436106",
       "name": "Antoine Laurent Lavoisier (1743–1794) and Marie Anne Lavoisier (Marie Anne Pierrette Paulze, 1758–1836)",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DP-19709-001.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DP-19709-001.jpg",
       "credit": "Jacques Louis David",
@@ -1061,7 +1061,7 @@
     {
       "id": "met-art-436016",
       "name": "Madame Auguste Cuoq (Mathilde Desportes, 1827–1910)",
-      "collection": "The Met Museum",
+      "collection": "Museum art",
       "url": "https://images.metmuseum.org/CRDImages/ep/original/DT1960.jpg",
       "original": "https://images.metmuseum.org/CRDImages/ep/original/DT1960.jpg",
       "credit": "Gustave Courbet",
@@ -1073,6 +1073,176 @@
       "width": 1568,
       "height": 2560,
       "sha256": "bc522a0942132c35a145335fb2d0117cf9226279a47106e1bfdebb14dd6a05f3"
+    },
+    {
+      "id": "met-botanical-438031",
+      "name": "Summer Flowers",
+      "collection": "Flowers & botanicals",
+      "url": "https://images.metmuseum.org/CRDImages/ep/original/DT4204.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/ep/original/DT4204.jpg",
+      "credit": "Henri Fantin-Latour",
+      "source": "https://www.metmuseum.org/art/collection/search/438031",
+      "sourceTitle": "Summer Flowers",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-botanical-438031.jpg",
+      "thumbnail": "/covers/met-botanical-438031-thumb.jpg",
+      "width": 2560,
+      "height": 2097,
+      "sha256": "142090aeb5fcdfe84412b884ceafeaaf893c1e0117c3715e1dabb715596a80c6"
+    },
+    {
+      "id": "met-botanical-11051",
+      "name": "Hummingbird and Apple Blossoms",
+      "collection": "Flowers & botanicals",
+      "url": "https://images.metmuseum.org/CRDImages/ad/original/DT9511.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/ad/original/DT9511.jpg",
+      "credit": "Martin Johnson Heade",
+      "source": "https://www.metmuseum.org/art/collection/search/11051",
+      "sourceTitle": "Hummingbird and Apple Blossoms",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-botanical-11051.jpg",
+      "thumbnail": "/covers/met-botanical-11051-thumb.jpg",
+      "width": 2560,
+      "height": 2216,
+      "sha256": "0da74d0be06f243172ca9dc1c21658d1415639bb8b99898e219380392c388f41"
+    },
+    {
+      "id": "met-botanical-359629",
+      "name": "Study of an orchid, “Vanda Roxburgia”",
+      "collection": "Flowers & botanicals",
+      "url": "https://images.metmuseum.org/CRDImages/dp/original/DP806036.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/dp/original/DP806036.jpg",
+      "credit": "James Sowerby",
+      "source": "https://www.metmuseum.org/art/collection/search/359629",
+      "sourceTitle": "Study of an orchid, “Vanda Roxburgia”",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-botanical-359629.jpg",
+      "thumbnail": "/covers/met-botanical-359629-thumb.jpg",
+      "width": 2072,
+      "height": 2560,
+      "sha256": "f1b4c83ed93f5453f1a94bf83bc0a1e9e351802a6167725cf2c3b426a9989aeb"
+    },
+    {
+      "id": "met-botanical-55094",
+      "name": "Plum Blossoms",
+      "collection": "Flowers & botanicals",
+      "url": "https://images.metmuseum.org/CRDImages/as/original/DP138397.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/as/original/DP138397.jpg",
+      "credit": "Yomo no Utagaki Magao",
+      "source": "https://www.metmuseum.org/art/collection/search/55094",
+      "sourceTitle": "Plum Blossoms",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-botanical-55094.jpg",
+      "thumbnail": "/covers/met-botanical-55094-thumb.jpg",
+      "width": 862,
+      "height": 2560,
+      "sha256": "57dd420b7ef4aeeb859f52eabbd4b079400d9abcea7462c23f55b55cba0b3fb9"
+    },
+    {
+      "id": "met-botanical-670922",
+      "name": "Cherry Blossoms",
+      "collection": "Flowers & botanicals",
+      "url": "https://images.metmuseum.org/CRDImages/as/original/DP-12232-080.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/as/original/DP-12232-080.jpg",
+      "credit": "Sakai Hōitsu",
+      "source": "https://www.metmuseum.org/art/collection/search/670922",
+      "sourceTitle": "Cherry Blossoms",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-botanical-670922.jpg",
+      "thumbnail": "/covers/met-botanical-670922-thumb.jpg",
+      "width": 2560,
+      "height": 1921,
+      "sha256": "089dcc18f36a31f077e0f5f2632b57f115eed14a7a892771ef47f3102f1557bf"
+    },
+    {
+      "id": "met-place-10141",
+      "name": "View of South Street, from Maiden Lane, New York City",
+      "collection": "City & architecture",
+      "url": "https://images.metmuseum.org/CRDImages/ad/original/DT5570.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/ad/original/DT5570.jpg",
+      "credit": "William James Bennett",
+      "source": "https://www.metmuseum.org/art/collection/search/10141",
+      "sourceTitle": "View of South Street, from Maiden Lane, New York City",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-place-10141.jpg",
+      "thumbnail": "/covers/met-place-10141-thumb.jpg",
+      "width": 2560,
+      "height": 1793,
+      "sha256": "93221b94bd7546f072e7982c0382b49396597ef0c40663291e2c28bd3e97f732"
+    },
+    {
+      "id": "met-place-12460",
+      "name": "Venice, a quiet canal",
+      "collection": "City & architecture",
+      "url": "https://images.metmuseum.org/CRDImages/ad/original/ap50.130.37.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/ad/original/ap50.130.37.jpg",
+      "credit": "John Singer Sargent",
+      "source": "https://www.metmuseum.org/art/collection/search/12460",
+      "sourceTitle": "Venice, a quiet canal",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-place-12460.jpg",
+      "thumbnail": "/covers/met-place-12460-thumb.jpg",
+      "width": 2244,
+      "height": 1616,
+      "sha256": "c76f8f635e7d362cc649e020480ecbb43bcf6b0660d0918040685a98ee72a954"
+    },
+    {
+      "id": "met-place-12459",
+      "name": "Venice, a narrow passage",
+      "collection": "City & architecture",
+      "url": "https://images.metmuseum.org/CRDImages/ad/original/DT2889.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/ad/original/DT2889.jpg",
+      "credit": "John Singer Sargent",
+      "source": "https://www.metmuseum.org/art/collection/search/12459",
+      "sourceTitle": "Venice, a narrow passage",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-place-12459.jpg",
+      "thumbnail": "/covers/met-place-12459-thumb.jpg",
+      "width": 2560,
+      "height": 1813,
+      "sha256": "f5be02ec8704913009f41b01e3a088b41cd41d4563332526d1d9bda3522c383c"
+    },
+    {
+      "id": "met-place-356524",
+      "name": "Richmond Palace",
+      "collection": "City & architecture",
+      "url": "https://images.metmuseum.org/CRDImages/dp/original/DP823327.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/dp/original/DP823327.jpg",
+      "credit": "Wenceslaus Hollar",
+      "source": "https://www.metmuseum.org/art/collection/search/356524",
+      "sourceTitle": "Richmond Palace",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-place-356524.jpg",
+      "thumbnail": "/covers/met-place-356524-thumb.jpg",
+      "width": 2560,
+      "height": 903,
+      "sha256": "435458215f7a77e8e0428077081be62b6653207c0ab4eca6834ed28550d4434d"
+    },
+    {
+      "id": "met-place-726473",
+      "name": "Temple of Horus at Edfu",
+      "collection": "City & architecture",
+      "url": "https://images.metmuseum.org/CRDImages/ph/original/DP-13897-021.jpg",
+      "original": "https://images.metmuseum.org/CRDImages/ph/original/DP-13897-021.jpg",
+      "credit": "Joseph-Philibert Girault de Prangey",
+      "source": "https://www.metmuseum.org/art/collection/search/726473",
+      "sourceTitle": "Temple of Horus at Edfu",
+      "license": "CC0; The Met Open Access public-domain image",
+      "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+      "src": "/covers/met-place-726473.jpg",
+      "thumbnail": "/covers/met-place-726473-thumb.jpg",
+      "width": 2560,
+      "height": 2024,
+      "sha256": "7479355796a94a6d24d0de361b5f622320b4ac9bff71dea5ac5a4fcf398bf5d0"
     }
   ]
 }
