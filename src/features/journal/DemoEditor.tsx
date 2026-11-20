@@ -113,8 +113,10 @@ export default function Editor() {
               <input
                 id="entry-title"
                 className="title-input"
-                placeholder={entryTitle('', localDay())}
-                value={title}
+                placeholder={entryTitle('', draft.entry_date)}
+                value={
+                  title === entryTitle('', draft.entry_date) ? '' : title
+                }
                 onChange={(e) => changeDraft({ title: e.target.value })}
               />
               <label className="sr-only" htmlFor="entry-body">
