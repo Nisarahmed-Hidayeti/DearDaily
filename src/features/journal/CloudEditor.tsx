@@ -483,7 +483,11 @@ function EntryForm({
                 id="entry-title"
                 className="title-input"
                 placeholder={entryTitle('', draft.entry_date)}
-                value={draft.title}
+                value={
+                  draft.title === entryTitle('', draft.entry_date)
+                    ? ''
+                    : draft.title
+                }
                 maxLength={200}
                 disabled={!ready}
                 onChange={(e) => patch({ title: e.target.value })}
