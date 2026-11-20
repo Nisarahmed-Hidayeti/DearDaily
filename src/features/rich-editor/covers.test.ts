@@ -6,14 +6,14 @@ import { expect, it } from 'vitest'
 import { photographicCovers, profileCovers, coverThumbnail } from './covers'
 import { documentFromText, validateDocument } from './document'
 it('bundles licensed photographs and public-domain museum artwork, with validated document IDs and credits', () => {
-  expect(photographicCovers.length).toBeGreaterThanOrEqual(90)
+  expect(photographicCovers.length).toBeGreaterThanOrEqual(125)
   expect(new Set(photographicCovers.map((c) => c.id)).size).toBe(
     photographicCovers.length,
   )
   for (const group of new Set(photographicCovers.map((c) => c.collection)))
     expect(
       photographicCovers.filter((c) => c.collection === group).length,
-    ).toBeGreaterThanOrEqual(10)
+    ).toBeGreaterThanOrEqual(15)
   for (const cover of photographicCovers) {
     const bytes = readFileSync('public' + cover.src)
     expect(imageSize(bytes).type).toBe('jpg')
@@ -22,7 +22,7 @@ it('bundles licensed photographs and public-domain museum artwork, with validate
     )
     expect(cover.credit.length).toBeGreaterThan(2)
     expect(cover.source).toMatch(
-      /^https:\/\/(www\.pexels\.com\/photo|www\.metmuseum\.org\/art\/collection\/search|images\.nasa\.gov\/details|science\.nasa\.gov\/asset\/webb)\//,
+      /^https:\/\/(www\.pexels\.com\/photo|www\.metmuseum\.org\/art\/collection\/search|images\.nasa\.gov\/details|science\.nasa\.gov\/asset\/webb|www\.rijksmuseum\.nl\/en\/collection\/object)\//,
     )
     expect(
       validateDocument({
