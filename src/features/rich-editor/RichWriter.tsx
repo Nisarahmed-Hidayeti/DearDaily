@@ -289,39 +289,121 @@ function ValidatedRichWriter({
       if (!editor.isDestroyed) setUploading(false)
     }
   }
+  const textStyle = editor.getAttributes('textStyle')
+  const highlight = editor.getAttributes('highlight')
   const tools = (
     <>
-      {(['bold', 'italic', 'underline', 'strike', 'code'] as const).map(
-        (name) => (
-          <button
-            key={name}
-            type="button"
-            disabled={disabled}
-            aria-label={name}
-            aria-pressed={editor.isActive(name)}
-            onClick={() => editor.chain().focus().toggleMark(name).run()}
-          >
-            {name === 'bold' ? (
-              <b>B</b>
-            ) : name === 'italic' ? (
-              <i>I</i>
-            ) : name === 'underline' ? (
-              <u>U</u>
-            ) : name === 'strike' ? (
-              <s>S</s>
-            ) : (
-              '&lt;/&gt;'
-            )}
-          </button>
-        ),
-      )}
       <button
         type="button"
         disabled={disabled}
-        onClick={() => setLink(editor.getAttributes('link').href ?? '')}
+        aria-label="Bold"
+        title="Bold"
+        aria-pressed={editor.isActive('bold')}
+        onClick={() => editor.chain().focus().toggleBold().run()}
       >
-        Link
+        <b>B</b>
       </button>
+      <button
+        type="button"
+        disabled={disabled}
+        aria-label="Underline"
+        title="Underline"
+        aria-pressed={editor.isActive('underline')}
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+      >
+        <u>U</u>
+      </button>
+      <label className="writer-color-picker" title="Text color">
+        <input
+          type="color"
+          aria-label="Text color"
+          value={textStyle.color ?? '#252525'}
+          disabled={disabled}
+          onChange={(event) =>
+            editor.chain().focus().setColor(event.currentTarget.value).run()
+          }
+        />
+      </label>
+      <label className="writer-color-picker" title="Text background color">
+        <input
+          type="color"
+          aria-label="Text background color"
+          value={highlight.color ?? '#ffe082'}
+          disabled={disabled}
+          onChange={(event) =>
+            editor
+              .chain()
+              .focus()
+              .setHighlight({ color: event.currentTarget.value })
+              .run()
+          }
+        />
+      </label>
+      <select
+        className="writer-font-select"
+        aria-label="Font family"
+        value={textStyle.fontFamily ?? ''}
+        disabled={disabled}
+        onChange={(event) => {
+          const font = event.currentTarget.value
+          const chain = editor.chain().focus()
+          if (font) chain.setFontFamily(font).run()
+          else chain.unsetFontFamily().run()
+        }}
+      >
+        <option value="">Font</option>
+        <option value="Georgia">Serif</option>
+        <option value="Arial">Arial</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Courier New">Mono</option>
+      </select>
+      <button
+        type="button"
+        disabled={disabled}
+        aria-label="Clear text styling"
+        title="Clear font, text color, and highlight"
+        onClick={() =>
+          editor
+            .chain()
+            .focus()
+            .unsetColor()
+            .unsetHighlight()
+            .unsetFontFamily()
+            .run()
+        }
+      >
+        Clear
+      </button>
+      <details className="writer-format-more">
+        <summary aria-label="More text formatting">More</summary>
+        <div className="writer-format-more-menu">
+          {(['italic', 'strike', 'code'] as const).map((name) => (
+            <button
+              key={name}
+              type="button"
+              disabled={disabled}
+              aria-label={name}
+              aria-pressed={editor.isActive(name)}
+              onClick={() => editor.chain().focus().toggleMark(name).run()}
+            >
+              {name === 'italic' ? (
+                <i>I</i>
+              ) : name === 'strike' ? (
+                <s>S</s>
+              ) : (
+                '</>'
+              )}
+            </button>
+          ))}
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => setLink(editor.getAttributes('link').href ?? '')}
+          >
+            Link
+          </button>
+        </div>
+      </details>
     </>
   )
   return (
@@ -335,7 +417,11 @@ function ValidatedRichWriter({
           event.preventDefault()
       }}
     >
-      <BubbleMenu editor={editor}>
+      <BubbleMenu
+        editor={editor}
+        shouldShow={({ state }) => !disabled && !state.selection.empty}
+        options={{ placement: 'top', offset: 8 }}
+      >
         <div
           className="writer-toolbar writer-bubble"
           role="group"

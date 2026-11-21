@@ -3,6 +3,10 @@ import StarterKit from '@tiptap/starter-kit'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
 import Placeholder from '@tiptap/extension-placeholder'
+import Color from '@tiptap/extension-color'
+import FontFamily from '@tiptap/extension-font-family'
+import Highlight from '@tiptap/extension-highlight'
+import { TextStyle } from '@tiptap/extension-text-style'
 import { safeWritingLink } from './document'
 /** Shared by the writing surface and real ProseMirror integration checks. */
 export function writingExtensions() {
@@ -18,6 +22,10 @@ export function writingExtensions() {
     JournalImage,
     TaskList,
     TaskItem.configure({ nested: true }),
+    TextStyle,
+    Color,
+    FontFamily,
+    Highlight.configure({ multicolor: true }),
     Placeholder.configure({
       placeholder: 'Write something, or type / for commands…',
     }),
