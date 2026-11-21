@@ -17,6 +17,26 @@ import { documentText, safeWritingLink, validateDocument } from './document'
 import type { WritingDocument } from './document'
 import './writer.css'
 
+function matchesPersistedContent(
+  editor: import('@tiptap/core').Editor,
+  content: WritingDocument['content'],
+) {
+  const current = editor.state.doc
+  const saved = editor.schema.nodeFromJSON(content)
+  if (current.eq(saved)) return true
+
+  // The editor may append a blank paragraph after a terminal block image.
+  // That editor-only helper node should not create a save by itself.
+  const last = current.lastChild
+  if (last?.type.name === 'paragraph' && last.content.size === 0) {
+    const withoutTrailingParagraph = current.copy(
+      current.content.cut(0, current.content.size - last.nodeSize),
+    )
+    return withoutTrailingParagraph.eq(saved)
+  }
+  return false
+}
+
 function ValidatedRichWriter({
   value,
   onChange,
@@ -163,6 +183,7 @@ function ValidatedRichWriter({
       syncSlash(current)
       if (disabled) return
       try {
+        if (matchesPersistedContent(current, value.content)) return
         onChange(
           validateDocument({
             ...value,
