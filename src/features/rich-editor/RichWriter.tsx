@@ -163,6 +163,8 @@ function ValidatedRichWriter({
       syncSlash(current)
       if (disabled) return
       try {
+        if (current.state.doc.eq(current.schema.nodeFromJSON(value.content)))
+          return
         onChange(
           validateDocument({
             ...value,
