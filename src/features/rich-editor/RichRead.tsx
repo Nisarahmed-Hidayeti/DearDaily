@@ -1,6 +1,6 @@
 import { MediaImage } from '../media/MediaImage'
 import './writer.css'
-import { createElement, type ReactNode } from 'react'
+import { createElement, type CSSProperties, type ReactNode } from 'react'
 import type { JSONContent } from '@tiptap/core'
 import { validateDocument, type WritingDocument } from './document'
 export function RichRead({
@@ -51,6 +51,29 @@ export function RichRead({
             >
               {text}
             </a>
+          )
+        else if (mark.type === 'textStyle')
+          text = (
+            <span
+              key={i}
+              style={
+                {
+                  color: mark.attrs?.color ?? undefined,
+                  fontFamily: mark.attrs?.fontFamily ?? undefined,
+                } as CSSProperties
+              }
+            >
+              {text}
+            </span>
+          )
+        else if (mark.type === 'highlight')
+          text = (
+            <mark
+              key={i}
+              style={{ backgroundColor: mark.attrs?.color ?? '#ffe082' }}
+            >
+              {text}
+            </mark>
           )
         else
           text = createElement(

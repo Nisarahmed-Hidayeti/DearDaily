@@ -36,6 +36,9 @@ export const pageIcons = [
 export const coverPresets = ['none', 'dawn', 'forest', 'ocean', 'clay'] as const
 export type CoverPreset = (typeof coverPresets)[number]
 
+const textColors = /^#[\da-f]{6}$/i
+const fontFamilies = new Set(['Georgia', 'Arial', 'Verdana', 'Courier New'])
+
 export function safeWritingLink(value: unknown): value is string {
   if (
     typeof value !== 'string' ||
@@ -223,9 +226,16 @@ export function validateDocument(value: unknown): WritingDocument {
       throw new Error('Invalid formatting.')
     for (const mark of node.marks ?? []) {
       if (
-        !['bold', 'italic', 'underline', 'strike', 'code', 'link'].includes(
-          mark.type,
-        )
+        ![
+          'bold',
+          'italic',
+          'underline',
+          'strike',
+          'code',
+          'link',
+          'textStyle',
+          'highlight',
+        ].includes(mark.type)
       )
         throw new Error('Unsupported formatting.')
       if (Object.keys(mark).some((k) => !['type', 'attrs'].includes(k)))
@@ -240,6 +250,32 @@ export function validateDocument(value: unknown): WritingDocument {
           throw new Error(
             'Use a complete http or https link without credentials.',
           )
+      } else if (mark.type === 'textStyle') {
+        const attrs = mark.attrs ?? {}
+        if (
+          typeof attrs !== 'object' ||
+          Array.isArray(attrs) ||
+          Object.keys(attrs).some(
+            (key) => !['color', 'fontFamily'].includes(key),
+          ) ||
+          (attrs.color != null &&
+            (typeof attrs.color !== 'string' ||
+              !textColors.test(attrs.color))) ||
+          (attrs.fontFamily != null &&
+            (typeof attrs.fontFamily !== 'string' ||
+              !fontFamilies.has(attrs.fontFamily)))
+        )
+          throw new Error('Invalid text style.')
+      } else if (mark.type === 'highlight') {
+        const attrs = mark.attrs ?? {}
+        if (
+          typeof attrs !== 'object' ||
+          Array.isArray(attrs) ||
+          Object.keys(attrs).some((key) => key !== 'color') ||
+          (attrs.color != null &&
+            (typeof attrs.color !== 'string' || !textColors.test(attrs.color)))
+        )
+          throw new Error('Invalid text highlight.')
       } else if (Object.keys(mark.attrs ?? {}).length)
         throw new Error('Unsupported formatting attributes.')
     }
