@@ -8,12 +8,16 @@ export function PageCover({
   className = '',
   privateMedia = false,
   fallback,
+  size = 'full',
+  priority = false,
 }: {
   document?: WritingDocument | null
   preset?: string | null
   className?: string
   privateMedia?: boolean
   fallback?: React.ReactNode
+  size?: 'full' | 'thumbnail'
+  priority?: boolean
 }) {
   const [failed, setFailed] = useState<string | null>(null)
   if (document?.page?.cover === 'upload')
@@ -29,17 +33,19 @@ export function PageCover({
       </div>
     )
   const photo = photographicCovers.find((c) => c.id === document?.page?.cover)
-  if (photo) if (failed === photo.src) return <>{fallback ?? null}</>
+  const source = size === 'thumbnail' ? photo?.thumbnail : photo?.src
+  if (source && failed === source) return <>{fallback ?? null}</>
   if (photo)
     return (
       <div className={`writer-cover photo-cover ${className}`}>
         <img
-          src={photo.src}
+          src={source}
           alt={photo.name}
           style={{ objectPosition: `50% ${document?.page?.position ?? 50}%` }}
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : undefined}
           decoding="async"
-          onError={() => setFailed(photo.src)}
+          onError={() => setFailed(source ?? null)}
         />
       </div>
     )

@@ -1,11 +1,16 @@
 -- Counts only. Execute in the owner SQL editor after confirming the target project.
 begin read only;
 
+select pg_database_size(current_database()) as database_bytes;
+
+select relname as table_name, pg_total_relation_size(relid) as total_bytes
+from pg_stat_user_tables
+order by total_bytes desc
+limit 20;
+
 select bucket_id, count(*) as objects,
        sum(coalesce((metadata->>'size')::bigint, 0)) as bytes
 from storage.objects
-where bucket_id in ('deardaily-private', 'deardaily-story-media',
-                    'deardaily-voice-private', 'deardaily-voice-public')
 group by bucket_id
 order by bucket_id;
 
