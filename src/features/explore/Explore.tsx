@@ -268,6 +268,7 @@ export function PublishedStory() {
             <PublicAuthor username={story.public_username} />
           </div>
           <PageCover
+            priority
             document={story.writing_document}
             preset={story.cover_preset}
           />

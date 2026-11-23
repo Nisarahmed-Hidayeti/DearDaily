@@ -431,6 +431,7 @@ function EntryForm({
             <>
               {preview && (
                 <PageCover
+                  priority
                   privateMedia
                   document={draft.writing_document}
                   preset={draft.cover_preset}

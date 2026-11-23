@@ -259,6 +259,7 @@ export default function CloudDashboard({
                       {r.writing_document?.page ||
                       (r.cover_preset && r.cover_preset !== 'none') ? (
                         <PageCover
+                          size="thumbnail"
                           privateMedia
                           document={r.writing_document}
                           preset={r.cover_preset}

@@ -24,6 +24,7 @@ export function StoryCard({ story: s }: { story: CommunityStory }) {
         {s.writing_document?.page ||
         (s.cover_preset && s.cover_preset !== 'none') ? (
           <PageCover
+            size="thumbnail"
             document={s.writing_document}
             preset={s.cover_preset}
             fallback={
