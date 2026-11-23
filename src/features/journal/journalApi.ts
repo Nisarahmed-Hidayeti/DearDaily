@@ -217,15 +217,25 @@ export async function publishStory(
         await preparePublicPhotos(client, entry.id, entry.version),
       )
     : entry.writing_document
+  const expectedVoiceCount =
+    metadata?.share_voice_notes === false
+      ? 0
+      : (entry.voice_notes ?? []).filter((note) => note.share === true).length
+  const voiceCopies =
+    voiceNotesEnabled && expectedVoiceCount > 0
+      ? await preparePublicVoice(client, entry.id, entry.version)
+      : []
+  if (
+    voiceNotesEnabled &&
+    (voiceCopies.length !== expectedVoiceCount ||
+      (metadata?.share_voice_notes === true &&
+        expectedVoiceCount !== (entry.voice_notes?.length ?? 0)))
+  )
+    throw new Error(
+      'Voice notes could not be copied. Your public story was not changed.',
+    )
   const fields = {
-    ...(voiceNotesEnabled
-      ? {
-          voice_notes:
-            metadata?.share_voice_notes === false
-              ? []
-              : await preparePublicVoice(client, entry.id, entry.version),
-        }
-      : {}),
+    ...(voiceNotesEnabled ? { voice_notes: voiceCopies } : {}),
     ...(persistentMusicEnabled ? { music: publicMusic(entry.music) } : {}),
     title: entryTitle(entry.title, entry.entry_date),
     body: entry.body,

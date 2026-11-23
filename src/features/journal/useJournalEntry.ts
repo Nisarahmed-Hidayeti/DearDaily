@@ -212,10 +212,12 @@ export function useJournalEntry(existingId?: string, newId?: string) {
         if (generation === epoch.current) setPublished(false)
       } else await removeEntry(client, userId, id, row.version)
       return generation === epoch.current
-    } catch {
+    } catch (cause) {
       if (generation === epoch.current)
         setError(
-          'The action was not confirmed. Reload to check the server before trying again.',
+          cause instanceof Error && cause.message.startsWith('Voice notes could not be copied')
+            ? cause.message
+            : 'The action was not confirmed. Reload to check the server before trying again.',
         )
       return false
     } finally {

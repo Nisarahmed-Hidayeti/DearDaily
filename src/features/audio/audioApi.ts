@@ -41,7 +41,7 @@ export async function preparePublicVoice(
     body: { action: 'prepare', entry, version },
   })
   if (error)
-    throw Error('Public recordings not prepared. Existing story is unchanged.')
+    throw Error('Voice notes could not be copied. Check your audio allowance and try again.')
   return validateVoiceNotes(data?.notes, false)
 }
 export async function cleanVoice(client: SupabaseClient) {
