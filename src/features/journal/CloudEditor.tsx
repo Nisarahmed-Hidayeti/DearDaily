@@ -225,6 +225,20 @@ function EntryForm({
         : defaultPublicationPlan)
   const { byline } = plan
   const shareVoiceNotes = plan.voiceNotes ?? false
+  useEffect(() => {
+    if (!shareVoiceNotes) return
+    setDraft((current) => {
+      const notes = current.voice_notes ?? []
+      if (!notes.length || notes.every((note) => note.share === true))
+        return current
+      // Older deployed voice gateways still read this per-note approval flag.
+      // The single Share setting now grants approval for every attached note.
+      return {
+        ...current,
+        voice_notes: notes.map((note) => ({ ...note, share: true })),
+      }
+    })
+  }, [shareVoiceNotes, draft.voice_notes, setDraft])
   const patchPlan = (values: Partial<PublicationPlan>) =>
     setDraft((current) => ({
       ...current,
@@ -699,9 +713,16 @@ function EntryForm({
                       disabled={
                         !ready || busy || (draft.voice_notes?.length ?? 0) === 0
                       }
-                      onChange={(event) =>
-                        patchPlan({ voiceNotes: event.target.checked })
-                      }
+                      onChange={(event) => {
+                        const include = event.target.checked
+                        patchPlan({ voiceNotes: include })
+                        if (include)
+                          patch({
+                            voice_notes: (draft.voice_notes ?? []).map(
+                              (note) => ({ ...note, share: true }),
+                            ),
+                          })
+                      }}
                     />
                     Include a copy of voice notes in public
                   </label>
