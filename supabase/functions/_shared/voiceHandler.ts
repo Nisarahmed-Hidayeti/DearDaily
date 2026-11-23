@@ -143,7 +143,6 @@ export function createVoiceHandler(
           created: string[] = []
         try {
           for (const n of entry.voice_notes) {
-            if (n.share !== true) continue
             const asset = await record('asset', { id: n.id })
             if (
               !asset ||
