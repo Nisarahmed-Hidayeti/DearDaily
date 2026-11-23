@@ -39,7 +39,7 @@ export function validateVoiceNotes(
       n.start < 0 ||
       n.end <= n.start ||
       n.end > maxAudioSeconds ||
-      (privateCopy && n.share !== undefined && typeof n.share !== 'boolean')
+      (privateCopy && typeof n.share !== 'boolean')
     )
       throw Error('Invalid voice note')
     seen.add(n.id)

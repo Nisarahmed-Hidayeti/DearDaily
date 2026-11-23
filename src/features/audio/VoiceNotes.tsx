@@ -392,7 +392,9 @@ export function VoiceNotes({
                       const id = await onUpload!(pending.blob)
                       onChange([
                         ...notes,
-                        { id, title: 'Voice note', start, end },
+                        // Keep the persisted approval flag required by the
+                        // database and the currently deployed voice gateway.
+                        { id, title: 'Voice note', start, end, share: false },
                       ])
                       setPending(null)
                     } catch (e) {
