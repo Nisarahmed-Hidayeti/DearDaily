@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { isMediaId } from '../media/mediaApi'
-import { validateVoiceNotes, type VoiceNote } from './audio'
+import { validateVoiceNotes } from './audio'
 export async function uploadVoice(
   client: SupabaseClient,
   entry: string,
@@ -50,7 +50,4 @@ export async function cleanVoice(client: SupabaseClient) {
   })
   if (error || data?.pending !== 0)
     throw Error('Audio cleanup remains queued for retry')
-}
-export function approvedVoice(notes?: VoiceNote[]) {
-  return (notes ?? []).filter((n) => n.share)
 }

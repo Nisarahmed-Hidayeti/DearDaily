@@ -18,14 +18,14 @@ const note = {
   end: 19,
   share: false,
 }
-it('puts compact audio controls behind an explicit action and never opts into publication', async () => {
+it('keeps audio options focused on naming and removal', async () => {
   const change = vi.fn()
   render(<VoiceNotes notes={[note]} onChange={change} onUpload={vi.fn()} />)
   expect(screen.queryByLabelText('Include in public copy')).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: '+ Add audio' }))
-  expect(screen.getByLabelText('Include in public copy')).not.toBeChecked()
-  await userEvent.click(screen.getByLabelText('Include in public copy'))
-  expect(change).toHaveBeenCalledWith([{ ...note, share: true }])
+  expect(screen.queryByLabelText('Include in public copy')).toBeNull()
+  expect(screen.getByLabelText('Name')).toBeVisible()
+  expect(screen.getByRole('button', { name: 'Remove' })).toBeVisible()
 })
 it('keeps public readers away from editing and recording controls', () => {
   render(

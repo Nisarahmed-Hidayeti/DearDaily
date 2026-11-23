@@ -233,21 +233,6 @@ export function VoiceNotes({
                   }
                 />
               </label>
-              <label className="row">
-                <input
-                  type="checkbox"
-                  checked={!!n.share}
-                  disabled={disabled || busy || recording}
-                  onChange={(e) =>
-                    onChange(
-                      notes.map((v, j) =>
-                        j === i ? { ...v, share: e.target.checked } : v,
-                      ),
-                    )
-                  }
-                />
-                Include in public copy
-              </label>
               <button
                 type="button"
                 className="text-button"
@@ -407,7 +392,7 @@ export function VoiceNotes({
                       const id = await onUpload!(pending.blob)
                       onChange([
                         ...notes,
-                        { id, title: 'Voice note', start, end, share: false },
+                        { id, title: 'Voice note', start, end },
                       ])
                       setPending(null)
                     } catch (e) {
