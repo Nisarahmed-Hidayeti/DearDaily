@@ -49,7 +49,7 @@ export function EntryDetails({
   if (mobile)
     return open ? (
       <Modal
-        title="Page details"
+        title="Share & details"
         className="editor-details-sheet"
         style={{ '--available-height': `${height}px` } as CSSProperties}
         onClose={onClose}
@@ -62,11 +62,14 @@ export function EntryDetails({
       id="entry-details"
       className="entry-settings"
       hidden={!open}
-      aria-label="Page details and publishing"
+      aria-labelledby="entry-details-heading"
     >
-      <button className="quiet" onClick={onClose}>
-        Close details
-      </button>
+      <header className="entry-details-header">
+        <h2 id="entry-details-heading">Share &amp; details</h2>
+        <button className="quiet" onClick={onClose}>
+          Close details
+        </button>
+      </header>
       {children}
     </aside>
   )

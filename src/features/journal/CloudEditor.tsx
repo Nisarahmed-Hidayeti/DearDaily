@@ -383,19 +383,51 @@ function EntryForm({
           <LockKeyhole size={14} />
         )}
         {!online
-          ? 'Offline · your unsaved writing is still in this tab. Export a copy before leaving.'
+          ? state.savedLocally
+            ? 'Offline · changes saved on this device'
+            : 'Offline · export unsaved writing before leaving'
           : busy
             ? 'Saving or confirming your action…'
             : !ready
               ? 'Loading your entry…'
               : error
-                ? 'Not confirmed — keep or export your words.'
+                ? state.savedLocally
+                  ? 'Saved on this device · cloud save not confirmed'
+                  : 'Not confirmed — keep or export your words.'
                 : dirty
                   ? 'Unsaved changes · autosave pending'
                   : row
                     ? 'Saved to your private account'
                     : ''}
       </p>
+      {ready && state.recovery && (
+        <div className="auth-notice" role="status">
+          <p>Unsynced writing was found on this device.</p>
+          {state.recovery.version === (row?.version ?? null) ? (
+            <button
+              className="button secondary"
+              onClick={state.restoreRecovery}
+            >
+              Restore unsynced writing
+            </button>
+          ) : (
+            <p>
+              The cloud entry has changed. Copy the recovered text before
+              discarding it.
+            </p>
+          )}
+          {state.recovery.version !== (row?.version ?? null) && (
+            <textarea
+              readOnly
+              aria-label="Recovered writing"
+              value={state.recovery.draft.body}
+            />
+          )}
+          <button className="button secondary" onClick={state.discardRecovery}>
+            Discard recovery copy
+          </button>
+        </div>
+      )}
       {appearanceError && <p role="alert">{appearanceError}</p>}
       {error && (
         <div role="alert" className="auth-notice">
@@ -728,6 +760,14 @@ function EntryForm({
                     Include a copy of voice notes in public
                   </label>
                 )}
+                {voiceNotesEnabled &&
+                  (published || !!draft.voice_notes?.length) && (
+                    <p className="tiny muted">
+                      Live public voice notes:{' '}
+                      {published ? state.publicVoiceCount : 0}. The checkbox
+                      applies when you publish or update the story.
+                    </p>
+                  )}
               </section>
             )}
           </section>
@@ -837,6 +877,20 @@ function EntryForm({
           </p>
           {confirmation === 'publish' && (
             <div>
+              {voiceNotesEnabled &&
+                shareVoiceNotes &&
+                !!row?.voice_notes?.length && (
+                  <section aria-label="Voice notes to publish">
+                    <p>
+                      These voice notes will be included in the public story:
+                    </p>
+                    <ul>
+                      {row.voice_notes.map((note) => (
+                        <li key={note.id}>{note.title || 'Voice note'}</li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
               {documentAssetIds(row?.writing_document).length > 0 && (
                 <label className="publication-check">
                   <input

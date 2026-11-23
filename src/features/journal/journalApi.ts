@@ -194,6 +194,60 @@ export async function listEntries(client: SupabaseClient, userId: string) {
       b.updated_at.localeCompare(a.updated_at),
   )
 }
+export type EntrySummary = Pick<
+  JournalEntry,
+  | 'id'
+  | 'title'
+  | 'body'
+  | 'entry_date'
+  | 'status'
+  | 'tags'
+  | 'mood'
+  | 'writing_document'
+  | 'page_icon'
+  | 'cover_preset'
+>
+
+export async function listEntrySummaries(
+  client: SupabaseClient,
+  userId: string,
+) {
+  const rows: EntrySummary[] = []
+  const fields =
+    'id,title,body,entry_date,status,tags,mood' +
+    (richEditorEnabled
+      ? ',page_icon,cover_preset,cover:writing_document->page,icon:writing_document->>icon'
+      : '')
+  for (let offset = 0; ; offset += 100) {
+    const { data, error } = await client
+      .from('journal_entries')
+      .select(fields)
+      .eq('user_id', userId)
+      .order('id')
+      .range(offset, offset + 99)
+      .returns<
+        (Omit<EntrySummary, 'writing_document'> & {
+          cover?: WritingDocument['page']
+          icon?: string | null
+        })[]
+      >()
+    if (error) throw new Error('Entries unavailable')
+    for (const { cover, icon, ...entry } of data)
+      rows.push({
+        ...entry,
+        writing_document:
+          cover || icon
+            ? {
+                version: 1,
+                content: { type: 'doc' },
+                page: cover ?? undefined,
+                icon: icon ?? undefined,
+              }
+            : null,
+      })
+    if (data.length < 100) return rows
+  }
+}
 export async function readStories(client: SupabaseClient, id?: string) {
   let query = client
     .from('public_stories')
@@ -250,7 +304,9 @@ export async function publishStory(
       : {}),
     ...(communityEnabled && metadata
       ? Object.fromEntries(
-          Object.entries(metadata).filter(([key]) => key !== 'share_voice_notes'),
+          Object.entries(metadata).filter(
+            ([key]) => key !== 'share_voice_notes',
+          ),
         )
       : {}),
   }

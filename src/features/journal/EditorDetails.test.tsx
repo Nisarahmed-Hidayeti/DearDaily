@@ -180,7 +180,7 @@ it('opens a compact mobile sheet, respects available keyboard space and returns 
     await userEvent.click(
       screen.getByRole('button', { name: /Share & details/ }),
     )
-    const dialog = screen.getByRole('dialog', { name: 'Page details' })
+    const dialog = screen.getByRole('dialog', { name: 'Share & details' })
     expect(dialog).toHaveClass('editor-details-sheet')
     expect(dialog.style.getPropertyValue('--available-height')).toBe('420px')
     fireEvent(dialog, new Event('cancel', { cancelable: true }))
