@@ -6,8 +6,8 @@ import { Link } from 'react-router-dom'
 import { BookOpen, Plus } from 'lucide-react'
 import { LoadingState, PageHeading } from '../../components/Shared'
 import { useAuth } from '../auth/AuthProvider'
-import { entryTitle, listEntries } from '../journal/journalApi'
-import type { JournalEntry } from '../journal/journalApi'
+import { entryTitle, listEntrySummaries } from '../journal/journalApi'
+import type { EntrySummary } from '../journal/journalApi'
 import { journalStats } from '../journal/journalStats'
 import { listDeviceDrafts } from '../journal/localDrafts'
 import ActivityHeatmap from './ActivityHeatmap'
@@ -17,7 +17,7 @@ export default function CloudDashboard({
   library?: boolean
 }) {
   const { client, session } = useAuth()
-  const [rows, setRows] = useState<JournalEntry[]>([])
+  const [rows, setRows] = useState<EntrySummary[]>([])
   const [status, setStatus] = useState('loading')
   const [refresh, setRefresh] = useState(0)
   const [search, setSearch] = useState('')
@@ -25,6 +25,7 @@ export default function CloudDashboard({
   const [date, setDate] = useState('')
   const [deviceDrafts, setDeviceDrafts] = useState(() => listDeviceDrafts())
   const [order, setOrder] = useState('newest')
+  const [visibleCount, setVisibleCount] = useState(24)
   const [view, setView] = useState<'list' | 'gallery'>(() => {
     try {
       return localStorage.getItem('deardaily.library-view') === 'list'
@@ -41,7 +42,7 @@ export default function CloudDashboard({
     const load = async () => {
       const request = ++sequence
       try {
-        const result = await listEntries(client, session.user.id)
+        const result = await listEntrySummaries(client, session.user.id)
         if (active && request === sequence) {
           setRows(result)
           setStatus('ready')
@@ -248,7 +249,7 @@ export default function CloudDashboard({
                 view === 'gallery' ? 'journal-gallery' : 'journal-list'
               }
             >
-              {filtered.map((r) => (
+              {filtered.slice(0, visibleCount).map((r) => (
                 <Link
                   to={`/app/write/${r.id}`}
                   className="entry-row"
@@ -289,6 +290,14 @@ export default function CloudDashboard({
                 </Link>
               ))}
             </div>
+            {visibleCount < filtered.length && (
+              <button
+                className="button secondary"
+                onClick={() => setVisibleCount((count) => count + 24)}
+              >
+                Show more entries
+              </button>
+            )}
           </section>
           <p className="tiny muted">
             Each checkmark is a day you wrote. Drafts do not count.

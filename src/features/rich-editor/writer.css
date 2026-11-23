@@ -497,10 +497,15 @@
 .notion-editor .entry-settings[hidden] {
   display: none;
 }
-.notion-editor .entry-settings > .quiet {
-  display: block;
-  margin-left: auto;
+.entry-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 20px;
+}
+.entry-settings .entry-details-header h2 {
+  margin: 0;
 }
 .app-main:has(.notion-editor) > .demo-notice {
   display: none;

@@ -15,6 +15,8 @@ import {
 } from './journalApi'
 import type { Draft, JournalEntry } from './journalApi'
 
+type Recovery = { draft: Draft; version: number | null }
+
 export function useJournalEntry(existingId?: string, newId?: string) {
   const { client, session } = useAuth()
   const userId = session!.user.id
@@ -29,6 +31,7 @@ export function useJournalEntry(existingId?: string, newId?: string) {
   const [ready, setReady] = useState(!existingId)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [publicVoiceCount, setPublicVoiceCount] = useState(0)
   const [published, setPublished] = useState(false)
   const [publicMetadata, setPublicMetadata] = useState<StoryMetadata | null>(
     null,
@@ -50,6 +53,58 @@ export function useJournalEntry(existingId?: string, newId?: string) {
     !draft.writing_document?.page &&
     (!draft.cover_preset || draft.cover_preset === 'none')
   const dirty = !emptyNewPage && draftFingerprint(draft) !== confirmed
+  const recoveryKey = `deardaily.recovery.v1.${userId}.${loadInitially || row ? id : 'new'}`
+  const [recovery, setRecovery] = useState<Recovery | null>(() => {
+    try {
+      const stored = JSON.parse(
+        localStorage.getItem(recoveryKey) ?? 'null',
+      ) as Recovery | null
+      return stored?.draft && typeof stored.draft.body === 'string'
+        ? stored
+        : null
+    } catch {
+      return null
+    }
+  })
+  const [savedLocally, setSavedLocally] = useState(false)
+  useEffect(() => {
+    if (!ready || recovery) return
+    let stored = false
+    try {
+      if (dirty) {
+        localStorage.setItem(
+          recoveryKey,
+          JSON.stringify({ draft, version: row?.version ?? null }),
+        )
+        stored = true
+      } else {
+        localStorage.removeItem(recoveryKey)
+      }
+    } catch {
+      // Storage can be disabled or full.
+    }
+    let active = true
+    queueMicrotask(() => {
+      if (active) setSavedLocally(stored)
+    })
+    return () => {
+      active = false
+    }
+  }, [ready, recovery, dirty, draft, row?.version, recoveryKey])
+  const restoreRecovery = () => {
+    if (!recovery || recovery.version !== (row?.version ?? null)) return
+    setDraft(recovery.draft)
+    setRecovery(null)
+    setError('')
+  }
+  const discardRecovery = () => {
+    try {
+      localStorage.removeItem(recoveryKey)
+    } catch {
+      // Storage can be disabled.
+    }
+    setRecovery(null)
+  }
   useEffect(() => {
     const lifetime = epoch
     return () => {
@@ -69,6 +124,7 @@ export function useJournalEntry(existingId?: string, newId?: string) {
       setConfirmed(draftFingerprint(draftOf(entry)))
       setRow(entry)
       setPublished(stories.length > 0)
+      setPublicVoiceCount(stories[0]?.voice_notes?.length ?? 0)
       setPublicMetadata(
         (stories[0] as (typeof stories)[number] & StoryMetadata) ?? null,
       )
@@ -89,7 +145,7 @@ export function useJournalEntry(existingId?: string, newId?: string) {
   const save = useCallback(
     (saved = false): Promise<JournalEntry | undefined> => {
       if (lock.current) return pendingSave.current ?? Promise.resolve(undefined)
-      if (!client || !ready) return Promise.resolve(undefined)
+      if (!client || !ready || recovery) return Promise.resolve(undefined)
       const generation = epoch.current
       const snapshot = {
         ...draft,
@@ -116,6 +172,13 @@ export function useJournalEntry(existingId?: string, newId?: string) {
               '/app/write/' + id,
             )
           }
+          if (!row && !loadInitially) {
+            try {
+              localStorage.removeItem(recoveryKey)
+            } catch {
+              // Storage can be disabled.
+            }
+          }
           setRow(result)
           setConfirmed(draftFingerprint(draftOf(result)))
           // Canonical titles are merged only if the submitted title was not edited meanwhile.
@@ -140,10 +203,20 @@ export function useJournalEntry(existingId?: string, newId?: string) {
       pendingSave.current = request
       return request
     },
-    [client, ready, draft, userId, id, row],
+    [
+      client,
+      ready,
+      draft,
+      userId,
+      id,
+      row,
+      loadInitially,
+      recoveryKey,
+      recovery,
+    ],
   )
   useEffect(() => {
-    if (!ready || !dirty || busy || error) return
+    if (!ready || !dirty || busy || error || recovery) return
     if (
       !row &&
       !draft.body.trim() &&
@@ -162,6 +235,7 @@ export function useJournalEntry(existingId?: string, newId?: string) {
     draft.title,
     draft.body,
     draft.entry_date,
+    recovery,
   ])
   useEffect(() => {
     if (!dirty && !busy) return
@@ -192,7 +266,12 @@ export function useJournalEntry(existingId?: string, newId?: string) {
     kind: 'publish' | 'unpublish' | 'delete',
     metadata?: StoryMetadata,
   ) {
-    if (!client || !row || lock.current || (kind === 'publish' && dirty))
+    if (
+      !client ||
+      !row ||
+      lock.current ||
+      (kind === 'publish' && (dirty || recovery))
+    )
       return false
     const generation = epoch.current
     lock.current = true
@@ -200,11 +279,12 @@ export function useJournalEntry(existingId?: string, newId?: string) {
     setError('')
     try {
       if (kind === 'publish') {
-        if (metadata)
-          await publishStory(client, userId, row, published, metadata)
-        else await publishStory(client, userId, row, published)
+        const story = metadata
+          ? await publishStory(client, userId, row, published, metadata)
+          : await publishStory(client, userId, row, published)
         if (generation === epoch.current) {
           setPublished(true)
+          setPublicVoiceCount(story.voice_notes?.length ?? 0)
           if (metadata) setPublicMetadata(metadata)
         }
       } else if (kind === 'unpublish') {
@@ -215,7 +295,8 @@ export function useJournalEntry(existingId?: string, newId?: string) {
     } catch (cause) {
       if (generation === epoch.current)
         setError(
-          cause instanceof Error && cause.message.startsWith('Voice notes could not be copied')
+          cause instanceof Error &&
+            cause.message.startsWith('Voice notes could not be copied')
             ? cause.message
             : 'The action was not confirmed. Reload to check the server before trying again.',
         )
@@ -225,7 +306,19 @@ export function useJournalEntry(existingId?: string, newId?: string) {
       if (generation === epoch.current) setBusy(false)
     }
   }
+  useEffect(() => {
+    const retry = () => {
+      if (dirty && !recovery) void save()
+    }
+    window.addEventListener('online', retry)
+    return () => window.removeEventListener('online', retry)
+  }, [dirty, recovery, save])
   return {
+    savedLocally,
+    recovery,
+    restoreRecovery,
+    discardRecovery,
+    publicVoiceCount,
     id,
     draft,
     setDraft,

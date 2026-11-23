@@ -1,7 +1,10 @@
 import type { ActivityDay } from '../../data/demo'
 import { localDay } from './journalApi'
 import type { JournalEntry } from './journalApi'
-export function journalStats(rows: JournalEntry[], today = new Date()) {
+export function journalStats(
+  rows: Pick<JournalEntry, 'status' | 'entry_date' | 'body'>[],
+  today = new Date(),
+) {
   const days = new Set(
     rows.filter((r) => r.status === 'saved').map((r) => r.entry_date),
   )
