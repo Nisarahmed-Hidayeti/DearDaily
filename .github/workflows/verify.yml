@@ -27,6 +27,8 @@ jobs:
         run: npx supabase start
       - run: npx supabase db reset
       - run: npx supabase test db
+      - name: Smoke test private entry and public voice lifecycle
+        run: python3 scripts/test-voice-local.py
       - name: Verify real local profile image permissions
         run: |
           umask 077

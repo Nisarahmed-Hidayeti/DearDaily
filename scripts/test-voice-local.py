@@ -1,6 +1,7 @@
 import urllib.request,urllib.error,json,subprocess,secrets,uuid,wave,io,math,struct
+from urllib.parse import urlsplit
 config=json.loads(subprocess.check_output(['npx','supabase','status','-o','json'],stderr=subprocess.DEVNULL))
-base=config['API_URL'];assert base.startswith(('http://127.0.0.1:','http://localhost:')),'Local only'
+base=config['API_URL'];assert urlsplit(base).hostname in ('127.0.0.1','localhost'),'Local only'
 key=config['ANON_KEY'];service=config['SERVICE_ROLE_KEY'];users=[];tokens=[];entries=[];checks=0
 class NoRedirect(urllib.request.HTTPRedirectHandler):
  def redirect_request(self,*args):return None
@@ -35,6 +36,9 @@ try:
  with wave.open(output,'wb') as f:
   f.setparams((1,2,16000,0,'NONE','not compressed'));f.writeframes(b''.join(struct.pack('<h',int(2000*math.sin(i/16))) for i in range(320000)))
  wav=output.getvalue();headers={'Content-Type':'audio/wav','x-action':'upload','x-entry-id':entries[0]}
+ status,_,_=call('/rest/v1/journal_entries?id=eq.'+entries[0],'PATCH',{'body':'Edited synthetic text'},tokens[0]);check(status==204,'private edit saved')
+ status,reopened,_=call('/rest/v1/journal_entries?id=eq.'+entries[0]+'&select=body',token=tokens[0]);check(status==200 and reopened==[{'body':'Edited synthetic text'}],'owner reopens latest private edit')
+ status,hidden,_=call('/rest/v1/journal_entries?id=eq.'+entries[0]+'&select=body');check(status in (401,403) or (status==200 and hidden==[]),'anonymous cannot read private entry')
  status,_,_=call('/functions/v1/voice-gateway','POST',wav,tokens[1],headers);check(status==403,'B cannot upload into A journal')
  status,_,_=call('/functions/v1/voice-gateway','POST',b'fake mp3',tokens[0],headers);check(status==400,'disguised/invalid audio rejected')
  status,asset,_=call('/functions/v1/voice-gateway','POST',wav,tokens[0],headers);check(status==200 and 'id' in asset,'canonical voice upload confirmed')
@@ -51,8 +55,9 @@ try:
  public=prepared['notes'][0];check(public['id']!=aid and 'share' not in public,'public copy hides private asset ID and approval metadata')
  status,_,_=call('/functions/v1/voice-gateway?public='+public['id']);check(status==404,'staged copy unreadable before publication')
  status,_,_=call('/rest/v1/public_stories','POST',{'id':entries[0],'user_id':users[0],'title':'Synthetic public audio','body':'Synthetic public text','voice_notes':[public]},tokens[0]);check(status==201,'approved audio snapshot published')
+ status,visible,_=call('/rest/v1/public_stories?id=eq.'+entries[0]+'&select=body,voice_notes');check(status==200 and len(visible)==1 and visible[0]['body']=='Synthetic public text' and visible[0]['voice_notes']==[public],'signed-out reader sees only the public snapshot')
  status,_,headers=call('/functions/v1/voice-gateway?public='+public['id']);check(status==302,'anonymous can request published excerpt only')
- signed=headers['Location'];assert signed.startswith(('http://127.0.0.1:','http://localhost:'))
+ signed=headers['Location'];assert urlsplit(signed).hostname in ('127.0.0.1','localhost'),'Local signed URL only'
  clip=urllib.request.urlopen(signed).read()
  with wave.open(io.BytesIO(clip))as f:check(f.getnframes()==9*16000,'public bytes contain exactly 9 seconds, not the private 20 seconds')
  check(len(clip)==9*32000+44,'no trailing private audio or metadata')
@@ -60,10 +65,19 @@ try:
  status,_,_=call('/functions/v1/voice-gateway?public='+public['id']);check(status==302,'B did not remove A public story')
  status,_,_=call('/rest/v1/public_stories?id=eq.'+entries[0],'DELETE',token=tokens[0]);check(status==204,'A unpublishes')
  status,_,_=call('/functions/v1/voice-gateway?public='+public['id']);check(status==404,'unpublish immediately blocks new public URLs')
+ status,hidden,_=call('/rest/v1/public_stories?id=eq.'+entries[0]+'&select=id');check(status==200 and hidden==[],'signed-out story disappears after unpublishing')
  status,_,_=call('/functions/v1/voice-gateway','POST',{'action':'read','id':aid},tokens[0]);check(status==200,'unpublish preserves owner private recording')
 finally:
+ cleanup_ok=True
  for i,eid in enumerate(entries):
   if i<len(tokens):
-   call('/rest/v1/public_stories?id=eq.'+eid,'DELETE',token=tokens[i]);call('/rest/v1/journal_entries?id=eq.'+eid,'DELETE',token=tokens[i]);status,receipt,_=call('/functions/v1/voice-gateway','POST',{'action':'cleanup'},tokens[i]);assert status==200 and receipt.get('pending')==0,'Exact fixture object cleanup'
- for uid in users:call('/auth/v1/admin/users/'+uid,'DELETE',token=service)
+   for table in ('public_stories','journal_entries'):
+    status,_,_=call('/rest/v1/'+table+'?id=eq.'+eid,'DELETE',token=tokens[i])
+    cleanup_ok &= status==204
+   status,receipt,_=call('/functions/v1/voice-gateway','POST',{'action':'cleanup'},tokens[i])
+   cleanup_ok &= status==200 and receipt.get('pending')==0
+ for uid in users:
+  status,_,_=call('/auth/v1/admin/users/'+uid,'DELETE',token=service)
+  cleanup_ok &= status in (200,204,404)
+ assert cleanup_ok,'Local fixture cleanup could not be confirmed'
  print('Exact local synthetic fixtures cleaned; checks:',checks,flush=True)
