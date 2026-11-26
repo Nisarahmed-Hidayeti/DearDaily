@@ -29,6 +29,13 @@ try {
     reservations.push(server)
     replacements.set(port, server.address().port)
   }
+  const apiPort = config.match(/^\[api\]\nenabled = true\nport = (\d+)$/m)?.[1]
+  if (!apiPort || !config.includes('# [edge_runtime.secrets]'))
+    throw Error('Missing local gateway configuration')
+  config = config.replace(
+    '# [edge_runtime.secrets]',
+    `[edge_runtime.secrets]\nMEDIA_PUBLIC_BASE_URL = "http://127.0.0.1:${replacements.get(apiPort)}"`,
+  )
   config = config.replace(
     /^project_id = ".*"$/m,
     `project_id = "deardaily-ci-${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}"`,

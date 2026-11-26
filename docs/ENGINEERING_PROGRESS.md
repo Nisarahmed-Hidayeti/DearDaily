@@ -14,7 +14,7 @@
 
 - Hosted HTTP and assets: `node scripts/check-hosted-baseline.mjs https://deardaily.com`. Pass an explicit Netlify hostname to verify that host separately.
 - Static PWA checks: `node scripts/check-pwa.mjs`.
-- Isolated stack only: start and migrate disposable local Supabase, run `npm run db:test` and `python3 scripts/test-voice-local.py`. CI provisions its own stack. The fixture generates credentials, UUIDs and synthetic WAV bytes, verifies exact public audio duration and visibility, and removes only its own rows and users.
+- Isolated stack only: start and migrate disposable local Supabase, run `npm run db:test` and `python3 scripts/test-voice-local.py`. CI provisions its own stack and sets the gateway public base to its reserved loopback API port. The fixture generates credentials, UUIDs and synthetic WAV bytes, verifies exact public audio duration and visibility, and removes only its own rows and users.
 - Browser follow-up: use a dedicated disposable account on the intended origin. Check landing, sign-in, guest draft persistence, private entry create/edit/reopen, formatting, autosave and recovery, photo/cover selection, audio, explicit publish, signed-out playback, unpublish, Explore/profile, published manager, appearance, privacy and mobile navigation. Check console errors, request statuses and offline fallback without retaining payloads or credentials.
 
 ### Recommended next assignment

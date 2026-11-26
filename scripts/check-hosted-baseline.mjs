@@ -1,3 +1,4 @@
+/* global process, console, URL, fetch, AbortSignal */
 import assert from 'node:assert/strict'
 
 const site = new URL(process.argv[2] ?? 'https://deardaily.com')
