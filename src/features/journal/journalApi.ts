@@ -126,7 +126,9 @@ export async function loadEntry(
   return data as JournalEntry
 }
 export class JournalSaveError extends Error {
-  constructor(readonly kind: 'retryable' | 'conflict' | 'auth' | 'failed') {
+  readonly kind: 'retryable' | 'conflict' | 'auth' | 'failed'
+
+  constructor(kind: JournalSaveError['kind']) {
     super(
       {
         retryable:
@@ -137,6 +139,7 @@ export class JournalSaveError extends Error {
         failed: 'Cloud save not confirmed. Keep or export your recovery copy.',
       }[kind],
     )
+    this.kind = kind
   }
 }
 
