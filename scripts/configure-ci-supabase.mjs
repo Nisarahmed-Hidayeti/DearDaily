@@ -29,7 +29,7 @@ try {
     reservations.push(server)
     replacements.set(port, server.address().port)
   }
-  const apiPort = config.match(/^\[api\]\nenabled = true\nport = (\d+)$/m)?.[1]
+  const apiPort = config.match(/^\[api\]\n(?:(?!\[)[^\n]*\n)*?port = (\d+)$/m)?.[1]
   if (!apiPort || !config.includes('# [edge_runtime.secrets]'))
     throw Error('Missing local gateway configuration')
   config = config.replace(
