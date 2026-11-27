@@ -5,6 +5,7 @@ import {
   draftOf,
   draftFingerprint,
   entryTitle,
+  JournalSaveError,
   loadEntry,
   newDraft,
   readStories,
@@ -31,6 +32,8 @@ export function useJournalEntry(existingId?: string, newId?: string) {
   const [ready, setReady] = useState(!existingId)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [retryDelay, setRetryDelay] = useState(0)
+  const retries = useRef(0)
   const [publicVoiceCount, setPublicVoiceCount] = useState(0)
   const [published, setPublished] = useState(false)
   const [publicMetadata, setPublicMetadata] = useState<StoryMetadata | null>(
@@ -179,6 +182,8 @@ export function useJournalEntry(existingId?: string, newId?: string) {
               // Storage can be disabled.
             }
           }
+          retries.current = 0
+          setRetryDelay(0)
           setRow(result)
           setConfirmed(draftFingerprint(draftOf(result)))
           // Canonical titles are merged only if the submitted title was not edited meanwhile.
@@ -189,11 +194,24 @@ export function useJournalEntry(existingId?: string, newId?: string) {
             ...(saved ? { status: 'saved' as const } : {}),
           }))
           return result
-        } catch {
-          if (generation === epoch.current)
-            setError(
-              'Save not confirmed. Your words are still here. Export a copy, then reload to reconcile a conflict or retry.',
-            )
+        } catch (cause) {
+          if (generation === epoch.current) {
+            if (
+              cause instanceof JournalSaveError &&
+              cause.kind === 'retryable' &&
+              retries.current < 3
+            ) {
+              setRetryDelay(2000 * 2 ** retries.current)
+              retries.current++
+            } else {
+              setRetryDelay(0)
+              setError(
+                cause instanceof JournalSaveError
+                  ? cause.message
+                  : 'Cloud save not confirmed. Keep or export your recovery copy.',
+              )
+            }
+          }
         } finally {
           lock.current = false
           pendingSave.current = null
@@ -216,14 +234,15 @@ export function useJournalEntry(existingId?: string, newId?: string) {
     ],
   )
   useEffect(() => {
-    if (!ready || !dirty || busy || error || recovery) return
+    if (!ready || !dirty || busy || error || recovery || !navigator.onLine)
+      return
     if (
       !row &&
       !draft.body.trim() &&
       (!draft.title.trim() || draft.title === entryTitle('', draft.entry_date))
     )
       return
-    const timer = window.setTimeout(() => void save(), 1200)
+    const timer = window.setTimeout(() => void save(), retryDelay || 1200)
     return () => window.clearTimeout(timer)
   }, [
     ready,
@@ -236,6 +255,7 @@ export function useJournalEntry(existingId?: string, newId?: string) {
     draft.body,
     draft.entry_date,
     recovery,
+    retryDelay,
   ])
   useEffect(() => {
     if (!dirty && !busy) return

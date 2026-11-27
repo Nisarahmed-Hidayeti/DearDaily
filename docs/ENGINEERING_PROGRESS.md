@@ -20,3 +20,10 @@
 ### Recommended next assignment
 
 Confirm the intended public hostname and its owner-managed Netlify/DNS configuration, then run the disposable account browser lifecycle on that exact host and record the frontend and backend release evidence.
+
+## Phase 1 · Reliability follow-up
+
+- Assignment 01 PR #86 passed isolated database and voice checks and merged. The Netlify API reports no custom domain or aliases, and the requested apex responds with a parking redirect. Domain ownership remains unverified. If owned, add the domain in the existing Netlify project's Domain management panel, apply only the DNS records Netlify specifies at the authoritative DNS provider, then verify TLS, Auth redirect allowlists and gateway origins before changing canonical links. If unowned, confirm the Netlify hostname or another owned domain.
+- Implemented bounded cloud-save retries and distinct auth/conflict/transient errors without changing the optimistic version check. Replaced unnecessary simulated keystrokes and autosave waiting in two timing-sensitive tests. Extended the isolated voice fixture with mixed approval. Dedicated hosted browser and user-specific playback remain unverified.
+- Reviewed voice gateway origin and session checks, publication copy ownership and expiry controls, media validation and cache behavior, and repository migration/feature flag configuration. No production security settings or journals changed. This review does not certify the hosted database or an exhaustive security audit.
+- Rollback: revert the reliability PR through a new PR. No migration accompanies it.

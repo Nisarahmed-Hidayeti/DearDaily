@@ -50,7 +50,8 @@ it(
     expect(
       screen.getByRole('dialog', { name: 'Make this page yours' }),
     ).toBeVisible()
-    await waitFor(() => expect(saveEntry).toHaveBeenCalled(), { timeout: 4000 })
+    await userEvent.keyboard('{Control>}s{/Control}')
+    await waitFor(() => expect(saveEntry).toHaveBeenCalled())
     const savedId = vi.mocked(saveEntry).mock.calls.at(-1)![2]
     await act(async () => navigate('/app/write/' + savedId))
     expect(

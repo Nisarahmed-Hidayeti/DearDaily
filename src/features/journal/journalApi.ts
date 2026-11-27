@@ -125,6 +125,24 @@ export async function loadEntry(
   if (error || !data) throw new Error('Entry unavailable')
   return data as JournalEntry
 }
+export class JournalSaveError extends Error {
+  readonly kind: 'retryable' | 'conflict' | 'auth' | 'failed'
+
+  constructor(kind: JournalSaveError['kind']) {
+    super(
+      {
+        retryable:
+          'Cloud save not confirmed. Your latest edits can be retried.',
+        conflict:
+          'The cloud entry may have changed. Keep your recovery copy and reload before saving again.',
+        auth: 'Sign in again to save your changes to the cloud.',
+        failed: 'Cloud save not confirmed. Keep or export your recovery copy.',
+      }[kind],
+    )
+    this.kind = kind
+  }
+}
+
 export async function saveEntry(
   client: SupabaseClient,
   userId: string,
@@ -149,11 +167,15 @@ export async function saveEntry(
           .eq('id', id)
           .eq('user_id', userId)
           .eq('version', version)
-  const { data, error } = await query.select('*').single()
-  if (error || !data)
-    throw new Error(
-      'Save not confirmed. Reload to reconcile a conflict or an uncertain network response.',
-    )
+  const { data, error, status } = await query.select('*').single()
+  if (error || !data) {
+    if (status === 401 || status === 403) throw new JournalSaveError('auth')
+    if (error?.code === 'PGRST116' || error?.code === '23505')
+      throw new JournalSaveError('conflict')
+    if (status === 0 || status === 408 || status === 429 || status >= 500)
+      throw new JournalSaveError('retryable')
+    throw new JournalSaveError('failed')
+  }
   return data as JournalEntry
 }
 export async function removeEntry(

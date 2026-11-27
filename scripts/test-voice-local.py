@@ -49,8 +49,10 @@ try:
  status,_,_=call('/rest/v1/journal_entries?id=eq.'+entries[1],'PATCH',{'voice_notes':[note]},tokens[1]);check(status>=400,'ownership spoofing rejected')
  status,_,_=call('/rest/v1/journal_entries?select=voice_notes',token=tokens[1]);check(status==200,'B retains access to own journal')
  row=query(entries[0],tokens[0]);status,prepared,_=call('/functions/v1/voice-gateway','POST',{'action':'prepare','entry':entries[0],'version':row['version']},tokens[0]);check(status==200 and prepared['notes']==[],'unapproved private recording excluded from public preparation')
+ status,other_asset,_=call('/functions/v1/voice-gateway','POST',wav,tokens[0],headers);check(status==200 and other_asset['id']!=aid,'second private recording uploaded')
+ private_note={**note,'id':other_asset['id'],'title':'Unapproved synthetic recording'}
  note['share']=True
- status,_,_=call('/rest/v1/journal_entries?id=eq.'+entries[0],'PATCH',{'voice_notes':[note]},tokens[0]);check(status==204,'explicit audio approval saved')
+ status,_,_=call('/rest/v1/journal_entries?id=eq.'+entries[0],'PATCH',{'voice_notes':[note,private_note]},tokens[0]);check(status==204,'mixed audio consent saved')
  row=query(entries[0],tokens[0]);status,prepared,_=call('/functions/v1/voice-gateway','POST',{'action':'prepare','entry':entries[0],'version':row['version']},tokens[0]);check(status==200 and len(prepared.get('notes',[]))==1,'approved excerpt prepared')
  public=prepared['notes'][0];check(public['id']!=aid and 'share' not in public,'public copy hides private asset ID and approval metadata')
  status,_,_=call('/functions/v1/voice-gateway?public='+public['id']);check(status==404,'staged copy unreadable before publication')

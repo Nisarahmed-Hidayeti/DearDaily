@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { useJournalEntry } from './useJournalEntry'
 import { journalStats } from './journalStats'
-import { newDraft, saveEntry } from './journalApi'
+import { JournalSaveError, newDraft, saveEntry } from './journalApi'
 import type { JournalEntry } from './journalApi'
 vi.mock('../auth/AuthProvider', () => ({
   useAuth: () => ({ client: {}, session: { user: { id: 'test-owner' } } }),
@@ -82,7 +82,7 @@ describe('journal save lifecycle', () => {
       await vi.advanceTimersByTimeAsync(1200)
     })
     expect(result.current.draft.body).toBe('Keep these private words')
-    expect(result.current.error).toContain('Save not confirmed')
+    expect(result.current.error).toContain('Cloud save not confirmed')
     expect(result.current.row).toBeNull()
     const calls = vi.mocked(saveEntry).mock.calls.length
     await act(async () => {
@@ -90,9 +90,30 @@ describe('journal save lifecycle', () => {
     })
     expect(saveEntry).toHaveBeenCalledTimes(calls)
   })
+  it('retries transient failures with bounded backoff without claiming a save', async () => {
+    vi.useFakeTimers()
+    vi.mocked(saveEntry).mockRejectedValue(new JournalSaveError('retryable'))
+    const { result } = renderHook(() => useJournalEntry())
+    await act(async () => {
+      result.current.setDraft({ ...newDraft(), body: 'Synthetic retry draft' })
+    })
+    for (const [index, delay] of [1200, 2000, 4000, 8000].entries()) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(delay)
+      })
+      expect(saveEntry).toHaveBeenCalledTimes(index + 1)
+      expect(result.current.row).toBeNull()
+    }
+    expect(result.current.error).toContain('Cloud save not confirmed')
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(16000)
+    })
+    expect(saveEntry).toHaveBeenCalledTimes(4)
+    vi.mocked(saveEntry).mockReset()
+  })
   it('does not overwrite after a conflict until the writer explicitly retries', async () => {
     vi.useFakeTimers()
-    vi.mocked(saveEntry).mockRejectedValueOnce(new Error('conflict'))
+    vi.mocked(saveEntry).mockRejectedValueOnce(new JournalSaveError('conflict'))
     const { result } = renderHook(() => useJournalEntry())
     await act(async () => {
       result.current.setDraft({ ...newDraft(), body: 'draft' })
@@ -101,7 +122,7 @@ describe('journal save lifecycle', () => {
       await vi.advanceTimersByTimeAsync(1200)
     })
     expect(result.current.dirty).toBe(true)
-    expect(result.current.error).toContain('reconcile a conflict')
+    expect(result.current.error).toContain('cloud entry may have changed')
   })
 })
 describe('honest journal statistics', () => {

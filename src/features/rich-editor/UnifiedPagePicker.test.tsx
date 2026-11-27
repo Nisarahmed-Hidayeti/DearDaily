@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, it, vi } from 'vitest'
 import { PageAppearance } from './PageAppearance'
@@ -20,9 +20,11 @@ it('shows icons and every named cover collection together and applies both witho
   ).toHaveAttribute('tabindex', '0')
   for (const group of new Set(photographicCovers.map((c) => c.collection)))
     expect(screen.getByRole('heading', { name: group })).toBeVisible()
-  await userEvent.type(
+  fireEvent.change(
     screen.getByRole('searchbox', { name: 'Search page icons' }),
-    'kitten',
+    {
+      target: { value: 'kitten' },
+    },
   )
   await userEvent.click(screen.getByRole('button', { name: 'Use 🐱' }))
   const last = photographicCovers.at(-1)!
